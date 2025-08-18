@@ -1,86 +1,253 @@
 import * as d3 from 'd3';
 
-export interface ChartData {
+// ============================================================================
+// CORE DATA STRUCTURES
+// ============================================================================
+
+/**
+ * Base chart data point for line, area, and scatter charts
+ */
+export interface ChartDataPoint {
   x: string | number;
   y: number;
-  date?: string; // Optional date field for stock chart tooltips
-  // For stacked data
+  date?: string; // Optional formatted date for display
+  // For stacked area charts
   y0?: number;
   y1?: number;
 }
 
-export interface ChartDataset {
+/**
+ * Pie/Doughnut chart data point
+ */
+export interface PieDataPoint {
   label: string;
-  data: ChartData[];
+  value: number;
   color?: string;
 }
 
-export interface ChartOptions {
+/**
+ * Dataset containing multiple data points with styling
+ */
+export interface ChartDataset {
+  label: string;
+  data: ChartDataPoint[];
+}
+
+// ============================================================================
+// CHART CONFIGURATION INTERFACES
+// ============================================================================
+
+/**
+ * Chart margin configuration
+ */
+export interface ChartMargin {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+/**
+ * Legend positioning options
+ */
+export type LegendPosition = 'bottom' | 'top' | 'left' | 'right';
+
+/**
+ * Curve interpolation types for line/area charts
+ */
+export type CurveType = 'linear' | 'smooth';
+
+/**
+ * Tooltip size variants
+ */
+export type TooltipSize = 'sm' | 'md';
+
+/**
+ * Base configuration interface for all chart types
+ */
+export interface BaseChartOptions {
+  // Dimensions
   width?: number;
   height?: number;
-  margin?: {
-    top: number;
-    right: number;
-    bottom: number;
-    left: number;
-  };
+  margin?: ChartMargin;
+
+  // Visual elements
   showGrid?: boolean;
   showAxis?: boolean;
   showTooltip?: boolean;
   showLegend?: boolean;
-  legendPosition?: 'bottom' | 'top' | 'left' | 'right';
+  legendPosition?: LegendPosition;
   animate?: boolean;
   colors?: string[];
-  curve?: 'linear' | 'smooth';
-  yAxisStartsFromZero?: boolean; // Allow Y-axis to start from data min instead of 0
+
+  // Axis configuration
+  yAxisStartsFromZero?: boolean;
+
+  // Tooltip configuration
+  tooltipSize?: TooltipSize;
 }
 
-export interface LineChartOptions extends ChartOptions {
+/**
+ * Line chart specific configuration
+ */
+export interface LineChartOptions extends BaseChartOptions {
   showPoints?: boolean;
   pointRadius?: number;
   strokeWidth?: number;
+  curve?: CurveType;
+  tooltipContentCallback?: (data: TooltipData[], xValue?: string | number) => string;
 }
 
-export interface AreaChartOptions extends ChartOptions {
+/**
+ * Area chart specific configuration
+ */
+export interface AreaChartOptions extends BaseChartOptions {
   showPoints?: boolean;
   pointRadius?: number;
   strokeWidth?: number;
   fillOpacity?: number;
   stacked?: boolean;
   showStackedTotal?: boolean;
+  curve?: CurveType;
+  tooltipContentCallback?: (data: TooltipData[], xValue?: string | number) => string;
 }
 
-export interface Chart {
+/**
+ * Scatter chart specific configuration
+ */
+export interface ScatterChartOptions extends BaseChartOptions {
+  pointRadius?: number;
+  pointOpacity?: number;
+  showTrendLine?: boolean;
+  trendLineColor?: string;
+  tooltipContentCallback?: (data: ScatterTooltipData) => string;
+}
+
+/**
+ * Pie/Doughnut chart specific configuration
+ */
+export interface PieChartOptions
+  extends Omit<BaseChartOptions, 'showGrid' | 'showAxis' | 'yAxisStartsFromZero'> {
+  // Pie-specific dimensions
+  innerRadius?: number; // 0 for pie chart, > 0 for doughnut chart
+  outerRadius?: number;
+  padAngle?: number; // Space between slices in radians
+  cornerRadius?: number; // Rounded corners for slices
+
+  // Label configuration
+  showLabels?: boolean;
+  showValues?: boolean;
+  showPercentages?: boolean;
+  labelDistance?: number; // Multiplier for label positioning from center
+
+  // Custom tooltip
+  tooltipContentCallback?: (data: PieTooltipData) => string;
+}
+
+// ============================================================================
+// CHART INTERFACE CONTRACTS
+// ============================================================================
+
+/**
+ * Line chart interface
+ */
+export interface ILineChart {
   render(): void;
   update(data: ChartDataset[]): void;
   destroy(): void;
 }
 
-// D3 Selection types for better type safety
-export type D3Selection<T extends d3.BaseType> = d3.Selection<T, unknown, HTMLElement, unknown>;
-export type SVGSelection = D3Selection<SVGSVGElement>;
-export type HTMLDivSelection = D3Selection<HTMLDivElement>;
-export type SVGLineSelection = D3Selection<SVGLineElement>;
+/**
+ * Area chart interface
+ */
+export interface IAreaChart {
+  render(): void;
+  update(data: ChartDataset[]): void;
+  destroy(): void;
+}
 
-// Scale types
-export type XScale =
-  | d3.ScaleLinear<number, number>
-  | d3.ScalePoint<string>
-  | d3.ScaleTime<number, number>;
-export type YScale = d3.ScaleLinear<number, number>;
+/**
+ * Scatter chart interface
+ */
+export interface IScatterChart {
+  render(): void;
+  update(data: ChartDataset[]): void;
+  destroy(): void;
+}
 
-// Union type for scale domain values
-export type ScaleDomainValue = string | number | Date;
+/**
+ * Pie chart interface
+ */
+export interface IPieChart {
+  render(): void;
+  update(data: PieDataPoint[]): void;
+  destroy(): void;
+}
 
-// D3 Selection types with specific elements
-export type SVGGroupSelection = d3.Selection<SVGGElement, unknown, HTMLElement, unknown>;
-export type SVGCircleSelection = d3.Selection<SVGCircleElement, unknown, HTMLElement, unknown>;
+// ============================================================================
+// TOOLTIP DATA INTERFACES
+// ============================================================================
 
-// Tooltip data interface
+/**
+ * Standard tooltip data for line/area charts
+ */
 export interface TooltipData {
   label: string;
   value: number;
   color: string;
-  stackedValue?: number;
-  yPosition?: number;
+  stackedValue?: number; // For stacked area charts
+  yPosition?: number; // For positioning in stacked tooltips
 }
+
+/**
+ * Scatter chart tooltip data
+ */
+export interface ScatterTooltipData {
+  label: string;
+  x: string | number;
+  y: number;
+  color: string;
+}
+
+/**
+ * Pie chart tooltip data
+ */
+export interface PieTooltipData {
+  label: string;
+  value: number;
+  percentage: number;
+  color: string;
+}
+
+// ============================================================================
+// D3.JS TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Generic D3 selection type for better type safety
+ */
+export type D3Selection<T extends d3.BaseType> = d3.Selection<T, unknown, HTMLElement, unknown>;
+
+/**
+ * Common D3 selection types
+ */
+export type SVGSelection = D3Selection<SVGSVGElement>;
+export type HTMLDivSelection = D3Selection<HTMLDivElement>;
+export type SVGLineSelection = D3Selection<SVGLineElement>;
+export type SVGGroupSelection = d3.Selection<SVGGElement, unknown, HTMLElement, unknown>;
+export type SVGCircleSelection = d3.Selection<SVGCircleElement, unknown, HTMLElement, unknown>;
+
+/**
+ * D3 scale types for chart axes
+ */
+export type XScale =
+  | d3.ScaleLinear<number, number>
+  | d3.ScalePoint<string>
+  | d3.ScaleTime<number, number>;
+
+export type YScale = d3.ScaleLinear<number, number>;
+
+/**
+ * Union type for scale domain values
+ */
+export type ScaleDomainValue = string | number | Date;

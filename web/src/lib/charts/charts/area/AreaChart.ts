@@ -3,10 +3,10 @@ import * as d3 from 'd3';
 import { getColor } from '../../core/colors';
 import {
   AreaChartOptions,
-  Chart,
-  ChartData,
+  ChartDataPoint,
   ChartDataset,
   HTMLDivSelection,
+  IAreaChart,
   SVGLineSelection,
   SVGSelection,
   TooltipData,
@@ -25,7 +25,7 @@ import {
   showTooltip,
 } from '../../core/utils';
 
-export class AreaChart implements Chart {
+export class AreaChart implements IAreaChart {
   private container: string;
   private data: ChartDataset[];
   private options: AreaChartOptions;
@@ -57,6 +57,7 @@ export class AreaChart implements Chart {
       stacked: true,
       showStackedTotal: false,
       yAxisStartsFromZero: true,
+      tooltipSize: 'sm',
       ...options,
     };
 
@@ -85,16 +86,16 @@ export class AreaChart implements Chart {
     if (showLegend) {
       switch (legendPosition) {
         case 'bottom':
-          bottom += 35;
+          bottom += 50; // Increased to accommodate potential multi-row legends
           break;
         case 'top':
-          top += 30;
+          top += 40; // Increased slightly
           break;
         case 'left':
-          left += 100;
+          left += 120; // Increased for longer labels
           break;
         case 'right':
-          right += 100;
+          right += 120; // Increased for longer labels
           break;
       }
     }
@@ -129,8 +130,8 @@ export class AreaChart implements Chart {
     this.svg.append('defs');
 
     if (this.options.showTooltip) {
-      this.tooltip = createTooltip(this.container);
-      this.crosshairTooltip = createCrosshairTooltip(this.container);
+      this.tooltip = createTooltip(this.container, this.options.tooltipSize);
+      this.crosshairTooltip = createCrosshairTooltip(this.container, this.options.tooltipSize);
     }
 
     // Update width in options to match container
@@ -291,7 +292,7 @@ export class AreaChart implements Chart {
     if (this.options.showLegend) {
       const legendData = this.data.map((dataset, index) => ({
         label: dataset.label || `Dataset ${index + 1}`,
-        color: dataset.color || getColor(index, this.options.colors),
+        color: getColor(index, this.options.colors),
       }));
       addLegend(this.svg!, legendData, width!, height!, margin!, this.options.legendPosition);
     }
@@ -329,19 +330,19 @@ export class AreaChart implements Chart {
     }
 
     // Create line and area generators
-    const getXPosition = (d: ChartData): number => {
+    const getXPosition = (d: ChartDataPoint): number => {
       if (isOrdinal) return (xScale as d3.ScalePoint<string>)(d.x as string)!;
       if (isDateScale) return (xScale as d3.ScaleTime<number, number>)(new Date(d.x as number));
       return (xScale as d3.ScaleLinear<number, number>)(d.x as number);
     };
 
     const line = d3
-      .line<ChartData>()
+      .line<ChartDataPoint>()
       .x(getXPosition)
       .y((d) => yScale(stacked ? d.y1 || d.y : d.y));
 
     const area = d3
-      .area<ChartData>()
+      .area<ChartDataPoint>()
       .x(getXPosition)
       .y0((d) => {
         if (stacked) {
@@ -363,7 +364,7 @@ export class AreaChart implements Chart {
 
     // Render each dataset
     stackedData.forEach((dataset, index) => {
-      const color = dataset.color || getColor(index, this.options.colors);
+      const color = getColor(index, this.options.colors);
       const gradientFill = this.createGradient(color, index);
 
       // Create group for this dataset
@@ -551,7 +552,7 @@ export class AreaChart implements Chart {
               value: originalValue,
               stackedValue: stacked ? cumulativeValue : undefined,
               yPosition: stacked ? cumulativeValue : originalValue,
-              color: dataset.color || getColor(index, this.options.colors),
+              color: getColor(index, this.options.colors),
             });
           }
         });
@@ -600,21 +601,29 @@ export class AreaChart implements Chart {
                   .replace(/,/g, " '")
               : closestX;
 
-          const tooltipContent = `
-            <div style="font-weight: 600; margin-bottom: 8px; color: #e5e7eb;">${xDisplayValue}</div>
-            ${tooltipData
-              .map(
-                (item) => `
-              <div style="display: flex; align-items: center; margin-bottom: 4px;">
-                <div style="width: 10px; height: 10px; background: ${item.color}; border-radius: 50%; margin-right: 8px;"></div>
-                <span style="color: #e5e7eb; margin-right: 8px;">${item.label}:</span>
-                <span style="font-weight: 600; color: white;">${item.value.toFixed(2)}</span>
-              </div>
-            `
-              )
-              .join('')}
-            ${stacked && this.options.showStackedTotal ? `<div style="border-top: 1px solid #374151; margin-top: 8px; padding-top: 4px; color: #e5e7eb; font-weight: 600;">Total: ${cumulativeValue.toFixed(2)}</div>` : ''}
-          `;
+          let tooltipContent: string;
+          
+          if (this.options.tooltipContentCallback) {
+            // Use custom tooltip callback
+            tooltipContent = this.options.tooltipContentCallback(tooltipData, xDisplayValue);
+          } else {
+            // Use default tooltip content
+            tooltipContent = `
+              <div style="font-weight: 600; margin-bottom: 8px; color: #e5e7eb;">${xDisplayValue}</div>
+              ${tooltipData
+                .map(
+                  (item) => `
+                <div style="display: flex; align-items: center; margin-bottom: 2px;">
+                  <div style="width: 10px; height: 10px; background: ${item.color}; border-radius: 50%; margin-right: 6px;"></div>
+                  <span style="color: #e5e7eb; margin-right: 4px;">${item.label}:</span>
+                  <span style="font-weight: 600; color: white;">${item.value.toFixed(2)}</span>
+                </div>
+              `
+                )
+                .join('')}
+              ${stacked && this.options.showStackedTotal ? `<div style="border-top: 1px solid #374151; margin-top: 8px; padding-top: 4px; color: #e5e7eb; font-weight: 600;">Total: ${cumulativeValue.toFixed(2)}</div>` : ''}
+            `;
+          }
 
           showCrosshairTooltip(this.crosshairTooltip!, tooltipContent, event.pageX, event.pageY);
         }

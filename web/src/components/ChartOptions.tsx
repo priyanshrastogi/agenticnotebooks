@@ -11,12 +11,19 @@ export interface ChartOptionsConfig {
   curve: 'linear' | 'smooth';
   yAxisStartsFromZero: boolean;
   showStackedTotal?: boolean;
+  showTrendLine?: boolean;
+  tooltipSize?: 'sm' | 'md';
+  // Pie chart specific options
+  innerRadius?: number;
+  showLabels?: boolean;
+  showValues?: boolean;
+  showPercentages?: boolean;
 }
 
 interface ChartOptionsProps {
   options: ChartOptionsConfig;
   onOptionsChange: (options: ChartOptionsConfig) => void;
-  chartType: 'line' | 'area';
+  chartType: 'line' | 'area' | 'scatter' | 'pie' | 'doughnut';
 }
 
 export const ChartOptions: React.FC<ChartOptionsProps> = ({
@@ -36,23 +43,27 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
       <h3 className="options-title">Options</h3>
       
       <div className="options-grid">
-        <label className="option-item">
-          <input
-            type="checkbox"
-            checked={options.showGrid}
-            onChange={(e) => handleChange('showGrid', e.target.checked)}
-          />
-          <span>Grid</span>
-        </label>
+        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
+          <label className="option-item">
+            <input
+              type="checkbox"
+              checked={options.showGrid}
+              onChange={(e) => handleChange('showGrid', e.target.checked)}
+            />
+            <span>Grid</span>
+          </label>
+        )}
         
-        <label className="option-item">
-          <input
-            type="checkbox"
-            checked={options.showAxis}
-            onChange={(e) => handleChange('showAxis', e.target.checked)}
-          />
-          <span>Axes</span>
-        </label>
+        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
+          <label className="option-item">
+            <input
+              type="checkbox"
+              checked={options.showAxis}
+              onChange={(e) => handleChange('showAxis', e.target.checked)}
+            />
+            <span>Axes</span>
+          </label>
+        )}
         
         <label className="option-item">
           <input
@@ -82,6 +93,39 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
             <span>Points</span>
           </label>
         )}
+
+        {(chartType === 'pie' || chartType === 'doughnut') && (
+          <label className="option-item">
+            <input
+              type="checkbox"
+              checked={options.showLabels || false}
+              onChange={(e) => handleChange('showLabels', e.target.checked)}
+            />
+            <span>Labels</span>
+          </label>
+        )}
+
+        {(chartType === 'pie' || chartType === 'doughnut') && (
+          <label className="option-item">
+            <input
+              type="checkbox"
+              checked={options.showValues || false}
+              onChange={(e) => handleChange('showValues', e.target.checked)}
+            />
+            <span>Values</span>
+          </label>
+        )}
+
+        {(chartType === 'pie' || chartType === 'doughnut') && (
+          <label className="option-item">
+            <input
+              type="checkbox"
+              checked={options.showPercentages || false}
+              onChange={(e) => handleChange('showPercentages', e.target.checked)}
+            />
+            <span>Percentages</span>
+          </label>
+        )}
         
         <label className="option-item">
           <input
@@ -92,14 +136,16 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
           <span>Animate</span>
         </label>
         
-        <label className="option-item">
-          <input
-            type="checkbox"
-            checked={options.yAxisStartsFromZero}
-            onChange={(e) => handleChange('yAxisStartsFromZero', e.target.checked)}
-          />
-          <span>Zero Base</span>
-        </label>
+        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
+          <label className="option-item">
+            <input
+              type="checkbox"
+              checked={options.yAxisStartsFromZero}
+              onChange={(e) => handleChange('yAxisStartsFromZero', e.target.checked)}
+            />
+            <span>Zero Base</span>
+          </label>
+        )}
 
         {chartType === 'area' && (
           <label className="option-item">
@@ -111,17 +157,30 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
             <span>Stack Total</span>
           </label>
         )}
+
+        {chartType === 'scatter' && (
+          <label className="option-item">
+            <input
+              type="checkbox"
+              checked={options.showTrendLine || false}
+              onChange={(e) => handleChange('showTrendLine', e.target.checked)}
+            />
+            <span>Trend Line</span>
+          </label>
+        )}
         
-        <div className="option-item select-item">
-          <select
-            value={options.curve}
-            onChange={(e) => handleChange('curve', e.target.value)}
-            className="curve-select"
-          >
-            <option value="linear">Linear</option>
-            <option value="smooth">Smooth</option>
-          </select>
-        </div>
+        {(chartType === 'line' || chartType === 'area') && (
+          <div className="option-item select-item">
+            <select
+              value={options.curve}
+              onChange={(e) => handleChange('curve', e.target.value)}
+              className="curve-select"
+            >
+              <option value="linear">Linear</option>
+              <option value="smooth">Smooth</option>
+            </select>
+          </div>
+        )}
         
         {options.showLegend && (
           <div className="option-item select-item">
@@ -134,6 +193,19 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
               <option value="top">Legend: Top</option>
               <option value="left">Legend: Left</option>
               <option value="right">Legend: Right</option>
+            </select>
+          </div>
+        )}
+        
+        {options.showTooltip && (
+          <div className="option-item select-item">
+            <select
+              value={options.tooltipSize || 'sm'}
+              onChange={(e) => handleChange('tooltipSize', e.target.value)}
+              className="curve-select"
+            >
+              <option value="sm">Tooltip: Small</option>
+              <option value="md">Tooltip: Medium</option>
             </select>
           </div>
         )}

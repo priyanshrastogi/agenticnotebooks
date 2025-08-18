@@ -7,6 +7,7 @@ This document provides comprehensive instructions for Claude Code when working o
 **IntelliCharts** is an AI-powered data visualization platform that transforms any data into beautiful, customizable charts instantly. Users can feed various data sources (JSON, CSV, APIs, XML, HTML) and watch the AI agent automatically parse, analyze, and create stunning charts in seconds.
 
 ### Key Value Proposition
+
 - **AI-Powered**: Intelligent data parsing and chart generation
 - **Any Data Source**: Supports JSON, CSV, APIs, XML, HTML
 - **Instant Results**: Automatic parsing, analysis, and visualization
@@ -25,6 +26,7 @@ This is a monorepo with two main components:
 ```
 
 ### Frontend (`/web`)
+
 - **Next.js 14** with App Router and React 19
 - **TypeScript** for type safety
 - **Tailwind CSS** for styling
@@ -32,6 +34,7 @@ This is a monorepo with two main components:
 - **Yarn** as package manager
 
 ### Backend (`/api`)
+
 - **NestJS** framework
 - **TypeScript** for type safety
 - **PostgreSQL** with TypeORM
@@ -41,12 +44,14 @@ This is a monorepo with two main components:
 ## Development Guidelines
 
 ### Package Management
+
 - **ALWAYS use Yarn** for both frontend and backend, never npm
 - Install dependencies: `yarn install`
 - Add packages: `yarn add <package-name>`
 - Add dev dependencies: `yarn add -D <package-name>`
 
 ### Development Commands
+
 - **DO NOT run build commands** (`yarn build`, `next build`, `nest build`, etc.)
 - **DO NOT start dev servers** (`yarn dev`, `next dev`, `yarn start:dev`, etc.)
 - **ONLY use these commands for validation:**
@@ -55,6 +60,7 @@ This is a monorepo with two main components:
   - `npx eslint <file-path> --fix` - Auto-fix ESLint errors
 
 ### Code Quality
+
 - Always check TypeScript and ESLint before completing tasks
 - Fix all TypeScript compilation errors
 - Fix all ESLint errors (use `--fix` when appropriate)
@@ -63,6 +69,7 @@ This is a monorepo with two main components:
 ## Frontend (`/web`) Architecture
 
 ### Key Technologies
+
 - **Next.js 14**: App Router with React Server Components
 - **React 19**: Latest React features
 - **TypeScript**: Type safety throughout
@@ -74,6 +81,7 @@ This is a monorepo with two main components:
 - **Radix UI**: Accessible UI components
 
 ### Directory Structure
+
 ```
 /web/src
 ├── app/                    # Next.js App Router
@@ -102,6 +110,7 @@ This is a monorepo with two main components:
 ### Core Features
 
 #### Landing Page (`/`)
+
 - Hero section with AI-powered data visualization messaging
 - Features showcase
 - How it works section
@@ -109,6 +118,7 @@ This is a monorepo with two main components:
 - Call-to-action to try the product
 
 #### Main App (`/chat`)
+
 - AI-powered chat interface for chart generation
 - File upload support (CSV, JSON, Excel)
 - Real-time chart generation
@@ -116,6 +126,7 @@ This is a monorepo with two main components:
 - Chart customization options
 
 #### Chart Library (`/demo`)
+
 - Showcase of available chart types
 - Interactive demos with real data
 - Chart/Data view toggle showing JSON data
@@ -123,6 +134,7 @@ This is a monorepo with two main components:
 - Examples: Line charts, area charts, stacked charts
 
 #### Chart Library Implementation
+
 - **LineChart**: Multi-dataset line charts with points, tooltips, crosshairs
 - **AreaChart**: Area charts with gradients, stacking support, tooltips
 - **Features**: Interactive tooltips, crosshairs, legends, animations, responsive design
@@ -131,6 +143,7 @@ This is a monorepo with two main components:
 ### Important Frontend Patterns
 
 #### Chart Integration
+
 ```typescript
 // Chart creation pattern
 const chart = createAreaChart('#container', datasets, options);
@@ -147,12 +160,14 @@ useEffect(() => {
 ```
 
 #### Authentication Flow
+
 - JWT-based authentication
 - Google OAuth integration
 - Session management with cookies
 - Protected routes with middleware
 
 #### File Handling
+
 - Support for CSV, JSON, Excel files
 - Client-side file parsing
 - Metadata extraction
@@ -161,6 +176,7 @@ useEffect(() => {
 ## Backend (`/api`) Architecture
 
 ### Key Technologies
+
 - **NestJS**: Progressive Node.js framework
 - **TypeORM**: Database ORM with PostgreSQL
 - **LangChain**: AI agent framework
@@ -168,6 +184,7 @@ useEffect(() => {
 - **Fastify**: High-performance server
 
 ### Directory Structure
+
 ```
 /api/src
 ├── modules/              # Feature modules
@@ -189,6 +206,7 @@ useEffect(() => {
 ### Core Modules
 
 #### Authentication (`/modules/auth`)
+
 - **JWT-based authentication** with refresh tokens
 - **Google OAuth** integration
 - **Password reset** functionality
@@ -196,12 +214,14 @@ useEffect(() => {
 - **Token management** and validation
 
 #### Users (`/modules/users`)
+
 - User profile management
 - Password updates
 - User preferences
 - Subscription management
 
 #### Agent (`/modules/agent`)
+
 - **AI chart generation** using LangChain
 - **Data parsing** for various formats
 - **Chart type detection** and recommendations
@@ -209,18 +229,21 @@ useEffect(() => {
 - **OpenAI and Anthropic** model integration
 
 #### Conversations (`/modules/conversations`)
+
 - Chat session management
 - Message history storage
 - Real-time communication
 - Context preservation
 
 #### Credits (`/modules/credits`)
+
 - Usage tracking and limits
 - Subscription-based credits
 - Rate limiting
 - Analytics
 
 ### Database Schema
+
 ```typescript
 // Key entities
 - User: User accounts and profiles
@@ -234,12 +257,14 @@ useEffect(() => {
 ### AI Agent System
 
 #### Current Agent (`/modules/agent`)
+
 - Basic chart generation from data
 - Support for various data formats
 - Chart type recommendations
 - Code generation capabilities
 
 #### Next-Gen Agent (`/modules/agentv2`)
+
 - **Coordinator Agent**: Orchestrates the workflow
 - **Database Agent**: Handles database interactions
 - **Sheets Agent**: Processes spreadsheet data
@@ -249,6 +274,7 @@ useEffect(() => {
 ## Routes and Navigation
 
 ### Frontend Routes
+
 - `/` - Landing page
 - `/auth` - Authentication page
 - `/chat` - Main application interface
@@ -259,53 +285,57 @@ useEffect(() => {
 - `/terms` - Terms of service
 
 ### API Endpoints
+
 - `/auth/*` - Authentication endpoints
 - `/users/*` - User management
-- `/conversations/*` - Chat functionality  
+- `/conversations/*` - Chat functionality
 - `/agent/*` - AI agent services
 - `/credits/*` - Usage tracking
 
 ## Chart Library Specifications
 
 ### Supported Chart Types
+
 - **Line Charts**: Multi-dataset with points, smooth/linear curves
 - **Area Charts**: With gradients, stacking support
 - **Features**: Tooltips, crosshairs, legends, animations
 
 ### Chart Options
+
 ```typescript
 interface ChartOptionsConfig {
   showGrid: boolean;
   showAxis: boolean;
   showTooltip: boolean;
   showLegend: boolean;
-  legendPosition: 'bottom' | 'top' | 'left' | 'right';
+  legendPosition: "bottom" | "top" | "left" | "right";
   showPoints?: boolean;
   animate: boolean;
-  curve: 'linear' | 'smooth';
+  curve: "linear" | "smooth";
   yAxisStartsFromZero: boolean;
   showStackedTotal?: boolean; // Area charts only
 }
 ```
 
 ### Data Format
+
 ```typescript
 interface ChartDataset {
   label: string;
   data: ChartData[];
-  color?: string;
 }
 
 interface ChartData {
   x: string | number;
   y: number;
-  date?: string;  // Optional for display
-  y0?: number;    // For stacked data
-  y1?: number;    // For stacked data
+  date?: string; // Optional for display
+  y0?: number; // For stacked data
+  y1?: number; // For stacked data
 }
 ```
 
 ### Styling Standards
+
 - Y-axis width: 40px (reduced from default 60px)
 - Crosshair dash pattern: '4,4' (matches grid lines)
 - Proper margin calculations to avoid axis overlap
@@ -315,6 +345,7 @@ interface ChartData {
 ## Key Implementation Details
 
 ### Authentication Flow
+
 1. User signs up/logs in through frontend
 2. JWT tokens issued by backend
 3. Tokens stored securely in cookies
@@ -322,6 +353,7 @@ interface ChartData {
 5. Refresh token mechanism for session management
 
 ### Chart Generation Process
+
 1. User uploads data or enters query
 2. Frontend sends data to AI agent
 3. Agent analyzes data structure and requirements
@@ -331,6 +363,7 @@ interface ChartData {
 7. Export functionality available
 
 ### File Processing
+
 1. User uploads file (CSV, JSON, Excel)
 2. Client-side parsing and validation
 3. Metadata extraction
@@ -340,6 +373,7 @@ interface ChartData {
 ## Common Development Tasks
 
 ### Adding New Chart Types
+
 1. Create chart class in `/lib/charts/charts/`
 2. Implement Chart interface methods
 3. Add to main exports in index files
@@ -347,6 +381,7 @@ interface ChartData {
 5. Add tests and documentation
 
 ### Extending AI Agent
+
 1. Add new prompts in agent service
 2. Implement data parsing logic
 3. Add validation and error handling
@@ -354,6 +389,7 @@ interface ChartData {
 5. Test with various data formats
 
 ### Adding New Features
+
 1. Design database schema changes
 2. Create/update entities and migrations
 3. Implement backend services and controllers
@@ -363,6 +399,7 @@ interface ChartData {
 ## Testing and Quality Assurance
 
 ### Frontend Testing
+
 - Component functionality with realistic data
 - Chart rendering and interactions
 - File upload and processing
@@ -370,6 +407,7 @@ interface ChartData {
 - Responsive design
 
 ### Backend Testing
+
 - API endpoint functionality
 - Database operations
 - AI agent responses
@@ -377,6 +415,7 @@ interface ChartData {
 - Rate limiting and credits
 
 ### Data Testing
+
 - Various file formats (CSV, JSON, Excel)
 - Edge cases (empty data, malformed files)
 - Large datasets performance
@@ -385,6 +424,7 @@ interface ChartData {
 ## Performance Considerations
 
 ### Frontend
+
 - Chart rendering optimization with D3.js
 - Lazy loading of components
 - Efficient data transformations
@@ -392,6 +432,7 @@ interface ChartData {
 - Bundle size optimization
 
 ### Backend
+
 - Database query optimization
 - AI model response caching
 - Rate limiting implementation
@@ -401,6 +442,7 @@ interface ChartData {
 ## Security Considerations
 
 ### Authentication
+
 - Secure JWT implementation
 - Password hashing with bcrypt
 - OAuth integration security
@@ -408,6 +450,7 @@ interface ChartData {
 - CSRF protection
 
 ### Data Handling
+
 - Input validation and sanitization
 - File upload security
 - API rate limiting
@@ -416,12 +459,14 @@ interface ChartData {
 ## Debugging and Troubleshooting
 
 ### Common Issues
+
 1. **Chart not rendering**: Check container existence, data format
 2. **Authentication failures**: Verify JWT tokens, check backend logs
 3. **File upload issues**: Validate file format, check size limits
 4. **AI agent errors**: Review prompt formatting, check API keys
 
 ### Debugging Tools
+
 - Browser DevTools for frontend issues
 - Network tab for API call inspection
 - NestJS built-in logging
@@ -431,12 +476,14 @@ interface ChartData {
 ## Environment Setup
 
 ### Prerequisites
+
 - Node.js 18+
 - Yarn package manager
 - PostgreSQL database
 - OpenAI/Anthropic API keys
 
 ### Development Workflow
+
 1. Check TypeScript: `npx tsc --noEmit`
 2. Check ESLint: `npx eslint <path>`
 3. Fix issues before committing

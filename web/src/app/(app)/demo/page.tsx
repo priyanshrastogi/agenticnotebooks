@@ -2,27 +2,76 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { ChartExportButton } from '@/components/ChartExportButton';
 import { type ChartOptionsConfig } from '@/components/ChartOptions';
 import ChartOptionsPopover from '@/components/ChartOptionsPopover';
-import { type AreaChart, createAreaChart, createLineChart, type LineChart } from '@/lib/charts';
+import {
+  type AreaChart,
+  createAreaChart,
+  createDoughnutChart,
+  createLineChart,
+  createPieChart,
+  createScatterChart,
+  type LineChart,
+  type PieChart,
+  type ScatterChart,
+} from '@/lib/charts';
 import type { ChartDataset } from '@/lib/charts/core/types';
 import {
   generateAppleStockData,
   generateAppleStockDataWithDates,
+  generateCampaignPerformanceScatter,
+  generateCustomerSatisfactionScatter,
+  generateGlobalTemperatureData,
+  generateHeightWeightData,
+  generateMarketShareData,
+  generateRegionalSalesData,
+  generateRevenueBreakdownData,
+  generateSalesMarketingData,
+  // Extended examples with more datasets
+  generateTechRevenueComparison,
   generateTechStocksData,
-} from '@/lib/charts/data/stockData';
+  generateTrafficSourcesData,
+  generateWebsitePerformanceData,
+} from '@/lib/charts/data';
 
 export default function DemoPage() {
   const appleStockRef = useRef<HTMLDivElement>(null);
   const appleMonthlyRef = useRef<HTMLDivElement>(null);
   const techStocksRef = useRef<HTMLDivElement>(null);
   const multiAreaChartRef = useRef<HTMLDivElement>(null);
+  const heightWeightRef = useRef<HTMLDivElement>(null);
+  const salesMarketingRef = useRef<HTMLDivElement>(null);
+  const marketShareRef = useRef<HTMLDivElement>(null);
+  const revenueBreakdownRef = useRef<HTMLDivElement>(null);
+  const trafficSourcesRef = useRef<HTMLDivElement>(null);
   
+  // Extended example refs
+  const techRevenueRef = useRef<HTMLDivElement>(null);
+  const globalTemperatureRef = useRef<HTMLDivElement>(null);
+  const websitePerformanceRef = useRef<HTMLDivElement>(null);
+  const regionalSalesRef = useRef<HTMLDivElement>(null);
+  const customerSatisfactionRef = useRef<HTMLDivElement>(null);
+  const campaignPerformanceRef = useRef<HTMLDivElement>(null);
+
   // Chart instances
   const appleStockChartRef = useRef<AreaChart | null>(null);
   const appleMonthlyChartRef = useRef<LineChart | null>(null);
   const techStocksChartRef = useRef<LineChart | null>(null);
   const multiAreaChartInstanceRef = useRef<AreaChart | null>(null);
+  const heightWeightChartRef = useRef<ScatterChart | null>(null);
+  const salesMarketingChartRef = useRef<ScatterChart | null>(null);
+  const marketShareChartRef = useRef<PieChart | null>(null);
+  const revenueBreakdownChartRef = useRef<PieChart | null>(null);
+  const trafficSourcesChartRef = useRef<PieChart | null>(null);
+  
+  // Extended example chart instances
+  const techRevenueChartRef = useRef<LineChart | null>(null);
+  const globalTemperatureChartRef = useRef<LineChart | null>(null);
+  const websitePerformanceChartRef = useRef<AreaChart | null>(null);
+  const regionalSalesChartRef = useRef<AreaChart | null>(null);
+  const customerSatisfactionChartRef = useRef<ScatterChart | null>(null);
+  const campaignPerformanceChartRef = useRef<ScatterChart | null>(null);
 
   // Chart options state
   const [appleStockOptions, setAppleStockOptions] = useState<ChartOptionsConfig>({
@@ -35,6 +84,7 @@ export default function DemoPage() {
     animate: true,
     curve: 'linear',
     yAxisStartsFromZero: false,
+    tooltipSize: 'sm',
   });
 
   const [appleMonthlyOptions, setAppleMonthlyOptions] = useState<ChartOptionsConfig>({
@@ -47,6 +97,7 @@ export default function DemoPage() {
     animate: true,
     curve: 'linear',
     yAxisStartsFromZero: false,
+    tooltipSize: 'sm',
   });
 
   const [techStocksOptions, setTechStocksOptions] = useState<ChartOptionsConfig>({
@@ -59,6 +110,7 @@ export default function DemoPage() {
     animate: true,
     curve: 'linear',
     yAxisStartsFromZero: false,
+    tooltipSize: 'sm',
   });
 
   const [multiAreaOptions, setMultiAreaOptions] = useState<ChartOptionsConfig>({
@@ -72,6 +124,161 @@ export default function DemoPage() {
     curve: 'smooth',
     yAxisStartsFromZero: false,
     showStackedTotal: false,
+    tooltipSize: 'sm',
+  });
+
+  const [heightWeightOptions, setHeightWeightOptions] = useState<ChartOptionsConfig>({
+    showGrid: true,
+    showAxis: true,
+    showTooltip: true,
+    showLegend: true,
+    legendPosition: 'bottom',
+    animate: true,
+    curve: 'linear',
+    yAxisStartsFromZero: false,
+    showTrendLine: true,
+    tooltipSize: 'sm',
+  });
+
+  const [salesMarketingOptions, setSalesMarketingOptions] = useState<ChartOptionsConfig>({
+    showGrid: true,
+    showAxis: true,
+    showTooltip: true,
+    showLegend: false,
+    legendPosition: 'bottom',
+    animate: true,
+    curve: 'linear',
+    yAxisStartsFromZero: true,
+    showTrendLine: true,
+    tooltipSize: 'sm',
+  });
+
+  const [marketShareOptions, setMarketShareOptions] = useState<ChartOptionsConfig>({
+    showGrid: false,
+    showAxis: false,
+    showTooltip: true,
+    showLegend: true,
+    legendPosition: 'right',
+    animate: true,
+    curve: 'linear',
+    yAxisStartsFromZero: false,
+    tooltipSize: 'sm',
+    showLabels: true,
+    showValues: false,
+    showPercentages: true,
+  });
+
+  const [revenueBreakdownOptions, setRevenueBreakdownOptions] = useState<ChartOptionsConfig>({
+    showGrid: false,
+    showAxis: false,
+    showTooltip: true,
+    showLegend: true,
+    legendPosition: 'bottom',
+    animate: true,
+    curve: 'linear',
+    yAxisStartsFromZero: false,
+    tooltipSize: 'sm',
+    innerRadius: 75,
+    showLabels: true,
+    showValues: false,
+    showPercentages: true,
+  });
+
+  const [trafficSourcesOptions, setTrafficSourcesOptions] = useState<ChartOptionsConfig>({
+    showGrid: false,
+    showAxis: false,
+    showTooltip: true,
+    showLegend: true,
+    legendPosition: 'right',
+    animate: true,
+    curve: 'linear',
+    yAxisStartsFromZero: false,
+    tooltipSize: 'sm',
+    innerRadius: 80,
+    showLabels: false,
+    showValues: false,
+    showPercentages: false,
+  });
+
+  // Extended example chart options state
+  const [techRevenueOptions, setTechRevenueOptions] = useState<ChartOptionsConfig>({
+    showGrid: true,
+    showAxis: true,
+    showTooltip: true,
+    showLegend: true,
+    legendPosition: 'bottom',
+    showPoints: true,
+    animate: true,
+    curve: 'smooth',
+    yAxisStartsFromZero: false,
+    tooltipSize: 'sm',
+  });
+
+  const [globalTemperatureOptions, setGlobalTemperatureOptions] = useState<ChartOptionsConfig>({
+    showGrid: true,
+    showAxis: true,
+    showTooltip: true,
+    showLegend: true,
+    legendPosition: 'bottom',
+    showPoints: false,
+    animate: true,
+    curve: 'smooth',
+    yAxisStartsFromZero: false,
+    tooltipSize: 'sm',
+  });
+
+  const [websitePerformanceOptions, setWebsitePerformanceOptions] = useState<ChartOptionsConfig>({
+    showGrid: true,
+    showAxis: true,
+    showTooltip: true,
+    showLegend: true,
+    legendPosition: 'bottom',
+    showPoints: false,
+    animate: true,
+    curve: 'smooth',
+    yAxisStartsFromZero: true,
+    showStackedTotal: true,
+    tooltipSize: 'sm',
+  });
+
+  const [regionalSalesOptions, setRegionalSalesOptions] = useState<ChartOptionsConfig>({
+    showGrid: true,
+    showAxis: true,
+    showTooltip: true,
+    showLegend: true,
+    legendPosition: 'bottom',
+    showPoints: false,
+    animate: true,
+    curve: 'smooth',
+    yAxisStartsFromZero: true,
+    showStackedTotal: false,
+    tooltipSize: 'sm',
+  });
+
+  const [customerSatisfactionOptions, setCustomerSatisfactionOptions] = useState<ChartOptionsConfig>({
+    showGrid: true,
+    showAxis: true,
+    showTooltip: true,
+    showLegend: true,
+    legendPosition: 'bottom',
+    animate: true,
+    curve: 'linear',
+    yAxisStartsFromZero: true,
+    showTrendLine: true,
+    tooltipSize: 'sm',
+  });
+
+  const [campaignPerformanceOptions, setCampaignPerformanceOptions] = useState<ChartOptionsConfig>({
+    showGrid: true,
+    showAxis: true,
+    showTooltip: true,
+    showLegend: true,
+    legendPosition: 'bottom',
+    animate: true,
+    curve: 'linear',
+    yAxisStartsFromZero: true,
+    showTrendLine: false,
+    tooltipSize: 'sm',
   });
 
   // Chart data - using useMemo to prevent regeneration on every render
@@ -81,23 +288,44 @@ export default function DemoPage() {
   const stackedData = useMemo(() => {
     // Create cumulative/portfolio data for stacked chart
     const baseData = generateTechStocksData();
-    return baseData.map(dataset => ({
+    return baseData.map((dataset) => ({
       ...dataset,
-      data: dataset.data.map(point => ({
+      data: dataset.data.map((point) => ({
         ...point,
-        y: point.y / 10 // Scale down for better stacking visualization
-      }))
+        y: point.y / 10, // Scale down for better stacking visualization
+      })),
     }));
   }, []);
+  const heightWeightData = useMemo(() => generateHeightWeightData(), []);
+  const salesMarketingData = useMemo(() => [generateSalesMarketingData()], []);
+  const marketShareData = useMemo(() => generateMarketShareData(), []);
+  const revenueBreakdownData = useMemo(() => generateRevenueBreakdownData(), []);
+  const trafficSourcesData = useMemo(() => generateTrafficSourcesData(), []);
+  
+  // Extended examples with more datasets
+  const techRevenueData = useMemo(() => generateTechRevenueComparison(), []);
+  const globalTemperatureData = useMemo(() => generateGlobalTemperatureData(), []);
+  const websitePerformanceData = useMemo(() => generateWebsitePerformanceData(), []);
+  const regionalSalesData = useMemo(() => generateRegionalSalesData(), []);
+  const customerSatisfactionData = useMemo(() => generateCustomerSatisfactionScatter(), []);
+  const campaignPerformanceData = useMemo(() => generateCampaignPerformanceScatter(), []);
 
   // Tab state for each chart
   const [appleStockTab, setAppleStockTab] = useState<'chart' | 'data'>('chart');
   const [appleMonthlyTab, setAppleMonthlyTab] = useState<'chart' | 'data'>('chart');
   const [techStocksTab, setTechStocksTab] = useState<'chart' | 'data'>('chart');
   const [stackedTab, setStackedTab] = useState<'chart' | 'data'>('chart');
+  const [heightWeightTab, setHeightWeightTab] = useState<'chart' | 'data'>('chart');
+  const [salesMarketingTab, setSalesMarketingTab] = useState<'chart' | 'data'>('chart');
+  const [marketShareTab, setMarketShareTab] = useState<'chart' | 'data'>('chart');
+  const [revenueBreakdownTab, setRevenueBreakdownTab] = useState<'chart' | 'data'>('chart');
+  const [trafficSourcesTab, setTrafficSourcesTab] = useState<'chart' | 'data'>('chart');
 
   // Function to convert ChartOptionsConfig to chart library options
-  const convertToChartOptions = (options: ChartOptionsConfig, isAreaChart = false) => ({
+  const convertToChartOptions = (
+    options: ChartOptionsConfig,
+    chartType: 'line' | 'area' | 'scatter' | 'pie' | 'doughnut' = 'line'
+  ) => ({
     height: 400,
     showGrid: options.showGrid,
     showAxis: options.showAxis,
@@ -108,10 +336,22 @@ export default function DemoPage() {
     curve: options.curve,
     yAxisStartsFromZero: options.yAxisStartsFromZero,
     showPoints: options.showPoints,
-    ...(isAreaChart && {
+    tooltipSize: options.tooltipSize || 'sm',
+    ...(chartType === 'area' && {
       fillOpacity: 0.3,
       stacked: false,
       showStackedTotal: options.showStackedTotal,
+    }),
+    ...(chartType === 'scatter' && {
+      pointRadius: 5,
+      pointOpacity: 0.7,
+      showTrendLine: options.showTrendLine,
+    }),
+    ...((chartType === 'pie' || chartType === 'doughnut') && {
+      innerRadius: options.innerRadius || (chartType === 'doughnut' ? 75 : 0),
+      showLabels: options.showLabels,
+      showValues: options.showValues,
+      showPercentages: options.showPercentages,
     }),
   });
 
@@ -126,7 +366,7 @@ export default function DemoPage() {
       appleStockChartRef.current = createAreaChart(
         '#apple-stock-chart',
         appleStockData,
-        convertToChartOptions(appleStockOptions, true)
+        convertToChartOptions(appleStockOptions, 'area')
       );
       appleStockChartRef.current.render();
     }
@@ -141,7 +381,7 @@ export default function DemoPage() {
       appleMonthlyChartRef.current = createLineChart(
         '#apple-monthly-chart',
         appleMonthlyData,
-        convertToChartOptions(appleMonthlyOptions)
+        convertToChartOptions(appleMonthlyOptions, 'line')
       );
       appleMonthlyChartRef.current.render();
     }
@@ -153,11 +393,36 @@ export default function DemoPage() {
       if (techStocksChartRef.current) {
         techStocksChartRef.current.destroy();
       }
-      techStocksChartRef.current = createLineChart(
-        '#tech-stocks-chart',
-        techStocksData,
-        convertToChartOptions(techStocksOptions)
-      );
+      techStocksChartRef.current = createLineChart('#tech-stocks-chart', techStocksData, {
+        ...convertToChartOptions(techStocksOptions, 'line'),
+        tooltipContentCallback: (data, xValue) => {
+          const totalValue = data.reduce((sum, item) => sum + item.value, 0);
+          const leader = data.reduce((prev, current) =>
+            prev.value > current.value ? prev : current
+          );
+          return `
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: white; margin-bottom: 4px;">${xValue}</div>
+                ${data
+                  .map(
+                    (item) => `
+                  <div style="display: flex; align-items: center; margin-bottom: 1px;">
+                    <div style="width: 8px; height: 8px; background: ${item.color}; border-radius: 50%; margin-right: 4px;"></div>
+                    <span style="color: #e5e7eb; font-size: 9px; margin-right: 3px;">${item.label}:</span>
+                    <span style="font-weight: 600; color: white; font-size: 9px;">$${item.value.toFixed(0)}</span>
+                  </div>
+                `
+                  )
+                  .join('')}
+                <div style="border-top: 1px solid #374151; margin-top: 3px; padding-top: 2px;">
+                  <div style="color: #fbbf24; font-size: 9px;">
+                    Portfolio: $${totalValue.toFixed(0)} | Leader: ${leader.label}
+                  </div>
+                </div>
+              </div>
+            `;
+        },
+      });
       techStocksChartRef.current.render();
     }
   }, [techStocksOptions, techStocksData, techStocksTab]);
@@ -168,32 +433,272 @@ export default function DemoPage() {
       if (multiAreaChartInstanceRef.current) {
         multiAreaChartInstanceRef.current.destroy();
       }
-      multiAreaChartInstanceRef.current = createAreaChart(
-        '#multi-area-chart',
-        stackedData,
-        {
-          ...convertToChartOptions(multiAreaOptions, true),
-          stacked: true, // Keep stacked for this specific chart
-        }
-      );
+      multiAreaChartInstanceRef.current = createAreaChart('#multi-area-chart', stackedData, {
+        ...convertToChartOptions(multiAreaOptions, 'area'),
+        stacked: true, // Keep stacked for this specific chart
+      });
       multiAreaChartInstanceRef.current.render();
     }
   }, [multiAreaOptions, stackedData, stackedTab]);
 
+  // Height Weight Scatter Chart
+  useEffect(() => {
+    if (heightWeightRef.current && heightWeightTab === 'chart') {
+      if (heightWeightChartRef.current) {
+        heightWeightChartRef.current.destroy();
+      }
+      heightWeightChartRef.current = createScatterChart('#height-weight-chart', heightWeightData, {
+        ...convertToChartOptions(heightWeightOptions, 'scatter'),
+        tooltipContentCallback: (data) => {
+          const bmi = (data.y / ((data.x as number) / 100) ** 2).toFixed(1);
+          const bmiCategory =
+            parseFloat(bmi) < 18.5
+              ? 'Underweight'
+              : parseFloat(bmi) < 25
+                ? 'Normal'
+                : parseFloat(bmi) < 30
+                  ? 'Overweight'
+                  : 'Obese';
+          return `
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: white; margin-bottom: 2px;">${data.label}</div>
+                <div style="color: #e5e7eb; font-size: 9px; margin-bottom: 1px;">
+                  ${data.x}cm, ${data.y}kg
+                </div>
+                <div style="color: #fbbf24; font-size: 9px;">
+                  BMI: ${bmi} (${bmiCategory})
+                </div>
+              </div>
+            `;
+        },
+      });
+      heightWeightChartRef.current.render();
+    }
+  }, [heightWeightOptions, heightWeightData, heightWeightTab]);
+
+  // Sales Marketing Scatter Chart
+  useEffect(() => {
+    if (salesMarketingRef.current && salesMarketingTab === 'chart') {
+      if (salesMarketingChartRef.current) {
+        salesMarketingChartRef.current.destroy();
+      }
+      salesMarketingChartRef.current = createScatterChart(
+        '#sales-marketing-chart',
+        salesMarketingData,
+        {
+          ...convertToChartOptions(salesMarketingOptions, 'scatter'),
+          tooltipContentCallback: (data) => {
+            const marketingSpend = data.x as number;
+            const sales = data.y;
+            const roi = (((sales - marketingSpend) / marketingSpend) * 100).toFixed(1);
+            const efficiency = (sales / marketingSpend).toFixed(1);
+            return `
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: white; margin-bottom: 2px;">Marketing Analysis</div>
+                <div style="color: #e5e7eb; font-size: 9px; margin-bottom: 1px;">
+                  Spend: $${marketingSpend.toFixed(1)}k
+                </div>
+                <div style="color: #e5e7eb; font-size: 9px; margin-bottom: 1px;">
+                  Sales: $${sales.toFixed(1)}k
+                </div>
+                <div style="color: #10b981; font-size: 9px;">
+                  ROI: ${roi}% | Efficiency: ${efficiency}x
+                </div>
+              </div>
+            `;
+          },
+        }
+      );
+      salesMarketingChartRef.current.render();
+    }
+  }, [salesMarketingOptions, salesMarketingData, salesMarketingTab]);
+
+  // Market Share Pie Chart
+  useEffect(() => {
+    if (marketShareRef.current && marketShareTab === 'chart') {
+      if (marketShareChartRef.current) {
+        marketShareChartRef.current.destroy();
+      }
+      marketShareChartRef.current = createPieChart('#market-share-chart', marketShareData, {
+        ...convertToChartOptions(marketShareOptions, 'pie'),
+        tooltipContentCallback: (data) => {
+          return `
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: white; margin-bottom: 2px;">${data.label}</div>
+                <div style="color: #e5e7eb; font-size: 9px; margin-bottom: 1px;">
+                  Market Share: ${data.percentage.toFixed(1)}%
+                </div>
+                <div style="color: #fbbf24; font-size: 9px;">
+                  ${data.value}M devices sold
+                </div>
+              </div>
+            `;
+        },
+      });
+      marketShareChartRef.current.render();
+    }
+  }, [marketShareOptions, marketShareData, marketShareTab]);
+
+  // Revenue Breakdown Doughnut Chart
+  useEffect(() => {
+    if (revenueBreakdownRef.current && revenueBreakdownTab === 'chart') {
+      if (revenueBreakdownChartRef.current) {
+        revenueBreakdownChartRef.current.destroy();
+      }
+      revenueBreakdownChartRef.current = createDoughnutChart(
+        '#revenue-breakdown-chart',
+        revenueBreakdownData,
+        {
+          ...convertToChartOptions(revenueBreakdownOptions, 'doughnut'),
+          tooltipContentCallback: (data) => {
+            return `
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: white; margin-bottom: 2px;">${data.label}</div>
+                <div style="color: #e5e7eb; font-size: 9px; margin-bottom: 1px;">
+                  Revenue Share: ${data.percentage.toFixed(1)}%
+                </div>
+                <div style="color: #10b981; font-size: 9px;">
+                  $${data.value.toFixed(1)}M quarterly
+                </div>
+              </div>
+            `;
+          },
+        }
+      );
+      revenueBreakdownChartRef.current.render();
+    }
+  }, [revenueBreakdownOptions, revenueBreakdownData, revenueBreakdownTab]);
+
+  // Traffic Sources Doughnut Chart
+  useEffect(() => {
+    if (trafficSourcesRef.current && trafficSourcesTab === 'chart') {
+      if (trafficSourcesChartRef.current) {
+        trafficSourcesChartRef.current.destroy();
+      }
+      trafficSourcesChartRef.current = createDoughnutChart(
+        '#traffic-sources-chart',
+        trafficSourcesData,
+        {
+          ...convertToChartOptions(trafficSourcesOptions, 'doughnut'),
+          tooltipContentCallback: (data) => {
+            return `
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: white; margin-bottom: 2px;">${data.label}</div>
+                <div style="color: #e5e7eb; font-size: 9px; margin-bottom: 1px;">
+                  ${data.percentage.toFixed(1)}% of traffic
+                </div>
+                <div style="color: #3b82f6; font-size: 9px;">
+                  ~${Math.round(data.value * 100)}K visitors/month
+                </div>
+              </div>
+            `;
+          },
+        }
+      );
+      trafficSourcesChartRef.current.render();
+    }
+  }, [trafficSourcesOptions, trafficSourcesData, trafficSourcesTab]);
+
+  // Extended examples useEffect hooks
+  
+  // Tech Revenue Chart
+  useEffect(() => {
+    if (techRevenueRef.current) {
+      if (techRevenueChartRef.current) {
+        techRevenueChartRef.current.destroy();
+      }
+      techRevenueChartRef.current = createLineChart('#tech-revenue-chart', techRevenueData, {
+        height: 400,
+        ...techRevenueOptions,
+      });
+      techRevenueChartRef.current.render();
+    }
+  }, [techRevenueData, techRevenueOptions]);
+
+  // Global Temperature Chart
+  useEffect(() => {
+    if (globalTemperatureRef.current) {
+      if (globalTemperatureChartRef.current) {
+        globalTemperatureChartRef.current.destroy();
+      }
+      globalTemperatureChartRef.current = createLineChart('#global-temperature-chart', globalTemperatureData, {
+        height: 400,
+        ...globalTemperatureOptions,
+      });
+      globalTemperatureChartRef.current.render();
+    }
+  }, [globalTemperatureData, globalTemperatureOptions]);
+
+  // Website Performance Chart
+  useEffect(() => {
+    if (websitePerformanceRef.current) {
+      if (websitePerformanceChartRef.current) {
+        websitePerformanceChartRef.current.destroy();
+      }
+      websitePerformanceChartRef.current = createAreaChart('#website-performance-chart', websitePerformanceData, {
+        height: 400,
+        ...websitePerformanceOptions,
+      });
+      websitePerformanceChartRef.current.render();
+    }
+  }, [websitePerformanceData, websitePerformanceOptions]);
+
+  // Regional Sales Chart
+  useEffect(() => {
+    if (regionalSalesRef.current) {
+      if (regionalSalesChartRef.current) {
+        regionalSalesChartRef.current.destroy();
+      }
+      regionalSalesChartRef.current = createAreaChart('#regional-sales-chart', regionalSalesData, {
+        height: 400,
+        ...regionalSalesOptions,
+      });
+      regionalSalesChartRef.current.render();
+    }
+  }, [regionalSalesData, regionalSalesOptions]);
+
+  // Customer Satisfaction Chart
+  useEffect(() => {
+    if (customerSatisfactionRef.current) {
+      if (customerSatisfactionChartRef.current) {
+        customerSatisfactionChartRef.current.destroy();
+      }
+      customerSatisfactionChartRef.current = createScatterChart('#customer-satisfaction-chart', customerSatisfactionData, {
+        height: 400,
+        ...customerSatisfactionOptions,
+      });
+      customerSatisfactionChartRef.current.render();
+    }
+  }, [customerSatisfactionData, customerSatisfactionOptions]);
+
+  // Campaign Performance Chart
+  useEffect(() => {
+    if (campaignPerformanceRef.current) {
+      if (campaignPerformanceChartRef.current) {
+        campaignPerformanceChartRef.current.destroy();
+      }
+      campaignPerformanceChartRef.current = createScatterChart('#campaign-performance-chart', campaignPerformanceData, {
+        height: 400,
+        ...campaignPerformanceOptions,
+      });
+      campaignPerformanceChartRef.current.render();
+    }
+  }, [campaignPerformanceData, campaignPerformanceOptions]);
+
   // Tab component
-  const TabButton = ({ 
-    active, 
-    onClick, 
-    children 
-  }: { 
-    active: boolean; 
-    onClick: () => void; 
-    children: React.ReactNode; 
+  const TabButton = ({
+    active,
+    onClick,
+    children,
+  }: {
+    active: boolean;
+    onClick: () => void;
+    children: React.ReactNode;
   }) => (
     <button
-      className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+      className={`rounded-t-lg px-4 py-2 text-sm font-medium transition-colors ${
         active
-          ? 'bg-white text-blue-600 border-b-2 border-blue-600'
+          ? 'border-b-2 border-blue-600 bg-white text-blue-600'
           : 'bg-gray-50 text-gray-500 hover:text-gray-700'
       }`}
       onClick={onClick}
@@ -228,25 +733,22 @@ export default function DemoPage() {
                 Daily stock price over the last year with gradient area fill
               </p>
             </div>
-            <ChartOptionsPopover
-              options={appleStockOptions}
-              onOptionsChange={setAppleStockOptions}
-              chartType="area"
-            />
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#apple-stock-chart" chartTitle="Apple Stock Price" />
+              <ChartOptionsPopover
+                options={appleStockOptions}
+                onOptionsChange={setAppleStockOptions}
+                chartType="area"
+              />
+            </div>
           </div>
-          
+
           {/* Tabs */}
           <div className="mb-4 flex border-b">
-            <TabButton
-              active={appleStockTab === 'chart'}
-              onClick={() => setAppleStockTab('chart')}
-            >
+            <TabButton active={appleStockTab === 'chart'} onClick={() => setAppleStockTab('chart')}>
               Chart
             </TabButton>
-            <TabButton
-              active={appleStockTab === 'data'}
-              onClick={() => setAppleStockTab('data')}
-            >
+            <TabButton active={appleStockTab === 'data'} onClick={() => setAppleStockTab('data')}>
               Data
             </TabButton>
           </div>
@@ -268,13 +770,16 @@ export default function DemoPage() {
                 Monthly closing prices showing seasonal patterns
               </p>
             </div>
-            <ChartOptionsPopover
-              options={appleMonthlyOptions}
-              onOptionsChange={setAppleMonthlyOptions}
-              chartType="line"
-            />
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#apple-monthly-chart" chartTitle="Apple Monthly Performance" />
+              <ChartOptionsPopover
+                options={appleMonthlyOptions}
+                onOptionsChange={setAppleMonthlyOptions}
+                chartType="line"
+              />
+            </div>
           </div>
-          
+
           {/* Tabs */}
           <div className="mb-4 flex border-b">
             <TabButton
@@ -306,25 +811,22 @@ export default function DemoPage() {
               <h2 className="text-xl font-semibold text-gray-800">Tech Stocks Comparison</h2>
               <p className="text-sm text-gray-600">AAPL vs GOOGL vs MSFT performance comparison</p>
             </div>
-            <ChartOptionsPopover
-              options={techStocksOptions}
-              onOptionsChange={setTechStocksOptions}
-              chartType="line"
-            />
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#tech-stocks-chart" chartTitle="Tech Stocks Comparison" />
+              <ChartOptionsPopover
+                options={techStocksOptions}
+                onOptionsChange={setTechStocksOptions}
+                chartType="line"
+              />
+            </div>
           </div>
-          
+
           {/* Tabs */}
           <div className="mb-4 flex border-b">
-            <TabButton
-              active={techStocksTab === 'chart'}
-              onClick={() => setTechStocksTab('chart')}
-            >
+            <TabButton active={techStocksTab === 'chart'} onClick={() => setTechStocksTab('chart')}>
               Chart
             </TabButton>
-            <TabButton
-              active={techStocksTab === 'data'}
-              onClick={() => setTechStocksTab('data')}
-            >
+            <TabButton active={techStocksTab === 'data'} onClick={() => setTechStocksTab('data')}>
               Data
             </TabButton>
           </div>
@@ -346,25 +848,22 @@ export default function DemoPage() {
                 Cumulative portfolio value showing stacked stock contributions
               </p>
             </div>
-            <ChartOptionsPopover
-              options={multiAreaOptions}
-              onOptionsChange={setMultiAreaOptions}
-              chartType="area"
-            />
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#multi-area-chart" chartTitle="Stacked Tech Portfolio" />
+              <ChartOptionsPopover
+                options={multiAreaOptions}
+                onOptionsChange={setMultiAreaOptions}
+                chartType="area"
+              />
+            </div>
           </div>
-          
+
           {/* Tabs */}
           <div className="mb-4 flex border-b">
-            <TabButton
-              active={stackedTab === 'chart'}
-              onClick={() => setStackedTab('chart')}
-            >
+            <TabButton active={stackedTab === 'chart'} onClick={() => setStackedTab('chart')}>
               Chart
             </TabButton>
-            <TabButton
-              active={stackedTab === 'data'}
-              onClick={() => setStackedTab('data')}
-            >
+            <TabButton active={stackedTab === 'data'} onClick={() => setStackedTab('data')}>
               Data
             </TabButton>
           </div>
@@ -375,6 +874,377 @@ export default function DemoPage() {
           ) : (
             <DataDisplay datasets={stackedData} />
           )}
+        </div>
+
+        {/* Height Weight Scatter Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Height vs Weight Analysis</h2>
+              <p className="text-sm text-gray-600">
+                Scatter plot showing correlation between height and weight by gender
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#height-weight-chart" chartTitle="Height vs Weight Analysis" />
+              <ChartOptionsPopover
+                options={heightWeightOptions}
+                onOptionsChange={setHeightWeightOptions}
+                chartType="scatter"
+              />
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="mb-4 flex border-b">
+            <TabButton
+              active={heightWeightTab === 'chart'}
+              onClick={() => setHeightWeightTab('chart')}
+            >
+              Chart
+            </TabButton>
+            <TabButton
+              active={heightWeightTab === 'data'}
+              onClick={() => setHeightWeightTab('data')}
+            >
+              Data
+            </TabButton>
+          </div>
+
+          {/* Content */}
+          {heightWeightTab === 'chart' ? (
+            <div id="height-weight-chart" ref={heightWeightRef} className="w-full"></div>
+          ) : (
+            <DataDisplay datasets={heightWeightData} />
+          )}
+        </div>
+
+        {/* Sales Marketing Scatter Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Sales vs Marketing Spend</h2>
+              <p className="text-sm text-gray-600">
+                Relationship between marketing investment and sales performance with trend line
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#sales-marketing-chart" chartTitle="Sales vs Marketing Spend" />
+              <ChartOptionsPopover
+                options={salesMarketingOptions}
+                onOptionsChange={setSalesMarketingOptions}
+                chartType="scatter"
+              />
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="mb-4 flex border-b">
+            <TabButton
+              active={salesMarketingTab === 'chart'}
+              onClick={() => setSalesMarketingTab('chart')}
+            >
+              Chart
+            </TabButton>
+            <TabButton
+              active={salesMarketingTab === 'data'}
+              onClick={() => setSalesMarketingTab('data')}
+            >
+              Data
+            </TabButton>
+          </div>
+
+          {/* Content */}
+          {salesMarketingTab === 'chart' ? (
+            <div id="sales-marketing-chart" ref={salesMarketingRef} className="w-full"></div>
+          ) : (
+            <DataDisplay datasets={salesMarketingData} />
+          )}
+        </div>
+
+        {/* Market Share Pie Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Smartphone Market Share</h2>
+              <p className="text-sm text-gray-600">
+                Global smartphone market share by manufacturer (2024)
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#market-share-chart" chartTitle="Smartphone Market Share" />
+              <ChartOptionsPopover
+                options={marketShareOptions}
+                onOptionsChange={setMarketShareOptions}
+                chartType="pie"
+              />
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="mb-4 flex border-b">
+            <TabButton
+              active={marketShareTab === 'chart'}
+              onClick={() => setMarketShareTab('chart')}
+            >
+              Chart
+            </TabButton>
+            <TabButton active={marketShareTab === 'data'} onClick={() => setMarketShareTab('data')}>
+              Data
+            </TabButton>
+          </div>
+
+          {/* Content */}
+          {marketShareTab === 'chart' ? (
+            <div id="market-share-chart" ref={marketShareRef} className="w-full"></div>
+          ) : (
+            <DataDisplay
+              datasets={[
+                {
+                  label: 'Market Share',
+                  data: marketShareData.map((d) => ({ x: d.label, y: d.value })),
+                },
+              ]}
+            />
+          )}
+        </div>
+
+        {/* Revenue Breakdown Doughnut Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Revenue Breakdown</h2>
+              <p className="text-sm text-gray-600">
+                Quarterly revenue distribution by business segment
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#revenue-breakdown-chart" chartTitle="Revenue Breakdown" />
+              <ChartOptionsPopover
+                options={revenueBreakdownOptions}
+                onOptionsChange={setRevenueBreakdownOptions}
+                chartType="doughnut"
+              />
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="mb-4 flex border-b">
+            <TabButton
+              active={revenueBreakdownTab === 'chart'}
+              onClick={() => setRevenueBreakdownTab('chart')}
+            >
+              Chart
+            </TabButton>
+            <TabButton
+              active={revenueBreakdownTab === 'data'}
+              onClick={() => setRevenueBreakdownTab('data')}
+            >
+              Data
+            </TabButton>
+          </div>
+
+          {/* Content */}
+          {revenueBreakdownTab === 'chart' ? (
+            <div id="revenue-breakdown-chart" ref={revenueBreakdownRef} className="w-full"></div>
+          ) : (
+            <DataDisplay
+              datasets={[
+                {
+                  label: 'Revenue',
+                  data: revenueBreakdownData.map((d) => ({ x: d.label, y: d.value })),
+                },
+              ]}
+            />
+          )}
+        </div>
+
+        {/* Traffic Sources Doughnut Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Website Traffic Sources</h2>
+              <p className="text-sm text-gray-600">
+                Monthly website traffic breakdown by source channel
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#traffic-sources-chart" chartTitle="Website Traffic Sources" />
+              <ChartOptionsPopover
+                options={trafficSourcesOptions}
+                onOptionsChange={setTrafficSourcesOptions}
+                chartType="doughnut"
+              />
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="mb-4 flex border-b">
+            <TabButton
+              active={trafficSourcesTab === 'chart'}
+              onClick={() => setTrafficSourcesTab('chart')}
+            >
+              Chart
+            </TabButton>
+            <TabButton
+              active={trafficSourcesTab === 'data'}
+              onClick={() => setTrafficSourcesTab('data')}
+            >
+              Data
+            </TabButton>
+          </div>
+
+          {/* Content */}
+          {trafficSourcesTab === 'chart' ? (
+            <div id="traffic-sources-chart" ref={trafficSourcesRef} className="w-full"></div>
+          ) : (
+            <DataDisplay
+              datasets={[
+                {
+                  label: 'Traffic Sources',
+                  data: trafficSourcesData.map((d) => ({ x: d.label, y: d.value })),
+                },
+              ]}
+            />
+          )}
+        </div>
+
+        {/* Tech Revenue Comparison - 6 Datasets Line Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Tech Companies Revenue Comparison</h2>
+              <p className="text-sm text-gray-600">
+                Quarterly revenue comparison across 6 major tech companies (6 datasets)
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#tech-revenue-chart" chartTitle="Tech Companies Revenue" />
+              <ChartOptionsPopover
+                options={techRevenueOptions}
+                onOptionsChange={setTechRevenueOptions}
+                chartType="line"
+              />
+            </div>
+          </div>
+          
+          {/* Chart */}
+          <div id="tech-revenue-chart" ref={techRevenueRef} className="w-full"></div>
+        </div>
+
+        {/* Global Temperature - 8 Datasets Line Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Global Temperature Patterns</h2>
+              <p className="text-sm text-gray-600">
+                Average monthly temperatures across 8 major cities worldwide (8 datasets)
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#global-temperature-chart" chartTitle="Global Temperature Patterns" />
+              <ChartOptionsPopover
+                options={globalTemperatureOptions}
+                onOptionsChange={setGlobalTemperatureOptions}
+                chartType="line"
+              />
+            </div>
+          </div>
+          
+          {/* Chart */}
+          <div id="global-temperature-chart" ref={globalTemperatureRef} className="w-full"></div>
+        </div>
+
+        {/* Website Performance - 5 Datasets Area Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Website Performance Metrics</h2>
+              <p className="text-sm text-gray-600">
+                Key performance metrics across different website pages (5 datasets)
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#website-performance-chart" chartTitle="Website Performance Metrics" />
+              <ChartOptionsPopover
+                options={websitePerformanceOptions}
+                onOptionsChange={setWebsitePerformanceOptions}
+                chartType="area"
+              />
+            </div>
+          </div>
+          
+          {/* Chart */}
+          <div id="website-performance-chart" ref={websitePerformanceRef} className="w-full"></div>
+        </div>
+
+        {/* Regional Sales - 6 Datasets Area Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Regional Sales Performance</h2>
+              <p className="text-sm text-gray-600">
+                Sales performance across 6 global regions with seasonal patterns (6 datasets)
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#regional-sales-chart" chartTitle="Regional Sales Performance" />
+              <ChartOptionsPopover
+                options={regionalSalesOptions}
+                onOptionsChange={setRegionalSalesOptions}
+                chartType="area"
+              />
+            </div>
+          </div>
+          
+          {/* Chart */}
+          <div id="regional-sales-chart" ref={regionalSalesRef} className="w-full"></div>
+        </div>
+
+        {/* Customer Satisfaction - 6 Datasets Scatter Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Customer Satisfaction Analysis</h2>
+              <p className="text-sm text-gray-600">
+                Response time vs satisfaction score across 6 departments (6 datasets)
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#customer-satisfaction-chart" chartTitle="Customer Satisfaction Analysis" />
+              <ChartOptionsPopover
+                options={customerSatisfactionOptions}
+                onOptionsChange={setCustomerSatisfactionOptions}
+                chartType="scatter"
+              />
+            </div>
+          </div>
+          
+          {/* Chart */}
+          <div id="customer-satisfaction-chart" ref={customerSatisfactionRef} className="w-full"></div>
+        </div>
+
+        {/* Campaign Performance - 7 Datasets Scatter Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Marketing Campaign Performance</h2>
+              <p className="text-sm text-gray-600">
+                Budget spent vs conversions across 7 different marketing campaigns (7 datasets)
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#campaign-performance-chart" chartTitle="Marketing Campaign Performance" />
+              <ChartOptionsPopover
+                options={campaignPerformanceOptions}
+                onOptionsChange={setCampaignPerformanceOptions}
+                chartType="scatter"
+              />
+            </div>
+          </div>
+          
+          {/* Chart */}
+          <div id="campaign-performance-chart" ref={campaignPerformanceRef} className="w-full"></div>
         </div>
       </div>
 
@@ -393,6 +1263,11 @@ export default function DemoPage() {
           <div>✅ Chart.js-like API</div>
           <div>✅ Chart/Data view toggle</div>
           <div>✅ Realistic stock data</div>
+          <div>✅ Scatter plots with correlations</div>
+          <div>✅ Trend line analysis</div>
+          <div>✅ Pie and doughnut charts</div>
+          <div>✅ Custom tooltip content</div>
+          <div>✅ Animated chart transitions</div>
         </div>
       </div>
     </div>

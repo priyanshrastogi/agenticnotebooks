@@ -1,15 +1,35 @@
 // Chart implementations
 export { AreaChart, createAreaChart } from './charts/area';
 export { createLineChart, LineChart } from './charts/line';
+export { createDoughnutChart, createPieChart, PieChart } from './charts/pie';
+export { createScatterChart, ScatterChart } from './charts/scatter';
 
 // Core types and utilities
 export {
+  // Chart options interfaces
   type AreaChartOptions,
-  type Chart,
-  type ChartData,
+  type BaseChartOptions,
+  // Data types
+  type ChartDataPoint,
   type ChartDataset,
-  type ChartOptions,
+  // Configuration types
+  type ChartMargin,
+  type CurveType,
+  type IAreaChart,
+  // Chart interfaces
+  type ILineChart,
+  type IPieChart,
+  type IScatterChart,
+  type LegendPosition,
   type LineChartOptions,
+  type PieChartOptions,
+  type PieDataPoint,
+  type PieTooltipData,
+  type ScatterChartOptions,
+  type ScatterTooltipData,
+  // Tooltip data interfaces
+  type TooltipData,
+  type TooltipSize,
 } from './core/types';
 
 // Color utilities
@@ -19,5 +39,17 @@ export { DEFAULT_COLORS, getColor, hexToRgba } from './core/colors';
 export {
   generateAppleStockData,
   generateAppleStockDataWithDates,
+  generateHeightWeightData,
+  generateMarketShareData,
+  generateRevenueBreakdownData,
+  generateSalesMarketingData,
   generateTechStocksData,
-} from './data/stockData';
+  generateTrafficSourcesData,
+  // Extended examples with more datasets
+  generateTechRevenueComparison,
+  generateGlobalTemperatureData,
+  generateWebsitePerformanceData,
+  generateRegionalSalesData,
+  generateCustomerSatisfactionScatter,
+  generateCampaignPerformanceScatter,
+} from './data';

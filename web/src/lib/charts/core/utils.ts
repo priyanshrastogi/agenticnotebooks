@@ -10,9 +10,11 @@ export const formatNumber = (num: number): string => {
   return num.toString();
 };
 
-export const createTooltip = (container: string) => {
+export const createTooltip = (container: string, size: 'sm' | 'md' = 'sm') => {
   // Remove existing tooltip
   d3.select(`${container}-tooltip`).remove();
+
+  const isSm = size === 'sm';
 
   return d3
     .select('body')
@@ -21,13 +23,13 @@ export const createTooltip = (container: string) => {
     .style('position', 'absolute')
     .style('background', 'rgba(0, 0, 0, 0.9)')
     .style('color', 'white')
-    .style('padding', '8px 12px')
-    .style('border-radius', '6px')
-    .style('font-size', '12px')
+    .style('padding', isSm ? '2px 4px' : '4px 6px')
+    .style('border-radius', isSm ? '3px' : '4px')
+    .style('font-size', isSm ? '10px' : '12px')
     .style('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
     .style('pointer-events', 'none')
     .style('opacity', 0)
-    .style('box-shadow', '0 4px 6px rgba(0, 0, 0, 0.1)')
+    .style('box-shadow', isSm ? '0 1px 3px rgba(0, 0, 0, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)')
     .style('z-index', '1000');
 };
 
@@ -49,9 +51,11 @@ export const hideTooltip = (
   tooltip.style('opacity', 0);
 };
 
-export const createCrosshairTooltip = (container: string) => {
+export const createCrosshairTooltip = (container: string, size: 'sm' | 'md' = 'sm') => {
   // Remove existing crosshair tooltip
   d3.select(`${container}-crosshair-tooltip`).remove();
+
+  const isSm = size === 'sm';
 
   return d3
     .select('body')
@@ -60,16 +64,16 @@ export const createCrosshairTooltip = (container: string) => {
     .style('position', 'absolute')
     .style('background', 'rgba(0, 0, 0, 0.9)')
     .style('color', 'white')
-    .style('padding', '12px 16px')
-    .style('border-radius', '8px')
-    .style('font-size', '13px')
+    .style('padding', isSm ? '4px 6px' : '6px 8px')
+    .style('border-radius', isSm ? '4px' : '6px')
+    .style('font-size', isSm ? '10px' : '12px')
     .style('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
     .style('pointer-events', 'none')
     .style('opacity', 0)
-    .style('box-shadow', '0 4px 12px rgba(0, 0, 0, 0.15)')
+    .style('box-shadow', isSm ? '0 1px 4px rgba(0, 0, 0, 0.15)' : '0 2px 6px rgba(0, 0, 0, 0.15)')
     .style('z-index', '1001')
-    .style('min-width', '120px')
-    .style('max-width', '300px');
+    .style('min-width', isSm ? '80px' : '100px')
+    .style('max-width', isSm ? '200px' : '250px');
 };
 
 export const showCrosshairTooltip = (
@@ -220,48 +224,145 @@ export const addLegend = (
 
   const legendGroup = svg.append('g').attr('class', 'legend');
 
-  const itemWidth = 120;
   const itemHeight = 20;
-  const itemSpacing = 10;
+  const itemSpacing = 15;
+  const circleRadius = 4;
+  const circleTextGap = 8;
 
   if (position === 'bottom' || position === 'top') {
-    // Horizontal layout
-    const totalWidth = datasets.length * itemWidth + (datasets.length - 1) * itemSpacing;
-    const startX = (width - totalWidth) / 2;
+    // Horizontal layout - use flexbox-like approach
     const y = position === 'bottom' ? height - 15 : margin.top - 30;
-
-    legendGroup
-      .selectAll('.legend-item')
-      .data(datasets)
-      .enter()
-      .append('g')
-      .attr('class', 'legend-item')
-      .attr('transform', (d, i) => `translate(${startX + i * (itemWidth + itemSpacing)}, ${y})`)
-      .each(function (d) {
-        const item = d3.select(this);
-        
-        // Color indicator (circle)
-        item
-          .append('circle')
-          .attr('cx', 6)
-          .attr('cy', -4)
-          .attr('r', 4)
-          .attr('fill', d.color);
-
-        // Label text
-        item
-          .append('text')
-          .attr('x', 16)
-          .attr('y', 0)
-          .attr('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
-          .attr('font-size', '12px')
-          .attr('fill', '#666')
-          .text(d.label);
+    
+    // Create a temporary text element to measure text width
+    const tempText = svg.append('text')
+      .style('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
+      .style('font-size', '12px')
+      .style('visibility', 'hidden');
+    
+    // Calculate actual widths for each label
+    const itemWidths = datasets.map(d => {
+      tempText.text(d.label);
+      const bbox = (tempText.node() as SVGTextElement).getBBox();
+      return Math.ceil(bbox.width) + circleRadius * 2 + circleTextGap + 5; // Add padding
+    });
+    
+    tempText.remove();
+    
+    // Calculate total width and determine if we need to wrap
+    const totalWidth = itemWidths.reduce((sum, w) => sum + w, 0) + (datasets.length - 1) * itemSpacing;
+    const availableWidth = width - margin.left - margin.right;
+    
+    // If total width exceeds available width, use multi-row layout
+    if (totalWidth > availableWidth) {
+      // Calculate rows
+      let currentX = 0;
+      let currentRow = 0;
+      const positions: { x: number; y: number }[] = [];
+      
+      datasets.forEach((d, i) => {
+        if (currentX + itemWidths[i] > availableWidth && currentX > 0) {
+          currentX = 0;
+          currentRow++;
+        }
+        positions.push({ 
+          x: margin.left + currentX, 
+          y: y - (currentRow * (itemHeight + 5)) 
+        });
+        currentX += itemWidths[i] + itemSpacing;
       });
+      
+      // Create legend items with calculated positions
+      legendGroup
+        .selectAll('.legend-item')
+        .data(datasets)
+        .enter()
+        .append('g')
+        .attr('class', 'legend-item')
+        .attr('transform', (d, i) => `translate(${positions[i].x}, ${positions[i].y})`)
+        .each(function (d) {
+          const item = d3.select(this);
+          
+          // Color indicator (circle)
+          item
+            .append('circle')
+            .attr('cx', circleRadius)
+            .attr('cy', -4)
+            .attr('r', circleRadius)
+            .attr('fill', d.color);
+
+          // Label text
+          item
+            .append('text')
+            .attr('x', circleRadius * 2 + circleTextGap)
+            .attr('y', 0)
+            .attr('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
+            .attr('font-size', '12px')
+            .attr('fill', '#666')
+            .text(d.label);
+        });
+    } else {
+      // Single row, centered
+      const startX = (width - totalWidth) / 2;
+      let currentX = startX;
+      
+      legendGroup
+        .selectAll('.legend-item')
+        .data(datasets)
+        .enter()
+        .append('g')
+        .attr('class', 'legend-item')
+        .attr('transform', (d, i) => {
+          const x = currentX;
+          currentX += itemWidths[i] + itemSpacing;
+          return `translate(${x}, ${y})`;
+        })
+        .each(function (d) {
+          const item = d3.select(this);
+          
+          // Color indicator (circle)
+          item
+            .append('circle')
+            .attr('cx', circleRadius)
+            .attr('cy', -4)
+            .attr('r', circleRadius)
+            .attr('fill', d.color);
+
+          // Label text
+          item
+            .append('text')
+            .attr('x', circleRadius * 2 + circleTextGap)
+            .attr('y', 0)
+            .attr('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
+            .attr('font-size', '12px')
+            .attr('fill', '#666')
+            .text(d.label);
+        });
+    }
   } else {
     // Vertical layout (left/right)
-    const x = position === 'right' ? width - 100 : 10;
     const startY = margin.top + 20;
+    
+    // Create a temporary text element to measure max text width
+    const tempText = svg.append('text')
+      .style('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
+      .style('font-size', '12px')
+      .style('visibility', 'hidden');
+    
+    // Find the maximum width needed
+    let maxWidth = 0;
+    datasets.forEach(d => {
+      tempText.text(d.label);
+      const bbox = (tempText.node() as SVGTextElement).getBBox();
+      maxWidth = Math.max(maxWidth, Math.ceil(bbox.width));
+    });
+    
+    tempText.remove();
+    
+    // Calculate x position based on side and max width
+    const totalLegendWidth = maxWidth + circleRadius * 2 + circleTextGap + 10; // Add padding
+    const x = position === 'right' 
+      ? width - totalLegendWidth - 10
+      : 10;
 
     legendGroup
       .selectAll('.legend-item')
@@ -276,15 +377,15 @@ export const addLegend = (
         // Color indicator (circle)
         item
           .append('circle')
-          .attr('cx', 6)
+          .attr('cx', circleRadius)
           .attr('cy', -4)
-          .attr('r', 4)
+          .attr('r', circleRadius)
           .attr('fill', d.color);
 
         // Label text
         item
           .append('text')
-          .attr('x', 16)
+          .attr('x', circleRadius * 2 + circleTextGap)
           .attr('y', 0)
           .attr('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
           .attr('font-size', '12px')

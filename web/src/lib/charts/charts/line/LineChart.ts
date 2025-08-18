@@ -2,10 +2,10 @@ import * as d3 from 'd3';
 
 import { getColor } from '../../core/colors';
 import {
-  Chart,
-  ChartData,
+  ChartDataPoint,
   ChartDataset,
   HTMLDivSelection,
+  ILineChart,
   LineChartOptions,
   SVGLineSelection,
   SVGSelection,
@@ -25,7 +25,7 @@ import {
   showTooltip,
 } from '../../core/utils';
 
-export class LineChart implements Chart {
+export class LineChart implements ILineChart {
   private container: string;
   private data: ChartDataset[];
   private options: LineChartOptions;
@@ -54,6 +54,7 @@ export class LineChart implements Chart {
       strokeWidth: 2.5,
       curve: 'smooth',
       yAxisStartsFromZero: true,
+      tooltipSize: 'sm',
       ...options,
     };
     
@@ -77,16 +78,16 @@ export class LineChart implements Chart {
     if (showLegend) {
       switch (legendPosition) {
         case 'bottom':
-          bottom += 35;
+          bottom += 50; // Increased to accommodate potential multi-row legends
           break;
         case 'top':
-          top += 30;
+          top += 40; // Increased slightly
           break;
         case 'left':
-          left += 100;
+          left += 120; // Increased for longer labels
           break;
         case 'right':
-          right += 100;
+          right += 120; // Increased for longer labels
           break;
       }
     }
@@ -118,8 +119,8 @@ export class LineChart implements Chart {
       .style('background', 'transparent');
 
     if (this.options.showTooltip) {
-      this.tooltip = createTooltip(this.container);
-      this.crosshairTooltip = createCrosshairTooltip(this.container);
+      this.tooltip = createTooltip(this.container, this.options.tooltipSize);
+      this.crosshairTooltip = createCrosshairTooltip(this.container, this.options.tooltipSize);
     }
 
     // Update width in options to match container
@@ -210,14 +211,14 @@ export class LineChart implements Chart {
     if (this.options.showLegend) {
       const legendData = this.data.map((dataset, index) => ({
         label: dataset.label || `Dataset ${index + 1}`,
-        color: dataset.color || getColor(index, this.options.colors),
+        color: getColor(index, this.options.colors),
       }));
       addLegend(this.svg!, legendData, width!, height!, margin!, this.options.legendPosition);
     }
 
     // Create line generator
     const line = d3
-      .line<ChartData>()
+      .line<ChartDataPoint>()
       .x((d) => {
         if (isOrdinal) {
           const pointScale = xScale as d3.ScalePoint<string>;
@@ -234,7 +235,7 @@ export class LineChart implements Chart {
 
     // Render each dataset
     this.data.forEach((dataset, index) => {
-      const color = dataset.color || getColor(index, this.options.colors);
+      const color = getColor(index, this.options.colors);
 
       // Create group for this dataset
       const group = this.svg!.append('g').attr('class', `dataset-${index}`);
@@ -383,7 +384,7 @@ export class LineChart implements Chart {
             tooltipData.push({
               label: dataset.label || `Dataset ${index + 1}`,
               value: dataPoint.y,
-              color: dataset.color || getColor(index, this.options.colors),
+              color: getColor(index, this.options.colors),
             });
           }
         });
@@ -418,20 +419,28 @@ export class LineChart implements Chart {
 
         if (tooltipData.length > 0) {
           // Create multi-value tooltip content
-          const tooltipContent = `
-            <div style="font-weight: 600; margin-bottom: 8px; color: #e5e7eb;">${closestX}</div>
-            ${tooltipData
-              .map(
-                (item) => `
-              <div style="display: flex; align-items: center; margin-bottom: 4px;">
-                <div style="width: 10px; height: 10px; background: ${item.color}; border-radius: 50%; margin-right: 8px;"></div>
-                <span style="color: #e5e7eb; margin-right: 8px;">${item.label}:</span>
-                <span style="font-weight: 600; color: white;">${item.value.toFixed(2)}</span>
-              </div>
-            `
-              )
-              .join('')}
-          `;
+          let tooltipContent: string;
+          
+          if (this.options.tooltipContentCallback) {
+            // Use custom tooltip callback
+            tooltipContent = this.options.tooltipContentCallback(tooltipData, closestX);
+          } else {
+            // Use default tooltip content
+            tooltipContent = `
+              <div style="font-weight: 600; margin-bottom: 8px; color: #e5e7eb;">${closestX}</div>
+              ${tooltipData
+                .map(
+                  (item) => `
+                <div style="display: flex; align-items: center; margin-bottom: 2px;">
+                  <div style="width: 10px; height: 10px; background: ${item.color}; border-radius: 50%; margin-right: 6px;"></div>
+                  <span style="color: #e5e7eb; margin-right: 4px;">${item.label}:</span>
+                  <span style="font-weight: 600; color: white;">${item.value.toFixed(2)}</span>
+                </div>
+              `
+                )
+                .join('')}
+            `;
+          }
 
           showCrosshairTooltip(this.crosshairTooltip!, tooltipContent, event.pageX, event.pageY);
         }
