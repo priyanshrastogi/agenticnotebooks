@@ -72,8 +72,10 @@ export interface BaseChartOptions {
   margin?: ChartMargin;
 
   // Visual elements
-  showGrid?: boolean;
-  showAxis?: boolean;
+  showXGrid?: boolean;
+  showYGrid?: boolean;
+  showXAxis?: boolean;
+  showYAxis?: boolean;
   showTooltip?: boolean;
   showLegend?: boolean;
   legendPosition?: LegendPosition;
@@ -122,6 +124,7 @@ export interface ScatterChartOptions extends BaseChartOptions {
   trendLineColor?: string;
   tooltipContentCallback?: (data: ScatterTooltipData) => string;
 }
+
 
 /**
  * Pie/Doughnut chart specific configuration
@@ -174,6 +177,7 @@ export interface IScatterChart {
   update(data: ChartDataset[]): void;
   destroy(): void;
 }
+
 
 /**
  * Pie chart interface

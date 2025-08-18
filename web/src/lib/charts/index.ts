@@ -39,17 +39,17 @@ export { DEFAULT_COLORS, getColor, hexToRgba } from './core/colors';
 export {
   generateAppleStockData,
   generateAppleStockDataWithDates,
+  generateCampaignPerformanceScatter,
+  generateCustomerSatisfactionScatter,
+  generateGlobalTemperatureData,
   generateHeightWeightData,
   generateMarketShareData,
+  generateRegionalSalesData,
   generateRevenueBreakdownData,
   generateSalesMarketingData,
-  generateTechStocksData,
-  generateTrafficSourcesData,
   // Extended examples with more datasets
   generateTechRevenueComparison,
-  generateGlobalTemperatureData,
+  generateTechStocksData,
+  generateTrafficSourcesData,
   generateWebsitePerformanceData,
-  generateRegionalSalesData,
-  generateCustomerSatisfactionScatter,
-  generateCampaignPerformanceScatter,
 } from './data';

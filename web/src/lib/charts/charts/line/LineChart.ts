@@ -45,8 +45,10 @@ export class LineChart implements ILineChart {
       width: 800,
       height: 400,
       margin: dynamicMargin,
-      showGrid: true,
-      showAxis: true,
+      showXGrid: true,
+      showYGrid: true,
+      showXAxis: true,
+      showYAxis: true,
       showTooltip: true,
       animate: true,
       showPoints: true,
@@ -65,14 +67,15 @@ export class LineChart implements ILineChart {
   }
 
   private calculateMargins(options: LineChartOptions): { top: number; right: number; bottom: number; left: number } {
-    const showAxis = options.showAxis !== false; // Default to true
+    const showXAxis = options.showXAxis !== false; // Default to true  
+    const showYAxis = options.showYAxis !== false; // Default to true
     const showLegend = options.showLegend !== false; // Default to true
     const legendPosition = options.legendPosition || 'bottom';
     
-    let top = showAxis ? 20 : 10;
-    let right = showAxis ? 20 : 10;
-    let bottom = showAxis ? 40 : 10;
-    let left = showAxis ? 40 : 10;
+    let top = 20;
+    let right = 20;
+    let bottom = showXAxis ? 40 : 10;
+    let left = showYAxis ? 40 : 10;
     
     // Add space for legend
     if (showLegend) {
@@ -187,8 +190,10 @@ export class LineChart implements ILineChart {
       width,
       height,
       margin,
-      showGrid,
-      showAxis,
+      showXGrid,
+      showYGrid,
+      showXAxis,
+      showYAxis,
       animate,
       curve,
       strokeWidth,
@@ -198,13 +203,17 @@ export class LineChart implements ILineChart {
     const { xScale, yScale, isOrdinal } = this.setupScales();
 
     // Add grid lines
-    if (showGrid) {
-      addGridLines(this.svg!, xScale, yScale, width!, height!, margin!);
+    const actualShowXGrid = showXGrid !== false;
+    const actualShowYGrid = showYGrid !== false;
+    if (actualShowXGrid || actualShowYGrid) {
+      addGridLines(this.svg!, xScale, yScale, width!, height!, margin!, actualShowXGrid, actualShowYGrid);
     }
 
     // Add axes
-    if (showAxis) {
-      addAxes(this.svg!, xScale, yScale, width!, height!, margin!);
+    const actualShowXAxis = showXAxis !== false;
+    const actualShowYAxis = showYAxis !== false;
+    if (actualShowXAxis || actualShowYAxis) {
+      addAxes(this.svg!, xScale, yScale, width!, height!, margin!, false, actualShowXAxis, actualShowYAxis);
     }
 
     // Add legend

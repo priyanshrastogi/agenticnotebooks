@@ -554,3 +554,4 @@ export function generateCampaignPerformanceScatter(): ChartDataset[] {
     };
   });
 }
+

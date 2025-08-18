@@ -1,8 +1,10 @@
 import React from 'react';
 
 export interface ChartOptionsConfig {
-  showGrid: boolean;
-  showAxis: boolean;
+  showXGrid: boolean;
+  showYGrid: boolean;
+  showXAxis: boolean;
+  showYAxis: boolean;
   showTooltip: boolean;
   showLegend: boolean;
   legendPosition: 'bottom' | 'top' | 'left' | 'right';
@@ -29,42 +31,64 @@ interface ChartOptionsProps {
 export const ChartOptions: React.FC<ChartOptionsProps> = ({
   options,
   onOptionsChange,
-  chartType
+  chartType,
 }) => {
   const handleChange = (key: keyof ChartOptionsConfig, value: boolean | string) => {
     onOptionsChange({
       ...options,
-      [key]: value
+      [key]: value,
     });
   };
 
   return (
     <div className="chart-options">
       <h3 className="options-title">Options</h3>
-      
+
       <div className="options-grid">
         {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
           <label className="option-item">
             <input
               type="checkbox"
-              checked={options.showGrid}
-              onChange={(e) => handleChange('showGrid', e.target.checked)}
+              checked={options.showXGrid}
+              onChange={(e) => handleChange('showXGrid', e.target.checked)}
             />
-            <span>Grid</span>
+            <span>X Grid</span>
           </label>
         )}
-        
+
         {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
           <label className="option-item">
             <input
               type="checkbox"
-              checked={options.showAxis}
-              onChange={(e) => handleChange('showAxis', e.target.checked)}
+              checked={options.showYGrid}
+              onChange={(e) => handleChange('showYGrid', e.target.checked)}
             />
-            <span>Axes</span>
+            <span>Y Grid</span>
           </label>
         )}
-        
+
+        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
+          <label className="option-item">
+            <input
+              type="checkbox"
+              checked={options.showXAxis}
+              onChange={(e) => handleChange('showXAxis', e.target.checked)}
+            />
+            <span>X Axis</span>
+          </label>
+        )}
+
+        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
+          <label className="option-item">
+            <input
+              type="checkbox"
+              checked={options.showYAxis}
+              onChange={(e) => handleChange('showYAxis', e.target.checked)}
+            />
+            <span>Y Axis</span>
+          </label>
+        )}
+
         <label className="option-item">
           <input
             type="checkbox"
@@ -73,7 +97,7 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
           />
           <span>Tooltips</span>
         </label>
-        
+
         <label className="option-item">
           <input
             type="checkbox"
@@ -126,7 +150,7 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
             <span>Percentages</span>
           </label>
         )}
-        
+
         <label className="option-item">
           <input
             type="checkbox"
@@ -135,7 +159,7 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
           />
           <span>Animate</span>
         </label>
-        
+
         {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
           <label className="option-item">
             <input
@@ -168,7 +192,7 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
             <span>Trend Line</span>
           </label>
         )}
-        
+
         {(chartType === 'line' || chartType === 'area') && (
           <div className="option-item select-item">
             <select
@@ -181,7 +205,7 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
             </select>
           </div>
         )}
-        
+
         {options.showLegend && (
           <div className="option-item select-item">
             <select
@@ -196,7 +220,7 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
             </select>
           </div>
         )}
-        
+
         {options.showTooltip && (
           <div className="option-item select-item">
             <select
@@ -250,7 +274,7 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
           background: rgba(0, 123, 255, 0.05);
         }
 
-        .option-item input[type="checkbox"] {
+        .option-item input[type='checkbox'] {
           width: 14px;
           height: 14px;
           accent-color: #007bff;

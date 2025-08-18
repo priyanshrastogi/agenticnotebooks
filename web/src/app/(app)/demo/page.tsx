@@ -75,8 +75,10 @@ export default function DemoPage() {
 
   // Chart options state
   const [appleStockOptions, setAppleStockOptions] = useState<ChartOptionsConfig>({
-    showGrid: true,
-    showAxis: true,
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
     showTooltip: true,
     showLegend: false,
     legendPosition: 'bottom',
@@ -88,8 +90,10 @@ export default function DemoPage() {
   });
 
   const [appleMonthlyOptions, setAppleMonthlyOptions] = useState<ChartOptionsConfig>({
-    showGrid: true,
-    showAxis: true,
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
     showTooltip: true,
     showLegend: false,
     legendPosition: 'bottom',
@@ -101,8 +105,10 @@ export default function DemoPage() {
   });
 
   const [techStocksOptions, setTechStocksOptions] = useState<ChartOptionsConfig>({
-    showGrid: true,
-    showAxis: true,
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
     showTooltip: true,
     showLegend: true,
     legendPosition: 'bottom',
@@ -114,8 +120,10 @@ export default function DemoPage() {
   });
 
   const [multiAreaOptions, setMultiAreaOptions] = useState<ChartOptionsConfig>({
-    showGrid: true,
-    showAxis: true,
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
     showTooltip: true,
     showLegend: true,
     legendPosition: 'bottom',
@@ -128,8 +136,10 @@ export default function DemoPage() {
   });
 
   const [heightWeightOptions, setHeightWeightOptions] = useState<ChartOptionsConfig>({
-    showGrid: true,
-    showAxis: true,
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
     showTooltip: true,
     showLegend: true,
     legendPosition: 'bottom',
@@ -141,8 +151,10 @@ export default function DemoPage() {
   });
 
   const [salesMarketingOptions, setSalesMarketingOptions] = useState<ChartOptionsConfig>({
-    showGrid: true,
-    showAxis: true,
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
     showTooltip: true,
     showLegend: false,
     legendPosition: 'bottom',
@@ -154,8 +166,10 @@ export default function DemoPage() {
   });
 
   const [marketShareOptions, setMarketShareOptions] = useState<ChartOptionsConfig>({
-    showGrid: false,
-    showAxis: false,
+    showXGrid: false,
+    showYGrid: false,
+    showXAxis: false,
+    showYAxis: false,
     showTooltip: true,
     showLegend: true,
     legendPosition: 'right',
@@ -169,8 +183,10 @@ export default function DemoPage() {
   });
 
   const [revenueBreakdownOptions, setRevenueBreakdownOptions] = useState<ChartOptionsConfig>({
-    showGrid: false,
-    showAxis: false,
+    showXGrid: false,
+    showYGrid: false,
+    showXAxis: false,
+    showYAxis: false,
     showTooltip: true,
     showLegend: true,
     legendPosition: 'bottom',
@@ -185,8 +201,10 @@ export default function DemoPage() {
   });
 
   const [trafficSourcesOptions, setTrafficSourcesOptions] = useState<ChartOptionsConfig>({
-    showGrid: false,
-    showAxis: false,
+    showXGrid: false,
+    showYGrid: false,
+    showXAxis: false,
+    showYAxis: false,
     showTooltip: true,
     showLegend: true,
     legendPosition: 'right',
@@ -202,8 +220,10 @@ export default function DemoPage() {
 
   // Extended example chart options state
   const [techRevenueOptions, setTechRevenueOptions] = useState<ChartOptionsConfig>({
-    showGrid: true,
-    showAxis: true,
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
     showTooltip: true,
     showLegend: true,
     legendPosition: 'bottom',
@@ -215,8 +235,10 @@ export default function DemoPage() {
   });
 
   const [globalTemperatureOptions, setGlobalTemperatureOptions] = useState<ChartOptionsConfig>({
-    showGrid: true,
-    showAxis: true,
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
     showTooltip: true,
     showLegend: true,
     legendPosition: 'bottom',
@@ -228,8 +250,10 @@ export default function DemoPage() {
   });
 
   const [websitePerformanceOptions, setWebsitePerformanceOptions] = useState<ChartOptionsConfig>({
-    showGrid: true,
-    showAxis: true,
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
     showTooltip: true,
     showLegend: true,
     legendPosition: 'bottom',
@@ -242,8 +266,10 @@ export default function DemoPage() {
   });
 
   const [regionalSalesOptions, setRegionalSalesOptions] = useState<ChartOptionsConfig>({
-    showGrid: true,
-    showAxis: true,
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
     showTooltip: true,
     showLegend: true,
     legendPosition: 'bottom',
@@ -256,8 +282,10 @@ export default function DemoPage() {
   });
 
   const [customerSatisfactionOptions, setCustomerSatisfactionOptions] = useState<ChartOptionsConfig>({
-    showGrid: true,
-    showAxis: true,
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
     showTooltip: true,
     showLegend: true,
     legendPosition: 'bottom',
@@ -269,8 +297,10 @@ export default function DemoPage() {
   });
 
   const [campaignPerformanceOptions, setCampaignPerformanceOptions] = useState<ChartOptionsConfig>({
-    showGrid: true,
-    showAxis: true,
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
     showTooltip: true,
     showLegend: true,
     legendPosition: 'bottom',
@@ -327,8 +357,10 @@ export default function DemoPage() {
     chartType: 'line' | 'area' | 'scatter' | 'pie' | 'doughnut' = 'line'
   ) => ({
     height: 400,
-    showGrid: options.showGrid,
-    showAxis: options.showAxis,
+    showXGrid: options.showXGrid,
+    showYGrid: options.showYGrid,
+    showXAxis: options.showXAxis,
+    showYAxis: options.showYAxis,
     showTooltip: options.showTooltip,
     showLegend: options.showLegend,
     legendPosition: options.legendPosition,

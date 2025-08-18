@@ -137,75 +137,80 @@ export const addGridLines = (
   yScale: d3.ScaleLinear<number, number>,
   width: number,
   height: number,
-  margin: { top: number; right: number; bottom: number; left: number }
+  margin: { top: number; right: number; bottom: number; left: number },
+  showXGrid: boolean = true,
+  showYGrid: boolean = true
 ) => {
   const gridGroup = svg.append('g').attr('class', 'grid-lines');
 
-  // Get nice ticks for the current y domain
-  const yDomain = yScale.domain();
-  const { ticks: yTicks } = calculateNiceScale(yDomain[0], yDomain[1]);
-
-  // Horizontal grid lines - only draw within chart area
-  const chartTop = margin.top;
-  const chartBottom = height - margin.bottom;
-  
-  gridGroup
-    .selectAll('.grid-line-horizontal')
-    .data(yTicks)
-    .enter()
-    .append('line')
-    .attr('class', 'grid-line-horizontal')
-    .attr('x1', margin.left)
-    .attr('x2', width - margin.right)
-    .attr('y1', (d) => {
-      const y = yScale(d);
-      return y >= chartTop && y <= chartBottom ? y : null;
-    })
-    .attr('y2', (d) => {
-      const y = yScale(d);
-      return y >= chartTop && y <= chartBottom ? y : null;
-    })
-    .attr('stroke', 'rgba(0, 0, 0, 0.1)')
-    .attr('stroke-width', 1)
-    .attr('stroke-dasharray', '4,4')
-    .style('display', (d) => {
-      const y = yScale(d);
-      return y >= chartTop && y <= chartBottom ? 'block' : 'none';
-    });
-
-  // Vertical grid lines
-  if ('bandwidth' in xScale) {
-    // For ordinal scales (string categories)
-    const xTicks = (xScale as d3.ScalePoint<string>).domain();
+  // Horizontal grid lines (Y-axis grid) - only draw within chart area
+  if (showYGrid) {
+    const yDomain = yScale.domain();
+    const { ticks: yTicks } = calculateNiceScale(yDomain[0], yDomain[1]);
+    
+    const chartTop = margin.top;
+    const chartBottom = height - margin.bottom;
+    
     gridGroup
-      .selectAll('.grid-line-vertical')
-      .data(xTicks)
+      .selectAll('.grid-line-horizontal')
+      .data(yTicks)
       .enter()
       .append('line')
-      .attr('class', 'grid-line-vertical')
-      .attr('x1', (d) => (xScale as d3.ScalePoint<string>)(d)!)
-      .attr('x2', (d) => (xScale as d3.ScalePoint<string>)(d)!)
-      .attr('y1', margin.top)
-      .attr('y2', height - margin.bottom)
+      .attr('class', 'grid-line-horizontal')
+      .attr('x1', margin.left)
+      .attr('x2', width - margin.right)
+      .attr('y1', (d) => {
+        const y = yScale(d);
+        return y >= chartTop && y <= chartBottom ? y : null;
+      })
+      .attr('y2', (d) => {
+        const y = yScale(d);
+        return y >= chartTop && y <= chartBottom ? y : null;
+      })
       .attr('stroke', 'rgba(0, 0, 0, 0.1)')
       .attr('stroke-width', 1)
-      .attr('stroke-dasharray', '4,4');
-  } else {
-    // For linear scales
-    const xTicks = (xScale as d3.ScaleLinear<number, number>).ticks(8);
-    gridGroup
-      .selectAll('.grid-line-vertical')
-      .data(xTicks)
-      .enter()
-      .append('line')
-      .attr('class', 'grid-line-vertical')
-      .attr('x1', (d) => (xScale as d3.ScaleLinear<number, number>)(d))
-      .attr('x2', (d) => (xScale as d3.ScaleLinear<number, number>)(d))
-      .attr('y1', margin.top)
-      .attr('y2', height - margin.bottom)
-      .attr('stroke', 'rgba(0, 0, 0, 0.1)')
-      .attr('stroke-width', 1)
-      .attr('stroke-dasharray', '4,4');
+      .attr('stroke-dasharray', '4,4')
+      .style('display', (d) => {
+        const y = yScale(d);
+        return y >= chartTop && y <= chartBottom ? 'block' : 'none';
+      });
+  }
+
+  // Vertical grid lines (X-axis grid)
+  if (showXGrid) {
+    if ('bandwidth' in xScale) {
+      // For ordinal scales (string categories)
+      const xTicks = (xScale as d3.ScalePoint<string>).domain();
+      gridGroup
+        .selectAll('.grid-line-vertical')
+        .data(xTicks)
+        .enter()
+        .append('line')
+        .attr('class', 'grid-line-vertical')
+        .attr('x1', (d) => (xScale as d3.ScalePoint<string>)(d)!)
+        .attr('x2', (d) => (xScale as d3.ScalePoint<string>)(d)!)
+        .attr('y1', margin.top)
+        .attr('y2', height - margin.bottom)
+        .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '4,4');
+    } else {
+      // For linear scales
+      const xTicks = (xScale as d3.ScaleLinear<number, number>).ticks(8);
+      gridGroup
+        .selectAll('.grid-line-vertical')
+        .data(xTicks)
+        .enter()
+        .append('line')
+        .attr('class', 'grid-line-vertical')
+        .attr('x1', (d) => (xScale as d3.ScaleLinear<number, number>)(d))
+        .attr('x2', (d) => (xScale as d3.ScaleLinear<number, number>)(d))
+        .attr('y1', margin.top)
+        .attr('y2', height - margin.bottom)
+        .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '4,4');
+    }
   }
 };
 
@@ -402,80 +407,82 @@ export const addAxes = (
   width: number,
   height: number,
   margin: { top: number; right: number; bottom: number; left: number },
-  isDateScale: boolean = false
+  isDateScale: boolean = false,
+  showXAxis: boolean = true,
+  showYAxis: boolean = true
 ) => {
   const chartBottom = height - margin.bottom;
   const chartLeft = margin.left;
 
   // X-axis - positioned at y=0 (bottom of chart area)
-  let xAxis: d3.Selection<SVGGElement, unknown, HTMLElement, unknown>;
+  if (showXAxis) {
+    let xAxis: d3.Selection<SVGGElement, unknown, HTMLElement, unknown>;
 
-  if (isDateScale) {
-    // For date scales, use time-based ticks
-    const timeScale = xScale as d3.ScaleTime<number, number>;
-    const xAxisGenerator = d3
-      .axisBottom(timeScale)
-      .tickSize(5)
-      .tickPadding(8)
-      .tickFormat((d) => d3.timeFormat('%b %Y')(d as Date))
-      .ticks(6); // Show about 6 month intervals
+    if (isDateScale) {
+      // For date scales, use time-based ticks
+      const timeScale = xScale as d3.ScaleTime<number, number>;
+      const xAxisGenerator = d3
+        .axisBottom(timeScale)
+        .tickSize(5)
+        .tickPadding(8)
+        .tickFormat((d) => d3.timeFormat('%b %Y')(d as Date))
+        .ticks(6); // Show about 6 month intervals
 
-    xAxis = svg
-      .append('g')
-      .attr('class', 'x-axis')
-      .attr('transform', `translate(0,${chartBottom})`)
-      .call(xAxisGenerator);
-  } else {
-    // Handle linear and point scales separately
-    if ('bandwidth' in xScale) {
-      // Point scale (ordinal)
-      const pointScale = xScale as d3.ScalePoint<string>;
-      const xAxisGenerator = d3.axisBottom(pointScale).tickSize(5).tickPadding(8);
       xAxis = svg
         .append('g')
         .attr('class', 'x-axis')
         .attr('transform', `translate(0,${chartBottom})`)
         .call(xAxisGenerator);
     } else {
-      // Linear scale
-      const linearScale = xScale as d3.ScaleLinear<number, number>;
-      const xAxisGenerator = d3.axisBottom(linearScale).tickSize(5).tickPadding(8);
-      xAxis = svg
-        .append('g')
-        .attr('class', 'x-axis')
-        .attr('transform', `translate(0,${chartBottom})`)
-        .call(xAxisGenerator);
+      // Handle linear and point scales separately
+      if ('bandwidth' in xScale) {
+        // Point scale (ordinal)
+        const pointScale = xScale as d3.ScalePoint<string>;
+        const xAxisGenerator = d3.axisBottom(pointScale).tickSize(5).tickPadding(8);
+        xAxis = svg
+          .append('g')
+          .attr('class', 'x-axis')
+          .attr('transform', `translate(0,${chartBottom})`)
+          .call(xAxisGenerator);
+      } else {
+        // Linear scale
+        const linearScale = xScale as d3.ScaleLinear<number, number>;
+        const xAxisGenerator = d3.axisBottom(linearScale).tickSize(5).tickPadding(8);
+        xAxis = svg
+          .append('g')
+          .attr('class', 'x-axis')
+          .attr('transform', `translate(0,${chartBottom})`)
+          .call(xAxisGenerator);
+      }
     }
+
+    // Style X-axis
+    xAxis.select('.domain').attr('stroke', 'rgba(0, 0, 0, 0.8)').attr('stroke-width', 1);
+    xAxis.selectAll('.tick line').attr('stroke', 'rgba(0, 0, 0, 0.8)').attr('stroke-width', 1);
   }
 
-  // xAxis is already created above
-
-  // Style X-axis
-  xAxis.select('.domain').attr('stroke', 'rgba(0, 0, 0, 0.8)').attr('stroke-width', 1);
-
-  xAxis.selectAll('.tick line').attr('stroke', 'rgba(0, 0, 0, 0.8)').attr('stroke-width', 1);
-
   // Y-axis - positioned at x=0 (left of chart area)
-  const yDomain = yScale.domain();
-  const { ticks: tickValues } = calculateNiceScale(yDomain[0], yDomain[1]);
+  if (showYAxis) {
+    const yDomain = yScale.domain();
+    const { ticks: tickValues } = calculateNiceScale(yDomain[0], yDomain[1]);
 
-  const yAxis = svg
-    .append('g')
-    .attr('class', 'y-axis')
-    .attr('transform', `translate(${chartLeft},0)`)
-    .call(
-      d3
-        .axisLeft(yScale)
-        .tickValues(tickValues)
-        .tickSize(5)
-        .tickPadding(8)
-        .tickFormat((d) => formatNumber(d as number))
-    );
+    const yAxis = svg
+      .append('g')
+      .attr('class', 'y-axis')
+      .attr('transform', `translate(${chartLeft},0)`)
+      .call(
+        d3
+          .axisLeft(yScale)
+          .tickValues(tickValues)
+          .tickSize(5)
+          .tickPadding(8)
+          .tickFormat((d) => formatNumber(d as number))
+      );
 
-  // Style Y-axis
-  yAxis.select('.domain').attr('stroke', 'rgba(0, 0, 0, 0.8)').attr('stroke-width', 1);
-
-  yAxis.selectAll('.tick line').attr('stroke', 'rgba(0, 0, 0, 0.8)').attr('stroke-width', 1);
+    // Style Y-axis
+    yAxis.select('.domain').attr('stroke', 'rgba(0, 0, 0, 0.8)').attr('stroke-width', 1);
+    yAxis.selectAll('.tick line').attr('stroke', 'rgba(0, 0, 0, 0.8)').attr('stroke-width', 1);
+  }
 
   // Style axis text
   svg

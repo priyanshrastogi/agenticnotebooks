@@ -7,6 +7,5 @@ export { createScatterChart, ScatterChart } from './scatter';
 // export { PieChart, createPieChart } from './pie';
 // export { DoughnutChart, createDoughnutChart } from './doughnut';
 // export { RadarChart, createRadarChart } from './radar';
-// export { BarChart, createBarChart } from './bar';
 // export { HistogramChart, createHistogramChart } from './histogram';
 // export { HeatmapChart, createHeatmapChart } from './heatmap';
