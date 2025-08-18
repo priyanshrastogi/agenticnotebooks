@@ -555,3 +555,195 @@ export function generateCampaignPerformanceScatter(): ChartDataset[] {
   });
 }
 
+/**
+ * Generate quarterly sales data for multiple products (for bar charts)
+ */
+export function generateQuarterlySalesData(): ChartDataset[] {
+  const products = ['Product A', 'Product B', 'Product C'];
+  const quarters = ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024'];
+
+  return products.map((product) => {
+    const data: ChartDataPoint[] = [];
+    
+    quarters.forEach((quarter) => {
+      // Base sales with some variation per product
+      let baseSales = 10000; // $10,000 base
+      
+      if (product === 'Product A') {
+        baseSales = 12000 + Math.random() * 3000; // $12K-$15K range
+      } else if (product === 'Product B') {
+        baseSales = 8000 + Math.random() * 4000; // $8K-$12K range
+      } else if (product === 'Product C') {
+        baseSales = 6000 + Math.random() * 3000; // $6K-$9K range
+      }
+      
+      // Q4 typically higher (holiday season)
+      if (quarter === 'Q4 2024') {
+        baseSales *= 1.3;
+      }
+      // Q1 typically lower (post-holiday)
+      if (quarter === 'Q1 2024') {
+        baseSales *= 0.8;
+      }
+      
+      data.push({
+        x: quarter,
+        y: Math.round(baseSales),
+      });
+    });
+
+    return {
+      label: product,
+      data,
+    };
+  });
+}
+
+/**
+ * Generate monthly revenue data by department (for horizontal bar charts)
+ */
+export function generateDepartmentRevenueData(): ChartDataset[] {
+  const departments = [
+    'Engineering', 
+    'Sales', 
+    'Marketing', 
+    'Customer Success', 
+    'Operations',
+    'Finance',
+    'HR'
+  ];
+  
+  const data: ChartDataPoint[] = departments.map(department => {
+    let baseRevenue = 50000; // $50K base monthly revenue
+    
+    // Department-specific revenue ranges
+    switch(department) {
+      case 'Sales':
+        baseRevenue = 120000 + Math.random() * 30000; // $120K-$150K
+        break;
+      case 'Engineering':
+        baseRevenue = 80000 + Math.random() * 25000; // $80K-$105K
+        break;
+      case 'Marketing':
+        baseRevenue = 60000 + Math.random() * 20000; // $60K-$80K
+        break;
+      case 'Customer Success':
+        baseRevenue = 45000 + Math.random() * 15000; // $45K-$60K
+        break;
+      case 'Operations':
+        baseRevenue = 30000 + Math.random() * 10000; // $30K-$40K
+        break;
+      case 'Finance':
+        baseRevenue = 35000 + Math.random() * 10000; // $35K-$45K
+        break;
+      case 'HR':
+        baseRevenue = 25000 + Math.random() * 8000; // $25K-$33K
+        break;
+    }
+    
+    return {
+      x: department,
+      y: Math.round(baseRevenue),
+    };
+  });
+
+  return [{
+    label: 'Monthly Revenue',
+    data,
+  }];
+}
+
+/**
+ * Generate browser usage statistics (for grouped bar charts)
+ */
+export function generateBrowserUsageData(): ChartDataset[] {
+  const browsers = ['Chrome', 'Firefox', 'Safari', 'Edge', 'Other'];
+  const datasets = ['Desktop', 'Mobile', 'Tablet'];
+  
+  return datasets.map(device => {
+    const data: ChartDataPoint[] = [];
+    
+    browsers.forEach(browser => {
+      let usage = 0;
+      
+      // Device and browser specific usage patterns
+      if (device === 'Desktop') {
+        switch(browser) {
+          case 'Chrome': usage = 60 + Math.random() * 10; break;
+          case 'Firefox': usage = 12 + Math.random() * 5; break;
+          case 'Safari': usage = 8 + Math.random() * 4; break;
+          case 'Edge': usage = 15 + Math.random() * 5; break;
+          case 'Other': usage = 3 + Math.random() * 2; break;
+        }
+      } else if (device === 'Mobile') {
+        switch(browser) {
+          case 'Chrome': usage = 45 + Math.random() * 10; break;
+          case 'Firefox': usage = 5 + Math.random() * 3; break;
+          case 'Safari': usage = 35 + Math.random() * 8; break;
+          case 'Edge': usage = 8 + Math.random() * 3; break;
+          case 'Other': usage = 5 + Math.random() * 2; break;
+        }
+      } else { // Tablet
+        switch(browser) {
+          case 'Chrome': usage = 40 + Math.random() * 10; break;
+          case 'Firefox': usage = 8 + Math.random() * 3; break;
+          case 'Safari': usage = 42 + Math.random() * 8; break;
+          case 'Edge': usage = 6 + Math.random() * 2; break;
+          case 'Other': usage = 3 + Math.random() * 2; break;
+        }
+      }
+      
+      data.push({
+        x: browser,
+        y: Math.round(usage * 10) / 10, // Round to 1 decimal
+      });
+    });
+    
+    return {
+      label: device,
+      data,
+    };
+  });
+}
+
+/**
+ * Generate employee satisfaction scores by office location (for stacked bar charts)
+ */
+export function generateOfficeSatisfactionData(): ChartDataset[] {
+  const offices = ['New York', 'San Francisco', 'London', 'Tokyo', 'Berlin'];
+  const categories = ['Work-Life Balance', 'Compensation', 'Management', 'Growth Opportunities'];
+  
+  return categories.map(category => {
+    const data: ChartDataPoint[] = [];
+    
+    offices.forEach(office => {
+      let baseScore = 70; // Base satisfaction score out of 100
+      
+      // Category-specific variations
+      if (category === 'Work-Life Balance') {
+        baseScore = 65 + Math.random() * 20; // 65-85 range
+      } else if (category === 'Compensation') {
+        baseScore = 60 + Math.random() * 25; // 60-85 range
+        // San Francisco typically higher compensation satisfaction
+        if (office === 'San Francisco') baseScore += 10;
+      } else if (category === 'Management') {
+        baseScore = 70 + Math.random() * 15; // 70-85 range
+      } else if (category === 'Growth Opportunities') {
+        baseScore = 75 + Math.random() * 15; // 75-90 range
+        // New York and London typically more opportunities
+        if (office === 'New York' || office === 'London') baseScore += 5;
+      }
+      
+      data.push({
+        x: office,
+        y: Math.round(baseScore),
+      });
+    });
+    
+    return {
+      label: category,
+      data,
+    };
+  });
+}
+

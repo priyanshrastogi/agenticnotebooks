@@ -1,5 +1,6 @@
 // Chart implementations exports
 export { AreaChart, createAreaChart } from './area';
+export { BarChart, createBarChart } from './bar';
 export { createLineChart, LineChart } from './line';
 export { createScatterChart, ScatterChart } from './scatter';
 

@@ -127,6 +127,20 @@ export interface ScatterChartOptions extends BaseChartOptions {
 
 
 /**
+ * Bar chart specific configuration
+ */
+export interface BarChartOptions extends BaseChartOptions {
+  barWidth?: number; // Width of bars as fraction of available space (0-1)
+  barPadding?: number; // Padding between bars (0-1)
+  groupPadding?: number; // Padding between groups in grouped bar charts (0-1)
+  stacked?: boolean; // Enable stacked bars
+  horizontal?: boolean; // Horizontal bar chart
+  showValues?: boolean; // Show value labels on bars
+  showStackedTotal?: boolean; // Show total value for stacked bars
+  tooltipContentCallback?: (data: TooltipData[], xValue?: string | number) => string;
+}
+
+/**
  * Pie/Doughnut chart specific configuration
  */
 export interface PieChartOptions
@@ -178,6 +192,14 @@ export interface IScatterChart {
   destroy(): void;
 }
 
+/**
+ * Bar chart interface
+ */
+export interface IBarChart {
+  render(): void;
+  update(data: ChartDataset[]): void;
+  destroy(): void;
+}
 
 /**
  * Pie chart interface

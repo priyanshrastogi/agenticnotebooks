@@ -8,7 +8,7 @@ import ChartOptions, { type ChartOptionsConfig } from './ChartOptions';
 interface ChartOptionsPopoverProps {
   options: ChartOptionsConfig;
   onOptionsChange: (options: ChartOptionsConfig) => void;
-  chartType: 'line' | 'area' | 'scatter' | 'pie' | 'doughnut';
+  chartType: 'line' | 'area' | 'scatter' | 'pie' | 'doughnut' | 'bar';
 }
 
 export const ChartOptionsPopover: React.FC<ChartOptionsPopoverProps> = ({

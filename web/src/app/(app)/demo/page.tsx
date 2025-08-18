@@ -7,7 +7,9 @@ import { type ChartOptionsConfig } from '@/components/ChartOptions';
 import ChartOptionsPopover from '@/components/ChartOptionsPopover';
 import {
   type AreaChart,
+  type BarChart,
   createAreaChart,
+  createBarChart,
   createDoughnutChart,
   createLineChart,
   createPieChart,
@@ -20,11 +22,15 @@ import type { ChartDataset } from '@/lib/charts/core/types';
 import {
   generateAppleStockData,
   generateAppleStockDataWithDates,
+  generateBrowserUsageData,
   generateCampaignPerformanceScatter,
   generateCustomerSatisfactionScatter,
+  generateDepartmentRevenueData,
   generateGlobalTemperatureData,
   generateHeightWeightData,
   generateMarketShareData,
+  generateOfficeSatisfactionData,
+  generateQuarterlySalesData,
   generateRegionalSalesData,
   generateRevenueBreakdownData,
   generateSalesMarketingData,
@@ -53,6 +59,12 @@ export default function DemoPage() {
   const regionalSalesRef = useRef<HTMLDivElement>(null);
   const customerSatisfactionRef = useRef<HTMLDivElement>(null);
   const campaignPerformanceRef = useRef<HTMLDivElement>(null);
+  
+  // Bar chart refs
+  const quarterlySalesRef = useRef<HTMLDivElement>(null);
+  const departmentRevenueRef = useRef<HTMLDivElement>(null);
+  const browserUsageRef = useRef<HTMLDivElement>(null);
+  const officeSatisfactionRef = useRef<HTMLDivElement>(null);
 
   // Chart instances
   const appleStockChartRef = useRef<AreaChart | null>(null);
@@ -72,6 +84,12 @@ export default function DemoPage() {
   const regionalSalesChartRef = useRef<AreaChart | null>(null);
   const customerSatisfactionChartRef = useRef<ScatterChart | null>(null);
   const campaignPerformanceChartRef = useRef<ScatterChart | null>(null);
+  
+  // Bar chart instances
+  const quarterlySalesChartRef = useRef<BarChart | null>(null);
+  const departmentRevenueChartRef = useRef<BarChart | null>(null);
+  const browserUsageChartRef = useRef<BarChart | null>(null);
+  const officeSatisfactionChartRef = useRef<BarChart | null>(null);
 
   // Chart options state
   const [appleStockOptions, setAppleStockOptions] = useState<ChartOptionsConfig>({
@@ -311,6 +329,75 @@ export default function DemoPage() {
     tooltipSize: 'sm',
   });
 
+  // Bar chart options
+  const [quarterlySalesOptions, setQuarterlySalesOptions] = useState<ChartOptionsConfig>({
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
+    showTooltip: true,
+    showLegend: true,
+    legendPosition: 'bottom',
+    animate: true,
+    curve: 'linear',
+    yAxisStartsFromZero: true,
+    tooltipSize: 'sm',
+    stacked: false,
+    horizontal: false,
+    showBarValues: false,
+  });
+
+  const [departmentRevenueOptions, setDepartmentRevenueOptions] = useState<ChartOptionsConfig>({
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
+    showTooltip: true,
+    showLegend: false,
+    legendPosition: 'bottom',
+    animate: true,
+    curve: 'linear',
+    yAxisStartsFromZero: true,
+    tooltipSize: 'sm',
+    stacked: false,
+    horizontal: true,
+    showBarValues: true,
+  });
+
+  const [browserUsageOptions, setBrowserUsageOptions] = useState<ChartOptionsConfig>({
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
+    showTooltip: true,
+    showLegend: true,
+    legendPosition: 'bottom',
+    animate: true,
+    curve: 'linear',
+    yAxisStartsFromZero: true,
+    tooltipSize: 'sm',
+    stacked: false,
+    horizontal: false,
+    showBarValues: false,
+  });
+
+  const [officeSatisfactionOptions, setOfficeSatisfactionOptions] = useState<ChartOptionsConfig>({
+    showXGrid: true,
+    showYGrid: true,
+    showXAxis: true,
+    showYAxis: true,
+    showTooltip: true,
+    showLegend: true,
+    legendPosition: 'bottom',
+    animate: true,
+    curve: 'linear',
+    yAxisStartsFromZero: true,
+    tooltipSize: 'sm',
+    stacked: true,
+    horizontal: false,
+    showBarValues: false,
+  });
+
   // Chart data - using useMemo to prevent regeneration on every render
   const appleStockData = useMemo(() => [generateAppleStockData()], []);
   const appleMonthlyData = useMemo(() => [generateAppleStockDataWithDates()], []);
@@ -339,6 +426,12 @@ export default function DemoPage() {
   const regionalSalesData = useMemo(() => generateRegionalSalesData(), []);
   const customerSatisfactionData = useMemo(() => generateCustomerSatisfactionScatter(), []);
   const campaignPerformanceData = useMemo(() => generateCampaignPerformanceScatter(), []);
+  
+  // Bar chart data
+  const quarterlySalesData = useMemo(() => generateQuarterlySalesData(), []);
+  const departmentRevenueData = useMemo(() => generateDepartmentRevenueData(), []);
+  const browserUsageData = useMemo(() => generateBrowserUsageData(), []);
+  const officeSatisfactionData = useMemo(() => generateOfficeSatisfactionData(), []);
 
   // Tab state for each chart
   const [appleStockTab, setAppleStockTab] = useState<'chart' | 'data'>('chart');
@@ -350,11 +443,17 @@ export default function DemoPage() {
   const [marketShareTab, setMarketShareTab] = useState<'chart' | 'data'>('chart');
   const [revenueBreakdownTab, setRevenueBreakdownTab] = useState<'chart' | 'data'>('chart');
   const [trafficSourcesTab, setTrafficSourcesTab] = useState<'chart' | 'data'>('chart');
+  
+  // Bar chart tabs
+  const [quarterlySalesTab, setQuarterlySalesTab] = useState<'chart' | 'data'>('chart');
+  const [departmentRevenueTab, setDepartmentRevenueTab] = useState<'chart' | 'data'>('chart');
+  const [browserUsageTab, setBrowserUsageTab] = useState<'chart' | 'data'>('chart');
+  const [officeSatisfactionTab, setOfficeSatisfactionTab] = useState<'chart' | 'data'>('chart');
 
   // Function to convert ChartOptionsConfig to chart library options
   const convertToChartOptions = (
     options: ChartOptionsConfig,
-    chartType: 'line' | 'area' | 'scatter' | 'pie' | 'doughnut' = 'line'
+    chartType: 'line' | 'area' | 'scatter' | 'pie' | 'doughnut' | 'bar' = 'line'
   ) => ({
     height: 400,
     showXGrid: options.showXGrid,
@@ -384,6 +483,13 @@ export default function DemoPage() {
       showLabels: options.showLabels,
       showValues: options.showValues,
       showPercentages: options.showPercentages,
+    }),
+    ...(chartType === 'bar' && {
+      stacked: options.stacked,
+      horizontal: options.horizontal,
+      showValues: options.showBarValues,
+      barPadding: 0.1,
+      groupPadding: 0.2,
     }),
   });
 
@@ -716,6 +822,60 @@ export default function DemoPage() {
       campaignPerformanceChartRef.current.render();
     }
   }, [campaignPerformanceData, campaignPerformanceOptions]);
+
+  // Bar chart useEffects
+  
+  // Quarterly Sales Bar Chart
+  useEffect(() => {
+    if (quarterlySalesRef.current && quarterlySalesTab === 'chart') {
+      if (quarterlySalesChartRef.current) {
+        quarterlySalesChartRef.current.destroy();
+      }
+      quarterlySalesChartRef.current = createBarChart('#quarterly-sales-chart', quarterlySalesData, {
+        ...convertToChartOptions(quarterlySalesOptions, 'bar'),
+      });
+      quarterlySalesChartRef.current.render();
+    }
+  }, [quarterlySalesData, quarterlySalesOptions, quarterlySalesTab]);
+
+  // Department Revenue Horizontal Bar Chart
+  useEffect(() => {
+    if (departmentRevenueRef.current && departmentRevenueTab === 'chart') {
+      if (departmentRevenueChartRef.current) {
+        departmentRevenueChartRef.current.destroy();
+      }
+      departmentRevenueChartRef.current = createBarChart('#department-revenue-chart', departmentRevenueData, {
+        ...convertToChartOptions(departmentRevenueOptions, 'bar'),
+      });
+      departmentRevenueChartRef.current.render();
+    }
+  }, [departmentRevenueData, departmentRevenueOptions, departmentRevenueTab]);
+
+  // Browser Usage Grouped Bar Chart
+  useEffect(() => {
+    if (browserUsageRef.current && browserUsageTab === 'chart') {
+      if (browserUsageChartRef.current) {
+        browserUsageChartRef.current.destroy();
+      }
+      browserUsageChartRef.current = createBarChart('#browser-usage-chart', browserUsageData, {
+        ...convertToChartOptions(browserUsageOptions, 'bar'),
+      });
+      browserUsageChartRef.current.render();
+    }
+  }, [browserUsageData, browserUsageOptions, browserUsageTab]);
+
+  // Office Satisfaction Stacked Bar Chart
+  useEffect(() => {
+    if (officeSatisfactionRef.current && officeSatisfactionTab === 'chart') {
+      if (officeSatisfactionChartRef.current) {
+        officeSatisfactionChartRef.current.destroy();
+      }
+      officeSatisfactionChartRef.current = createBarChart('#office-satisfaction-chart', officeSatisfactionData, {
+        ...convertToChartOptions(officeSatisfactionOptions, 'bar'),
+      });
+      officeSatisfactionChartRef.current.render();
+    }
+  }, [officeSatisfactionData, officeSatisfactionOptions, officeSatisfactionTab]);
 
   // Tab component
   const TabButton = ({
@@ -1278,6 +1438,154 @@ export default function DemoPage() {
           {/* Chart */}
           <div id="campaign-performance-chart" ref={campaignPerformanceRef} className="w-full"></div>
         </div>
+
+        {/* Quarterly Sales Bar Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Quarterly Sales Performance</h2>
+              <p className="text-sm text-gray-600">
+                Product sales comparison across quarters with grouping support
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#quarterly-sales-chart" chartTitle="Quarterly Sales Performance" />
+              <ChartOptionsPopover
+                options={quarterlySalesOptions}
+                onOptionsChange={setQuarterlySalesOptions}
+                chartType="bar"
+              />
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="mb-4 flex border-b">
+            <TabButton active={quarterlySalesTab === 'chart'} onClick={() => setQuarterlySalesTab('chart')}>
+              Chart
+            </TabButton>
+            <TabButton active={quarterlySalesTab === 'data'} onClick={() => setQuarterlySalesTab('data')}>
+              Data
+            </TabButton>
+          </div>
+
+          {/* Content */}
+          {quarterlySalesTab === 'chart' ? (
+            <div id="quarterly-sales-chart" ref={quarterlySalesRef} className="w-full"></div>
+          ) : (
+            <DataDisplay datasets={quarterlySalesData} />
+          )}
+        </div>
+
+        {/* Department Revenue Horizontal Bar Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Department Revenue Analysis</h2>
+              <p className="text-sm text-gray-600">
+                Monthly revenue by department with horizontal bars and value labels
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#department-revenue-chart" chartTitle="Department Revenue Analysis" />
+              <ChartOptionsPopover
+                options={departmentRevenueOptions}
+                onOptionsChange={setDepartmentRevenueOptions}
+                chartType="bar"
+              />
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="mb-4 flex border-b">
+            <TabButton active={departmentRevenueTab === 'chart'} onClick={() => setDepartmentRevenueTab('chart')}>
+              Chart
+            </TabButton>
+            <TabButton active={departmentRevenueTab === 'data'} onClick={() => setDepartmentRevenueTab('data')}>
+              Data
+            </TabButton>
+          </div>
+
+          {/* Content */}
+          {departmentRevenueTab === 'chart' ? (
+            <div id="department-revenue-chart" ref={departmentRevenueRef} className="w-full"></div>
+          ) : (
+            <DataDisplay datasets={departmentRevenueData} />
+          )}
+        </div>
+
+        {/* Browser Usage Grouped Bar Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Browser Usage Statistics</h2>
+              <p className="text-sm text-gray-600">
+                Browser usage across different device types with grouped bars
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#browser-usage-chart" chartTitle="Browser Usage Statistics" />
+              <ChartOptionsPopover
+                options={browserUsageOptions}
+                onOptionsChange={setBrowserUsageOptions}
+                chartType="bar"
+              />
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="mb-4 flex border-b">
+            <TabButton active={browserUsageTab === 'chart'} onClick={() => setBrowserUsageTab('chart')}>
+              Chart
+            </TabButton>
+            <TabButton active={browserUsageTab === 'data'} onClick={() => setBrowserUsageTab('data')}>
+              Data
+            </TabButton>
+          </div>
+
+          {/* Content */}
+          {browserUsageTab === 'chart' ? (
+            <div id="browser-usage-chart" ref={browserUsageRef} className="w-full"></div>
+          ) : (
+            <DataDisplay datasets={browserUsageData} />
+          )}
+        </div>
+
+        {/* Office Satisfaction Stacked Bar Chart */}
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Employee Satisfaction by Office</h2>
+              <p className="text-sm text-gray-600">
+                Satisfaction scores across office locations with stacked categories
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChartExportButton chartId="#office-satisfaction-chart" chartTitle="Employee Satisfaction by Office" />
+              <ChartOptionsPopover
+                options={officeSatisfactionOptions}
+                onOptionsChange={setOfficeSatisfactionOptions}
+                chartType="bar"
+              />
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="mb-4 flex border-b">
+            <TabButton active={officeSatisfactionTab === 'chart'} onClick={() => setOfficeSatisfactionTab('chart')}>
+              Chart
+            </TabButton>
+            <TabButton active={officeSatisfactionTab === 'data'} onClick={() => setOfficeSatisfactionTab('data')}>
+              Data
+            </TabButton>
+          </div>
+
+          {/* Content */}
+          {officeSatisfactionTab === 'chart' ? (
+            <div id="office-satisfaction-chart" ref={officeSatisfactionRef} className="w-full"></div>
+          ) : (
+            <DataDisplay datasets={officeSatisfactionData} />
+          )}
+        </div>
       </div>
 
       {/* Features */}
@@ -1298,6 +1606,9 @@ export default function DemoPage() {
           <div>✅ Scatter plots with correlations</div>
           <div>✅ Trend line analysis</div>
           <div>✅ Pie and doughnut charts</div>
+          <div>✅ Bar charts (vertical/horizontal)</div>
+          <div>✅ Grouped and stacked bars</div>
+          <div>✅ Value labels on bars</div>
           <div>✅ Custom tooltip content</div>
           <div>✅ Animated chart transitions</div>
         </div>

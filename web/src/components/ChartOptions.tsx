@@ -20,12 +20,16 @@ export interface ChartOptionsConfig {
   showLabels?: boolean;
   showValues?: boolean;
   showPercentages?: boolean;
+  // Bar chart specific options
+  stacked?: boolean;
+  horizontal?: boolean;
+  showBarValues?: boolean;
 }
 
 interface ChartOptionsProps {
   options: ChartOptionsConfig;
   onOptionsChange: (options: ChartOptionsConfig) => void;
-  chartType: 'line' | 'area' | 'scatter' | 'pie' | 'doughnut';
+  chartType: 'line' | 'area' | 'scatter' | 'pie' | 'doughnut' | 'bar';
 }
 
 export const ChartOptions: React.FC<ChartOptionsProps> = ({
@@ -67,7 +71,18 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
           </label>
         )}
 
-        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
+        {chartType === 'bar' && (
+          <label className="option-item">
+            <input
+              type="checkbox"
+              checked={options.horizontal ? options.showXGrid : options.showYGrid}
+              onChange={(e) => handleChange(options.horizontal ? 'showXGrid' : 'showYGrid', e.target.checked)}
+            />
+            <span>Value Grid</span>
+          </label>
+        )}
+
+        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter' || chartType === 'bar') && (
           <label className="option-item">
             <input
               type="checkbox"
@@ -78,7 +93,7 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
           </label>
         )}
 
-        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
+        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter' || chartType === 'bar') && (
           <label className="option-item">
             <input
               type="checkbox"
@@ -160,7 +175,7 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
           <span>Animate</span>
         </label>
 
-        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
+        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter' || chartType === 'bar') && (
           <label className="option-item">
             <input
               type="checkbox"
@@ -190,6 +205,39 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
               onChange={(e) => handleChange('showTrendLine', e.target.checked)}
             />
             <span>Trend Line</span>
+          </label>
+        )}
+
+        {chartType === 'bar' && (
+          <label className="option-item">
+            <input
+              type="checkbox"
+              checked={options.stacked || false}
+              onChange={(e) => handleChange('stacked', e.target.checked)}
+            />
+            <span>Stacked</span>
+          </label>
+        )}
+
+        {chartType === 'bar' && (
+          <label className="option-item">
+            <input
+              type="checkbox"
+              checked={options.horizontal || false}
+              onChange={(e) => handleChange('horizontal', e.target.checked)}
+            />
+            <span>Horizontal</span>
+          </label>
+        )}
+
+        {chartType === 'bar' && (
+          <label className="option-item">
+            <input
+              type="checkbox"
+              checked={options.showBarValues || false}
+              onChange={(e) => handleChange('showBarValues', e.target.checked)}
+            />
+            <span>Show Values</span>
           </label>
         )}
 

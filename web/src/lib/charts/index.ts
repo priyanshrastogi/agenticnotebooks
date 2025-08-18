@@ -1,5 +1,6 @@
 // Chart implementations
 export { AreaChart, createAreaChart } from './charts/area';
+export { BarChart, createBarChart } from './charts/bar';
 export { createLineChart, LineChart } from './charts/line';
 export { createDoughnutChart, createPieChart, PieChart } from './charts/pie';
 export { createScatterChart, ScatterChart } from './charts/scatter';
@@ -8,6 +9,7 @@ export { createScatterChart, ScatterChart } from './charts/scatter';
 export {
   // Chart options interfaces
   type AreaChartOptions,
+  type BarChartOptions,
   type BaseChartOptions,
   // Data types
   type ChartDataPoint,
@@ -16,6 +18,7 @@ export {
   type ChartMargin,
   type CurveType,
   type IAreaChart,
+  type IBarChart,
   // Chart interfaces
   type ILineChart,
   type IPieChart,
@@ -39,11 +42,15 @@ export { DEFAULT_COLORS, getColor, hexToRgba } from './core/colors';
 export {
   generateAppleStockData,
   generateAppleStockDataWithDates,
+  generateBrowserUsageData,
   generateCampaignPerformanceScatter,
   generateCustomerSatisfactionScatter,
+  generateDepartmentRevenueData,
   generateGlobalTemperatureData,
   generateHeightWeightData,
   generateMarketShareData,
+  generateOfficeSatisfactionData,
+  generateQuarterlySalesData,
   generateRegionalSalesData,
   generateRevenueBreakdownData,
   generateSalesMarketingData,
