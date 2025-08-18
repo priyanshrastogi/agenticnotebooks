@@ -11,7 +11,7 @@ export function LandingFinalCTA() {
         <h2 className="mb-6 text-3xl font-bold md:text-4xl">Start Creating Beautiful Charts Today</h2>
         <p className="text-foreground/90 mx-auto mb-10 max-w-2xl text-lg">
           Join thousands of users who are transforming their raw data into stunning visualizations
-          with Intellicharts' AI-powered charting engine.
+          with Intellicharts&apos; AI-powered charting engine.
         </p>
         <Link href="/new">
           <Button

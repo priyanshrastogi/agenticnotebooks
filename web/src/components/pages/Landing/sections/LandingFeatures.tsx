@@ -1,4 +1,4 @@
-import { BarChart3, Bot, Code2, Download, Palette, Sparkles } from 'lucide-react';
+import { BarChart3, Bot, Code2, Download, Palette } from 'lucide-react';
 import React from 'react';
 
 export function LandingFeatures() {
