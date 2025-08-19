@@ -84,6 +84,14 @@ export class LineChart implements ILineChart {
     let bottom = showXAxis ? 40 : 10;
     let left = showYAxis ? 40 : 10;
 
+    // Add extra space for axis labels
+    if (showXAxis && options.xAxisLabel) {
+      bottom += 20; // Extra space for X-axis label
+    }
+    if (showYAxis && options.yAxisLabel) {
+      left += 20; // Extra space for Y-axis label
+    }
+
     // Calculate dynamic left margin based on Y-axis label lengths
     if (showYAxis && this.data.length > 0) {
       // Get all Y values to estimate maximum label length
@@ -100,6 +108,11 @@ export class LineChart implements ILineChart {
         // Approximate 7 pixels per character + base padding
         const estimatedWidth = formattedMax.length * 7 + 20;
         left = Math.max(40, estimatedWidth);
+        
+        // Add extra space for Y-axis label if present
+        if (options.yAxisLabel) {
+          left += 15; // Additional space for the axis label
+        }
       }
     }
 
@@ -275,7 +288,11 @@ export class LineChart implements ILineChart {
         margin!,
         flatData,
         actualShowXAxis,
-        actualShowYAxis
+        actualShowYAxis,
+        this.options.xAxisLabel,
+        this.options.yAxisLabel,
+        this.options.legendPosition || 'bottom',
+        this.options.showLegend !== false
       );
     }
 

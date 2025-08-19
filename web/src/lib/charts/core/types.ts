@@ -84,6 +84,8 @@ export interface BaseChartOptions {
 
   // Axis configuration
   yAxisStartsFromZero?: boolean;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
 
   // Tooltip configuration
   tooltipSize?: TooltipSize;

@@ -13,6 +13,7 @@ import {
   YScale,
 } from '../../core/types';
 import {
+  addAxisLabels,
   addGridLines,
   addLegend,
   calculateLegendSpace,
@@ -83,6 +84,14 @@ export class BarChart implements IBarChart {
     let bottom = showXAxis ? 40 : 10;
     let left = showYAxis ? 40 : 10;
 
+    // Add extra space for axis labels
+    if (showXAxis && options.xAxisLabel) {
+      bottom += 20; // Extra space for X-axis label
+    }
+    if (showYAxis && options.yAxisLabel) {
+      left += 20; // Extra space for Y-axis label
+    }
+
     // For horizontal bar charts, calculate dynamic left margin based on label lengths
     if (horizontal && showYAxis) {
       const allXValues = Array.from(
@@ -91,6 +100,11 @@ export class BarChart implements IBarChart {
       const maxLabelLength = Math.max(...allXValues.map((x) => String(x).length));
       // Approximate 7 pixels per character + base padding
       left = Math.max(40, maxLabelLength * 7 + 20);
+      
+      // Add extra space for Y-axis label if present
+      if (options.yAxisLabel) {
+        left += 15; // Additional space for the axis label
+      }
     }
 
     // Add dynamic space for legend based on actual content and wrapping
@@ -956,6 +970,20 @@ export class BarChart implements IBarChart {
       .attr('fill', '#666')
       .attr('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
       .attr('font-size', '12px');
+
+    // Add axis labels using utility function
+    addAxisLabels(
+      this.svg!, 
+      this.options.width!, 
+      this.options.height!, 
+      this.options.margin!, 
+      showXAxis, 
+      showYAxis, 
+      this.options.xAxisLabel, 
+      this.options.yAxisLabel,
+      this.options.legendPosition || 'bottom',
+      this.options.showLegend !== false
+    );
   }
 
   destroy(): void {

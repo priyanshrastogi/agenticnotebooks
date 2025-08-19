@@ -9,6 +9,7 @@ import {
   SVGSelection,
 } from '../../core/types';
 import {
+  addAxisLabels,
   addGridLines,
   addLegend,
   calculateNiceScale,
@@ -84,6 +85,14 @@ export class HistogramChart implements IHistogramChart {
     let bottom = showXAxis ? 40 : 10;
     let left = showYAxis ? 40 : 10;
 
+    // Add extra space for axis labels
+    if (showXAxis && options.xAxisLabel) {
+      bottom += 20; // Extra space for X-axis label
+    }
+    if (showYAxis && options.yAxisLabel) {
+      left += 20; // Extra space for Y-axis label
+    }
+
     // Calculate dynamic left margin based on estimated Y-axis tick values
     if (showYAxis && this.data.length > 0) {
       // Estimate maximum frequency for margin calculation
@@ -107,6 +116,11 @@ export class HistogramChart implements IHistogramChart {
 
       // Calculate required width: ~7 pixels per character + padding
       left = Math.max(40, maxTickLength * 7 + 20);
+      
+      // Add extra space for Y-axis label if present
+      if (options.yAxisLabel) {
+        left += 15; // Additional space for the axis label
+      }
     }
 
     // Add space for legend
@@ -308,6 +322,20 @@ export class HistogramChart implements IHistogramChart {
       .attr('fill', '#666')
       .attr('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
       .attr('font-size', '12px');
+
+    // Add axis labels using utility function
+    addAxisLabels(
+      svg, 
+      this.options.width || 800, 
+      height, 
+      margin, 
+      showXAxis || false, 
+      showYAxis || false, 
+      this.options.xAxisLabel, 
+      this.options.yAxisLabel,
+      this.options.legendPosition || 'bottom',
+      this.options.showLegend !== false
+    );
   }
 
   private renderChart() {

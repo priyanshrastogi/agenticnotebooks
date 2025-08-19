@@ -717,6 +717,10 @@ export const addAxes = (
   data: { x: string | number }[] = [],
   showXAxis: boolean = true,
   showYAxis: boolean = true,
+  xAxisLabel?: string,
+  yAxisLabel?: string,
+  legendPosition: 'bottom' | 'top' | 'left' | 'right' = 'bottom',
+  hasLegend: boolean = false,
 ) => {
   const chartBottom = height - margin.bottom;
   const chartLeft = margin.left;
@@ -903,4 +907,55 @@ export const addAxes = (
     .attr('fill', '#666')
     .attr('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
     .attr('font-size', '12px');
+
+  // Add axis labels using utility function
+  addAxisLabels(svg, width, height, margin, showXAxis, showYAxis, xAxisLabel, yAxisLabel, legendPosition, hasLegend);
+};
+
+/**
+ * Adds axis labels to the chart
+ */
+export const addAxisLabels = (
+  svg: d3.Selection<SVGSVGElement, unknown, HTMLElement, unknown>,
+  width: number,
+  height: number,
+  margin: { top: number; right: number; bottom: number; left: number },
+  showXAxis: boolean,
+  showYAxis: boolean,
+  xAxisLabel?: string,
+  yAxisLabel?: string,
+  legendPosition: 'bottom' | 'top' | 'left' | 'right' = 'bottom',
+  hasLegend: boolean = false
+) => {
+  // Calculate positions accounting for legend
+  const xLabelY = hasLegend && legendPosition === 'bottom' 
+    ? height - 40 // Position above legend with more space
+    : height - 20; // Position further up from bottom
+
+  // Add X-axis label
+  if (showXAxis && xAxisLabel) {
+    svg
+      .append('text')
+      .attr('class', 'x-axis-label')
+      .attr('text-anchor', 'middle')
+      .attr('x', margin.left + (width - margin.left - margin.right) / 2)
+      .attr('y', xLabelY)
+      .attr('fill', '#666')
+      .attr('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
+      .attr('font-size', '12px')
+      .text(xAxisLabel);
+  }
+
+  // Add Y-axis label with more margin from tick values
+  if (showYAxis && yAxisLabel) {
+    svg
+      .append('text')
+      .attr('class', 'y-axis-label')
+      .attr('text-anchor', 'middle')
+      .attr('transform', `translate(15, ${margin.top + (height - margin.top - margin.bottom) / 2}) rotate(-90)`)
+      .attr('fill', '#666')
+      .attr('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
+      .attr('font-size', '12px')
+      .text(yAxisLabel);
+  }
 };

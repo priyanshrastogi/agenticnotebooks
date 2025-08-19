@@ -3,16 +3,17 @@
 import { useEffect, useRef } from 'react';
 
 import { ChartOptionsConfig } from '@/components/ChartOptions';
-import { createLineChart } from '@/lib/charts';
-import { ChartDataset, LineChartOptions } from '@/lib/charts/core/types';
+import { createAreaChart, createLineChart, createScatterChart } from '@/lib/charts';
+import { AreaChartOptions, ChartDataset, LineChartOptions, ScatterChartOptions } from '@/lib/charts/core/types';
 
 interface ChartContainerProps {
   data: ChartDataset[];
   chartId: string;
   options: ChartOptionsConfig;
+  chartType?: 'line' | 'area' | 'scatter';
 }
 
-export default function ChartContainer({ data, chartId, options }: ChartContainerProps) {
+export default function ChartContainer({ data, chartId, options, chartType = 'line' }: ChartContainerProps) {
   const chartRef = useRef<{ render: () => void; destroy: () => void } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +37,7 @@ export default function ChartContainer({ data, chartId, options }: ChartContaine
         const isMobile = containerWidth < 640;
 
         // Create chart options
-        const chartOptions: LineChartOptions = {
+        const baseChartOptions = {
           width: Math.max(320, containerWidth - 32), // Responsive width with min 320px
           height: isMobile ? 280 : 400, // Shorter on mobile
           showXGrid: options.showXGrid,
@@ -50,17 +51,36 @@ export default function ChartContainer({ data, chartId, options }: ChartContaine
           animate: options.animate,
           curve: options.curve,
           yAxisStartsFromZero: options.yAxisStartsFromZero,
+          xAxisLabel: options.xAxisLabel,
+          yAxisLabel: options.yAxisLabel,
           tooltipSize: options.tooltipSize,
         };
 
-        // Create and render chart
-        chartRef.current = createLineChart(`#${chartId}`, data, chartOptions);
+        // Create and render chart based on type
+        if (chartType === 'area') {
+          const areaOptions: AreaChartOptions = {
+            ...baseChartOptions,
+            showStackedTotal: options.showStackedTotal,
+            solidFill: options.solidFill,
+          };
+          chartRef.current = createAreaChart(`#${chartId}`, data, areaOptions);
+        } else if (chartType === 'scatter') {
+          const scatterOptions: ScatterChartOptions = {
+            ...baseChartOptions,
+            showTrendLine: options.showTrendLine,
+          };
+          chartRef.current = createScatterChart(`#${chartId}`, data, scatterOptions);
+        } else {
+          const lineOptions: LineChartOptions = baseChartOptions;
+          chartRef.current = createLineChart(`#${chartId}`, data, lineOptions);
+        }
+        
         chartRef.current.render();
       }, 100);
 
       return () => clearTimeout(timer);
     }
-  }, [data, options, chartId]);
+  }, [data, options, chartId, chartType]);
 
   // Cleanup on unmount
   useEffect(() => {

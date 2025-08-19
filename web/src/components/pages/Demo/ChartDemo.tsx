@@ -16,6 +16,7 @@ interface ChartDemoProps {
   dataGenerator: () => ChartDataset[];
   chartId: string;
   defaultOptions?: Partial<ChartOptionsConfig>;
+  chartType?: 'line' | 'area' | 'scatter';
 }
 
 export default function ChartDemo({
@@ -24,6 +25,7 @@ export default function ChartDemo({
   dataGenerator,
   chartId,
   defaultOptions = {},
+  chartType = 'line',
 }: ChartDemoProps) {
   const [data, setData] = useState<ChartDataset[]>([]);
   const [activeTab, setActiveTab] = useState<'chart' | 'data'>('chart');
@@ -84,7 +86,7 @@ export default function ChartDemo({
               onValueChange={(value) => setActiveTab(value as 'chart' | 'data')}
             >
               <TabsContent value="chart" className="mt-0">
-                <ChartContainer data={data} chartId={chartId} options={options} />
+                <ChartContainer data={data} chartId={chartId} options={options} chartType={chartType} />
               </TabsContent>
               <TabsContent value="data" className="mt-0">
                 <div className="h-[400px] overflow-auto rounded-lg border bg-gray-50 p-4">
@@ -98,7 +100,7 @@ export default function ChartDemo({
           <div className="lg:col-span-1">
             <div className="space-y-4">
               <div>
-                <OptionsPanel options={options} onOptionsChange={setOptions} chartType="line" />
+                <OptionsPanel options={options} onOptionsChange={setOptions} chartType={chartType} />
               </div>
             </div>
           </div>

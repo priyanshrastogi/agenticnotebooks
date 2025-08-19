@@ -1,5 +1,12 @@
 import React from 'react';
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -22,6 +29,8 @@ export interface ChartOptionsConfig {
   animate: boolean;
   curve: 'linear' | 'smooth';
   yAxisStartsFromZero: boolean;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
   showStackedTotal?: boolean;
   showTrendLine?: boolean;
   solidFill?: boolean;
@@ -108,250 +117,322 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
   );
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        {/* Grid Controls */}
-        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
-          <>
-            <OptionSwitch
-              id="x-grid"
-              checked={options.showXGrid}
-              onChange={(checked) => handleChange('showXGrid', checked)}
-              label="X Grid"
-            />
-            <OptionSwitch
-              id="y-grid"
-              checked={options.showYGrid}
-              onChange={(checked) => handleChange('showYGrid', checked)}
-              label="Y Grid"
-            />
-          </>
-        )}
+    <div className="space-y-3">
+      <Accordion type="multiple" defaultValue={['visual']} className="w-full">
+        {/* Visual Elements Section */}
+        <AccordionItem value="visual" className="border-b border-gray-200">
+          <AccordionTrigger className="py-2 text-sm font-medium">
+            Visual Elements
+          </AccordionTrigger>
+          <AccordionContent className="pb-3">
+            <div className="grid grid-cols-2 gap-2">
+              {/* Grid Controls */}
+              {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
+                <>
+                  <OptionSwitch
+                    id="x-grid"
+                    checked={options.showXGrid}
+                    onChange={(checked) => handleChange('showXGrid', checked)}
+                    label="X Grid"
+                  />
+                  <OptionSwitch
+                    id="y-grid"
+                    checked={options.showYGrid}
+                    onChange={(checked) => handleChange('showYGrid', checked)}
+                    label="Y Grid"
+                  />
+                </>
+              )}
 
-        {chartType === 'bar' && (
-          <OptionSwitch
-            id="value-grid"
-            checked={options.horizontal ? options.showXGrid : options.showYGrid}
-            onChange={(checked) =>
-              handleChange(options.horizontal ? 'showXGrid' : 'showYGrid', checked)
-            }
-            label="Value Grid"
-          />
-        )}
+              {chartType === 'bar' && (
+                <OptionSwitch
+                  id="value-grid"
+                  checked={options.horizontal ? options.showXGrid : options.showYGrid}
+                  onChange={(checked) =>
+                    handleChange(options.horizontal ? 'showXGrid' : 'showYGrid', checked)
+                  }
+                  label="Value Grid"
+                />
+              )}
 
-        {chartType === 'histogram' && (
-          <OptionSwitch
-            id="histogram-y-grid"
-            checked={options.showYGrid}
-            onChange={(checked) => handleChange('showYGrid', checked)}
-            label="Y Grid"
-          />
-        )}
+              {chartType === 'histogram' && (
+                <OptionSwitch
+                  id="histogram-y-grid"
+                  checked={options.showYGrid}
+                  onChange={(checked) => handleChange('showYGrid', checked)}
+                  label="Y Grid"
+                />
+              )}
 
-        {/* Axis Controls */}
+              <OptionSwitch
+                id="tooltips"
+                checked={options.showTooltip}
+                onChange={(checked) => handleChange('showTooltip', checked)}
+                label="Tooltips"
+              />
+
+              <OptionSwitch
+                id="legend"
+                checked={options.showLegend}
+                onChange={(checked) => handleChange('showLegend', checked)}
+                label="Legend"
+              />
+
+              <OptionSwitch
+                id="animate"
+                checked={options.animate}
+                onChange={(checked) => handleChange('animate', checked)}
+                label="Animate"
+              />
+
+              {(chartType === 'line' ||
+                chartType === 'area' ||
+                chartType === 'scatter' ||
+                chartType === 'bar' ||
+                chartType === 'histogram') && (
+                <OptionSwitch
+                  id="zero-base"
+                  checked={options.yAxisStartsFromZero}
+                  onChange={(checked) => handleChange('yAxisStartsFromZero', checked)}
+                  label="Zero Base"
+                />
+              )}
+
+              {/* Line/Area Specific */}
+              {(chartType === 'line' || chartType === 'area') && (
+                <OptionSwitch
+                  id="points"
+                  checked={options.showPoints || false}
+                  onChange={(checked) => handleChange('showPoints', checked)}
+                  label="Points"
+                />
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Axes Section */}
         {(chartType === 'line' ||
           chartType === 'area' ||
           chartType === 'scatter' ||
           chartType === 'bar' ||
           chartType === 'histogram') && (
-          <>
-            <OptionSwitch
-              id="x-axis"
-              checked={options.showXAxis}
-              onChange={(checked) => handleChange('showXAxis', checked)}
-              label="X Axis"
-            />
-            <OptionSwitch
-              id="y-axis"
-              checked={options.showYAxis}
-              onChange={(checked) => handleChange('showYAxis', checked)}
-              label="Y Axis"
-            />
-          </>
+          <AccordionItem value="axes" className="border-b border-gray-200">
+            <AccordionTrigger className="py-2 text-sm font-medium">
+              Axes & Labels
+            </AccordionTrigger>
+            <AccordionContent className="pb-3 space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <OptionSwitch
+                  id="x-axis"
+                  checked={options.showXAxis}
+                  onChange={(checked) => handleChange('showXAxis', checked)}
+                  label="X Axis"
+                />
+                <OptionSwitch
+                  id="y-axis"
+                  checked={options.showYAxis}
+                  onChange={(checked) => handleChange('showYAxis', checked)}
+                  label="Y Axis"
+                />
+              </div>
+              {options.showXAxis && (
+                <div>
+                  <Label htmlFor="x-axis-label" className="text-xs text-gray-600">
+                    X Axis Label
+                  </Label>
+                  <Input
+                    id="x-axis-label"
+                    type="text"
+                    placeholder="X axis label..."
+                    value={options.xAxisLabel || ''}
+                    onChange={(e) => handleChange('xAxisLabel', e.target.value)}
+                    className="text-sm h-7 mt-1"
+                  />
+                </div>
+              )}
+              {options.showYAxis && (
+                <div>
+                  <Label htmlFor="y-axis-label" className="text-xs text-gray-600">
+                    Y Axis Label
+                  </Label>
+                  <Input
+                    id="y-axis-label"
+                    type="text"
+                    placeholder="Y axis label..."
+                    value={options.yAxisLabel || ''}
+                    onChange={(e) => handleChange('yAxisLabel', e.target.value)}
+                    className="text-sm h-7 mt-1"
+                  />
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
         )}
 
-        {/* Common Controls */}
-        <OptionSwitch
-          id="tooltips"
-          checked={options.showTooltip}
-          onChange={(checked) => handleChange('showTooltip', checked)}
-          label="Tooltips"
-        />
-
-        <OptionSwitch
-          id="legend"
-          checked={options.showLegend}
-          onChange={(checked) => handleChange('showLegend', checked)}
-          label="Legend"
-        />
-
-        <OptionSwitch
-          id="animate"
-          checked={options.animate}
-          onChange={(checked) => handleChange('animate', checked)}
-          label="Animate"
-        />
-
-        {(chartType === 'line' ||
-          chartType === 'area' ||
+        {/* Chart Specific Section */}
+        {(chartType === 'area' ||
           chartType === 'scatter' ||
           chartType === 'bar' ||
+          chartType === 'pie' ||
+          chartType === 'doughnut' ||
           chartType === 'histogram') && (
-          <OptionSwitch
-            id="zero-base"
-            checked={options.yAxisStartsFromZero}
-            onChange={(checked) => handleChange('yAxisStartsFromZero', checked)}
-            label="Zero Base"
-          />
+          <AccordionItem value="specific" className="border-b border-gray-200">
+            <AccordionTrigger className="py-2 text-sm font-medium">
+              {chartType.charAt(0).toUpperCase() + chartType.slice(1)} Options
+            </AccordionTrigger>
+            <AccordionContent className="pb-3">
+              <div className="grid grid-cols-2 gap-2">
+                {/* Pie/Doughnut Specific */}
+                {(chartType === 'pie' || chartType === 'doughnut') && (
+                  <>
+                    <OptionSwitch
+                      id="pie-labels"
+                      checked={options.showLabels || false}
+                      onChange={(checked) => handleChange('showLabels', checked)}
+                      label="Labels"
+                    />
+                    <OptionSwitch
+                      id="pie-values"
+                      checked={options.showValues || false}
+                      onChange={(checked) => handleChange('showValues', checked)}
+                      label="Values"
+                    />
+                    <OptionSwitch
+                      id="pie-percentages"
+                      checked={options.showPercentages || false}
+                      onChange={(checked) => handleChange('showPercentages', checked)}
+                      label="Percentages"
+                    />
+                  </>
+                )}
+
+                {/* Area Specific */}
+                {chartType === 'area' && (
+                  <>
+                    <OptionSwitch
+                      id="stack-total"
+                      checked={options.showStackedTotal || false}
+                      onChange={(checked) => handleChange('showStackedTotal', checked)}
+                      label="Stack Total"
+                    />
+                    <OptionSwitch
+                      id="solid-fill"
+                      checked={options.solidFill || false}
+                      onChange={(checked) => handleChange('solidFill', checked)}
+                      label="Solid Fill"
+                    />
+                  </>
+                )}
+
+                {/* Scatter Specific */}
+                {chartType === 'scatter' && (
+                  <OptionSwitch
+                    id="trend-line"
+                    checked={options.showTrendLine || false}
+                    onChange={(checked) => handleChange('showTrendLine', checked)}
+                    label="Trend Line"
+                  />
+                )}
+
+                {/* Bar Specific */}
+                {chartType === 'bar' && (
+                  <>
+                    <OptionSwitch
+                      id="stacked"
+                      checked={options.stacked || false}
+                      onChange={(checked) => handleChange('stacked', checked)}
+                      label="Stacked"
+                    />
+                    <OptionSwitch
+                      id="horizontal"
+                      checked={options.horizontal || false}
+                      onChange={(checked) => handleChange('horizontal', checked)}
+                      label="Horizontal"
+                    />
+                    <OptionSwitch
+                      id="bar-values"
+                      checked={options.showBarValues || false}
+                      onChange={(checked) => handleChange('showBarValues', checked)}
+                      label="Show Values"
+                    />
+                  </>
+                )}
+
+                {/* Histogram Specific */}
+                {chartType === 'histogram' && (
+                  <>
+                    <OptionSwitch
+                      id="density"
+                      checked={options.showDensity || false}
+                      onChange={(checked) => handleChange('showDensity', checked)}
+                      label="Show Density"
+                    />
+                    <OptionSelect
+                      value={options.bins || 10}
+                      onChange={(value) => handleChange('bins', parseInt(value as string))}
+                      options={[
+                        { value: 5, label: 'Bins: 5' },
+                        { value: 10, label: 'Bins: 10' },
+                        { value: 15, label: 'Bins: 15' },
+                        { value: 20, label: 'Bins: 20' },
+                        { value: 25, label: 'Bins: 25' },
+                        { value: 30, label: 'Bins: 30' },
+                      ]}
+                      className="col-span-2"
+                    />
+                  </>
+                )}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
         )}
 
-        {/* Line/Area Specific */}
-        {(chartType === 'line' || chartType === 'area') && (
-          <OptionSwitch
-            id="points"
-            checked={options.showPoints || false}
-            onChange={(checked) => handleChange('showPoints', checked)}
-            label="Points"
-          />
-        )}
+        {/* Styling Section */}
+        <AccordionItem value="styling" className="border-b-0">
+          <AccordionTrigger className="py-2 text-sm font-medium">
+            Styling
+          </AccordionTrigger>
+          <AccordionContent className="pb-3">
+            <div className="space-y-2">
+              {(chartType === 'line' || chartType === 'area') && (
+                <OptionSelect
+                  value={options.curve}
+                  onChange={(value) => handleChange('curve', value)}
+                  options={[
+                    { value: 'linear', label: 'Curve: Linear' },
+                    { value: 'smooth', label: 'Curve: Smooth' },
+                  ]}
+                />
+              )}
 
-        {/* Pie/Doughnut Specific */}
-        {(chartType === 'pie' || chartType === 'doughnut') && (
-          <>
-            <OptionSwitch
-              id="pie-labels"
-              checked={options.showLabels || false}
-              onChange={(checked) => handleChange('showLabels', checked)}
-              label="Labels"
-            />
-            <OptionSwitch
-              id="pie-values"
-              checked={options.showValues || false}
-              onChange={(checked) => handleChange('showValues', checked)}
-              label="Values"
-            />
-            <OptionSwitch
-              id="pie-percentages"
-              checked={options.showPercentages || false}
-              onChange={(checked) => handleChange('showPercentages', checked)}
-              label="Percentages"
-            />
-          </>
-        )}
+              {options.showLegend && (
+                <OptionSelect
+                  value={options.legendPosition}
+                  onChange={(value) => handleChange('legendPosition', value)}
+                  options={[
+                    { value: 'bottom', label: 'Legend: Bottom' },
+                    { value: 'top', label: 'Legend: Top' },
+                    { value: 'left', label: 'Legend: Left' },
+                    { value: 'right', label: 'Legend: Right' },
+                  ]}
+                />
+              )}
 
-        {/* Area Specific */}
-        {chartType === 'area' && (
-          <>
-            <OptionSwitch
-              id="stack-total"
-              checked={options.showStackedTotal || false}
-              onChange={(checked) => handleChange('showStackedTotal', checked)}
-              label="Stack Total"
-            />
-            <OptionSwitch
-              id="solid-fill"
-              checked={options.solidFill || false}
-              onChange={(checked) => handleChange('solidFill', checked)}
-              label="Solid Fill"
-            />
-          </>
-        )}
-
-        {/* Scatter Specific */}
-        {chartType === 'scatter' && (
-          <OptionSwitch
-            id="trend-line"
-            checked={options.showTrendLine || false}
-            onChange={(checked) => handleChange('showTrendLine', checked)}
-            label="Trend Line"
-          />
-        )}
-
-        {/* Bar Specific */}
-        {chartType === 'bar' && (
-          <>
-            <OptionSwitch
-              id="stacked"
-              checked={options.stacked || false}
-              onChange={(checked) => handleChange('stacked', checked)}
-              label="Stacked"
-            />
-            <OptionSwitch
-              id="horizontal"
-              checked={options.horizontal || false}
-              onChange={(checked) => handleChange('horizontal', checked)}
-              label="Horizontal"
-            />
-            <OptionSwitch
-              id="bar-values"
-              checked={options.showBarValues || false}
-              onChange={(checked) => handleChange('showBarValues', checked)}
-              label="Show Values"
-            />
-          </>
-        )}
-
-        {/* Histogram Specific */}
-        {chartType === 'histogram' && (
-          <OptionSwitch
-            id="density"
-            checked={options.showDensity || false}
-            onChange={(checked) => handleChange('showDensity', checked)}
-            label="Show Density"
-          />
-        )}
-
-        {/* Select Controls */}
-        {chartType === 'histogram' && (
-          <OptionSelect
-            value={options.bins || 10}
-            onChange={(value) => handleChange('bins', parseInt(value as string))}
-            options={[
-              { value: 5, label: 'Bins: 5' },
-              { value: 10, label: 'Bins: 10' },
-              { value: 15, label: 'Bins: 15' },
-              { value: 20, label: 'Bins: 20' },
-              { value: 25, label: 'Bins: 25' },
-              { value: 30, label: 'Bins: 30' },
-            ]}
-          />
-        )}
-
-        {(chartType === 'line' || chartType === 'area') && (
-          <OptionSelect
-            value={options.curve}
-            onChange={(value) => handleChange('curve', value)}
-            options={[
-              { value: 'linear', label: 'Curve: Linear' },
-              { value: 'smooth', label: 'Curve: Smooth' },
-            ]}
-          />
-        )}
-
-        {options.showLegend && (
-          <OptionSelect
-            value={options.legendPosition}
-            onChange={(value) => handleChange('legendPosition', value)}
-            options={[
-              { value: 'bottom', label: 'Legend: Bottom' },
-              { value: 'top', label: 'Legend: Top' },
-              { value: 'left', label: 'Legend: Left' },
-              { value: 'right', label: 'Legend: Right' },
-            ]}
-          />
-        )}
-
-        {options.showTooltip && (
-          <OptionSelect
-            value={options.tooltipSize || 'sm'}
-            onChange={(value) => handleChange('tooltipSize', value)}
-            options={[
-              { value: 'sm', label: 'Tooltip: Small' },
-              { value: 'md', label: 'Tooltip: Medium' },
-            ]}
-          />
-        )}
-      </div>
+              {options.showTooltip && (
+                <OptionSelect
+                  value={options.tooltipSize || 'sm'}
+                  onChange={(value) => handleChange('tooltipSize', value)}
+                  options={[
+                    { value: 'sm', label: 'Tooltip: Small' },
+                    { value: 'md', label: 'Tooltip: Medium' },
+                  ]}
+                />
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 };
