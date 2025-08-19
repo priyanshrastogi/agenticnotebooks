@@ -20,6 +20,7 @@ import {
   calculateNiceScale,
   createCrosshairTooltip,
   createTooltip,
+  formatNumber,
   hideTooltip,
   showCrosshairTooltip,
   showTooltip,
@@ -40,7 +41,7 @@ export class LineChart implements ILineChart {
     this.data = data;
     // Calculate dynamic margins based on options
     const dynamicMargin = this.calculateMargins(options);
-    
+
     this.options = {
       width: 800,
       height: 400,
@@ -59,24 +60,48 @@ export class LineChart implements ILineChart {
       tooltipSize: 'sm',
       ...options,
     };
-    
+
     // Override margin with dynamic calculation if not explicitly provided
     if (!options.margin) {
       this.options.margin = dynamicMargin;
     }
   }
 
-  private calculateMargins(options: LineChartOptions): { top: number; right: number; bottom: number; left: number } {
-    const showXAxis = options.showXAxis !== false; // Default to true  
+  private calculateMargins(options: LineChartOptions): {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  } {
+    const showXAxis = options.showXAxis !== false; // Default to true
     const showYAxis = options.showYAxis !== false; // Default to true
     const showLegend = options.showLegend !== false; // Default to true
     const legendPosition = options.legendPosition || 'bottom';
-    
+
     let top = 20;
     let right = 20;
     let bottom = showXAxis ? 40 : 10;
     let left = showYAxis ? 40 : 10;
-    
+
+    // Calculate dynamic left margin based on Y-axis label lengths
+    if (showYAxis && this.data.length > 0) {
+      // Get all Y values to estimate maximum label length
+      const allYValues = this.data.flatMap((d) => d.data.map((item) => item.y));
+      if (allYValues.length > 0) {
+        const yExtent = d3.extent(allYValues) as [number, number];
+        const yMin = options.yAxisStartsFromZero !== false ? 0 : yExtent[0];
+        const { niceMin, niceMax } = calculateNiceScale(yMin, yExtent[1]);
+        const maxYValue = Math.max(Math.abs(niceMin), Math.abs(niceMax));
+        
+        // Format the maximum value to estimate its display length using the same logic as axis labels
+        const formattedMax = formatNumber(maxYValue);
+        
+        // Approximate 7 pixels per character + base padding
+        const estimatedWidth = formattedMax.length * 7 + 20;
+        left = Math.max(40, estimatedWidth);
+      }
+    }
+
     // Add space for legend
     if (showLegend) {
       switch (legendPosition) {
@@ -94,7 +119,7 @@ export class LineChart implements ILineChart {
           break;
       }
     }
-    
+
     return { top, right, bottom, left };
   }
 
@@ -206,14 +231,35 @@ export class LineChart implements ILineChart {
     const actualShowXGrid = showXGrid !== false;
     const actualShowYGrid = showYGrid !== false;
     if (actualShowXGrid || actualShowYGrid) {
-      addGridLines(this.svg!, xScale, yScale, width!, height!, margin!, actualShowXGrid, actualShowYGrid);
+      addGridLines(
+        this.svg!,
+        xScale,
+        yScale,
+        width!,
+        height!,
+        margin!,
+        actualShowXGrid,
+        actualShowYGrid
+      );
     }
 
     // Add axes
     const actualShowXAxis = showXAxis !== false;
     const actualShowYAxis = showYAxis !== false;
     if (actualShowXAxis || actualShowYAxis) {
-      addAxes(this.svg!, xScale, yScale, width!, height!, margin!, false, actualShowXAxis, actualShowYAxis);
+      // Flatten data for analysis
+      const flatData = this.data.flatMap((dataset) => dataset.data);
+      addAxes(
+        this.svg!,
+        xScale,
+        yScale,
+        width!,
+        height!,
+        margin!,
+        flatData,
+        actualShowXAxis,
+        actualShowYAxis
+      );
     }
 
     // Add legend
@@ -429,7 +475,7 @@ export class LineChart implements ILineChart {
         if (tooltipData.length > 0) {
           // Create multi-value tooltip content
           let tooltipContent: string;
-          
+
           if (this.options.tooltipContentCallback) {
             // Use custom tooltip callback
             tooltipContent = this.options.tooltipContentCallback(tooltipData, closestX);

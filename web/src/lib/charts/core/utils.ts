@@ -1,5 +1,144 @@
 import * as d3 from 'd3';
 
+// ============================================================================
+// DATE/TIME DETECTION AND FORMATTING UTILITIES
+// ============================================================================
+
+/**
+ * Detects if a value is a date/time and returns its type
+ */
+export const detectDateTimeType = (value: string | number): 'date' | 'time' | 'timestamp' | 'datetime' | null => {
+  if (typeof value === 'number') {
+    // Check if it's a timestamp (milliseconds or seconds)
+    if (value > 1000000000 && value < 10000000000) {
+      return 'timestamp'; // Unix timestamp in seconds
+    }
+    if (value > 1000000000000) {
+      return 'timestamp'; // Unix timestamp in milliseconds
+    }
+    return null;
+  }
+
+  const str = value.toString();
+  
+  // ISO date patterns
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(str)) return 'datetime';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return 'date';
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) return 'date';
+  if (/^\d{2}-\d{2}-\d{4}$/.test(str)) return 'date';
+  
+  // Time patterns
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(str)) return 'time';
+  
+  // Month year patterns
+  if (/^\w{3}\s\d{4}$/.test(str)) return 'date'; // "Jan 2024"
+  if (/^\d{4}-\d{2}$/.test(str)) return 'date'; // "2024-01"
+  
+  return null;
+};
+
+/**
+ * Converts various date/time formats to Date objects
+ */
+export const parseDateTime = (value: string | number): Date | null => {
+  if (typeof value === 'number') {
+    // Handle timestamps
+    if (value > 1000000000 && value < 10000000000) {
+      return new Date(value * 1000); // Unix timestamp in seconds
+    }
+    if (value > 1000000000000) {
+      return new Date(value); // Unix timestamp in milliseconds
+    }
+    return null;
+  }
+
+  const str = value.toString();
+  
+  // Try parsing directly first
+  const directParse = new Date(str);
+  if (!isNaN(directParse.getTime())) {
+    return directParse;
+  }
+  
+  // Handle specific formats
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) {
+    const [month, day, year] = str.split('/');
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  }
+  
+  if (/^\d{2}-\d{2}-\d{4}$/.test(str)) {
+    const [month, day, year] = str.split('-');
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  }
+  
+  return null;
+};
+
+/**
+ * Formats date/time values for display on axes
+ */
+export const formatDateTimeForAxis = (value: string | number, type: string): string => {
+  const date = parseDateTime(value);
+  if (!date) return value.toString();
+  
+  switch (type) {
+    case 'date':
+      // For dates, show short month and day
+      return d3.timeFormat('%b %d')(date);
+    case 'datetime':
+      // For datetime with hours, show month/day and hour only
+      return d3.timeFormat('%m/%d %Hh')(date);
+    case 'time':
+      // For time, show formatted time
+      return d3.timeFormat('%H:%M')(date);
+    case 'timestamp':
+      // For timestamps, show date or datetime based on data density
+      return d3.timeFormat('%b %d')(date);
+    default:
+      return value.toString();
+  }
+};
+
+/**
+ * Analyzes a dataset to determine if X values are date/time and their type
+ */
+export const analyzeXAxisType = (data: { x: string | number }[]): { isDateTime: boolean; type: string | null; formatter: ((value: string | number) => string) | null } => {
+  if (data.length === 0) return { isDateTime: false, type: null, formatter: null };
+  
+  // Sample first few values to determine type
+  const sampleSize = Math.min(5, data.length);
+  const samples = data.slice(0, sampleSize);
+  
+  let detectedType: string | null = null;
+  let consistentType = true;
+  
+  for (const item of samples) {
+    const xValue = item.x;
+    const currentType = detectDateTimeType(xValue);
+    
+    if (currentType === null) {
+      return { isDateTime: false, type: null, formatter: null };
+    }
+    
+    if (detectedType === null) {
+      detectedType = currentType;
+    } else if (detectedType !== currentType) {
+      consistentType = false;
+      break;
+    }
+  }
+  
+  if (!consistentType || !detectedType) {
+    return { isDateTime: false, type: null, formatter: null };
+  }
+  
+  return {
+    isDateTime: true,
+    type: detectedType,
+    formatter: (value: string | number) => formatDateTimeForAxis(value, detectedType!)
+  };
+};
+
 export const formatNumber = (num: number): string => {
   if (Math.abs(num) >= 1000000) {
     return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -178,9 +317,27 @@ export const addGridLines = (
 
   // Vertical grid lines (X-axis grid)
   if (showXGrid) {
+    const chartWidth = width - margin.left - margin.right;
+    const optimalTicks = Math.min(12, Math.floor(chartWidth / 50));
+    
     if ('bandwidth' in xScale) {
       // For ordinal scales (string categories)
-      const xTicks = (xScale as d3.ScalePoint<string>).domain();
+      const fullDomain = (xScale as d3.ScalePoint<string>).domain();
+      const totalItems = fullDomain.length;
+      
+      // Filter ticks if there are too many
+      let xTicks: string[];
+      if (totalItems > optimalTicks) {
+        const step = Math.ceil(totalItems / optimalTicks);
+        xTicks = fullDomain.filter((_, i) => i % step === 0);
+        // Ensure last item is included
+        if (xTicks[xTicks.length - 1] !== fullDomain[fullDomain.length - 1]) {
+          xTicks.push(fullDomain[fullDomain.length - 1]);
+        }
+      } else {
+        xTicks = fullDomain;
+      }
+      
       gridGroup
         .selectAll('.grid-line-vertical')
         .data(xTicks)
@@ -196,7 +353,7 @@ export const addGridLines = (
         .attr('stroke-dasharray', '4,4');
     } else {
       // For linear scales
-      const xTicks = (xScale as d3.ScaleLinear<number, number>).ticks(8);
+      const xTicks = (xScale as d3.ScaleLinear<number, number>).ticks(optimalTicks);
       gridGroup
         .selectAll('.grid-line-vertical')
         .data(xTicks)
@@ -407,38 +564,133 @@ export const addAxes = (
   width: number,
   height: number,
   margin: { top: number; right: number; bottom: number; left: number },
-  isDateScale: boolean = false,
+  data: { x: string | number }[] = [],
   showXAxis: boolean = true,
-  showYAxis: boolean = true
+  showYAxis: boolean = true,
 ) => {
   const chartBottom = height - margin.bottom;
   const chartLeft = margin.left;
+  const chartWidth = width - margin.left - margin.right;
+
+  // Calculate optimal number of ticks based on available width
+  const calculateOptimalTicks = (availableWidth: number, isMobile: boolean = false): number => {
+    if (isMobile) return Math.min(5, Math.floor(availableWidth / 60));
+    return Math.min(12, Math.floor(availableWidth / 50)); // Aim for ~50px per label
+  };
+
+  // Smart tick filtering for ordinal scales
+  const filterOrdinalTicks = (domain: string[], maxTicks: number): string[] => {
+    const totalItems = domain.length;
+    if (totalItems <= maxTicks) return domain;
+
+    const step = Math.ceil(totalItems / maxTicks);
+    const filtered: string[] = [];
+    
+    // Always include first and last
+    for (let i = 0; i < totalItems; i += step) {
+      filtered.push(domain[i]);
+    }
+    
+    // Ensure last item is included
+    if (filtered[filtered.length - 1] !== domain[domain.length - 1]) {
+      filtered.push(domain[domain.length - 1]);
+    }
+    
+    return filtered;
+  };
+
+  // Format time labels for better readability
+  const formatTimeLabel = (label: string): string => {
+    // Check if it's a time format (HH:MM)
+    if (/^\d{2}:\d{2}$/.test(label)) {
+      const [hour, minute] = label.split(':');
+      const h = parseInt(hour);
+      // Show only major hours
+      if (minute === '00') {
+        if (h === 0) return '12am';
+        if (h === 12) return '12pm';
+        if (h < 12) return `${h}am`;
+        return `${h - 12}pm`;
+      }
+      return ''; // Hide non-hour marks
+    }
+    return label;
+  };
 
   // X-axis - positioned at y=0 (bottom of chart area)
   if (showXAxis) {
     let xAxis: d3.Selection<SVGGElement, unknown, HTMLElement, unknown>;
+    const isMobile = chartWidth < 400;
+    const optimalTicks = calculateOptimalTicks(chartWidth, isMobile);
 
-    if (isDateScale) {
-      // For date scales, use time-based ticks
-      const timeScale = xScale as d3.ScaleTime<number, number>;
-      const xAxisGenerator = d3
-        .axisBottom(timeScale)
-        .tickSize(5)
-        .tickPadding(8)
-        .tickFormat((d) => d3.timeFormat('%b %Y')(d as Date))
-        .ticks(6); // Show about 6 month intervals
+    // Analyze data to detect date/time patterns
+    const dateAnalysis = analyzeXAxisType(data);
 
-      xAxis = svg
-        .append('g')
-        .attr('class', 'x-axis')
-        .attr('transform', `translate(0,${chartBottom})`)
-        .call(xAxisGenerator);
+    if (dateAnalysis.isDateTime && dateAnalysis.formatter) {
+      // For detected date/time data, create appropriate time scale
+      if ('bandwidth' in xScale) {
+        // Point scale with date formatting
+        const pointScale = xScale as d3.ScalePoint<string>;
+        const fullDomain = pointScale.domain();
+        const filteredDomain = filterOrdinalTicks(fullDomain, optimalTicks);
+        
+        const xAxisGenerator = d3
+          .axisBottom(pointScale)
+          .tickSize(5)
+          .tickPadding(8)
+          .tickValues(filteredDomain)
+          .tickFormat((d) => dateAnalysis.formatter!(d as string | number));
+          
+        xAxis = svg
+          .append('g')
+          .attr('class', 'x-axis')
+          .attr('transform', `translate(0,${chartBottom})`)
+          .call(xAxisGenerator);
+      } else if ('ticks' in xScale && typeof (xScale as any).ticks === 'function') {
+        // Time scale
+        const timeScale = xScale as d3.ScaleTime<number, number>;
+        const xAxisGenerator = d3
+          .axisBottom(timeScale)
+          .tickSize(5)
+          .tickPadding(8)
+          .ticks(optimalTicks);
+          
+        xAxis = svg
+          .append('g')
+          .attr('class', 'x-axis')
+          .attr('transform', `translate(0,${chartBottom})`)
+          .call(xAxisGenerator);
+      } else {
+        // Linear scale - likely timestamps
+        const linearScale = xScale as d3.ScaleLinear<number, number>;
+        const xAxisGenerator = d3
+          .axisBottom(linearScale)
+          .tickSize(5)
+          .tickPadding(8)
+          .ticks(optimalTicks)
+          .tickFormat((d) => dateAnalysis.formatter!(d as string | number));
+          
+        xAxis = svg
+          .append('g')
+          .attr('class', 'x-axis')
+          .attr('transform', `translate(0,${chartBottom})`)
+          .call(xAxisGenerator);
+      }
     } else {
       // Handle linear and point scales separately
       if ('bandwidth' in xScale) {
         // Point scale (ordinal)
         const pointScale = xScale as d3.ScalePoint<string>;
-        const xAxisGenerator = d3.axisBottom(pointScale).tickSize(5).tickPadding(8);
+        const fullDomain = pointScale.domain();
+        const filteredDomain = filterOrdinalTicks(fullDomain, optimalTicks);
+        
+        const xAxisGenerator = d3
+          .axisBottom(pointScale)
+          .tickSize(5)
+          .tickPadding(8)
+          .tickValues(filteredDomain)
+          .tickFormat(d => formatTimeLabel(d));
+          
         xAxis = svg
           .append('g')
           .attr('class', 'x-axis')
@@ -447,7 +699,12 @@ export const addAxes = (
       } else {
         // Linear scale
         const linearScale = xScale as d3.ScaleLinear<number, number>;
-        const xAxisGenerator = d3.axisBottom(linearScale).tickSize(5).tickPadding(8);
+        const xAxisGenerator = d3
+          .axisBottom(linearScale)
+          .tickSize(5)
+          .tickPadding(8)
+          .ticks(optimalTicks);
+          
         xAxis = svg
           .append('g')
           .attr('class', 'x-axis')
@@ -459,6 +716,12 @@ export const addAxes = (
     // Style X-axis
     xAxis.select('.domain').attr('stroke', 'rgba(0, 0, 0, 0.8)').attr('stroke-width', 1);
     xAxis.selectAll('.tick line').attr('stroke', 'rgba(0, 0, 0, 0.8)').attr('stroke-width', 1);
+    
+    // Remove empty labels
+    xAxis.selectAll('.tick text').filter((d, i, nodes) => {
+      const text = d3.select(nodes[i]).text();
+      return text === '';
+    }).remove();
   }
 
   // Y-axis - positioned at x=0 (left of chart area)

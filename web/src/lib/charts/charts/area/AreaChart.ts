@@ -20,6 +20,7 @@ import {
   calculateNiceScale,
   createCrosshairTooltip,
   createTooltip,
+  formatNumber,
   hideTooltip,
   showCrosshairTooltip,
   showTooltip,
@@ -76,7 +77,7 @@ export class AreaChart implements IAreaChart {
     bottom: number;
     left: number;
   } {
-    const showXAxis = options.showXAxis !== false; // Default to true  
+    const showXAxis = options.showXAxis !== false; // Default to true
     const showYAxis = options.showYAxis !== false; // Default to true
     const showLegend = options.showLegend !== false; // Default to true
     const legendPosition = options.legendPosition || 'bottom';
@@ -85,6 +86,24 @@ export class AreaChart implements IAreaChart {
     let right = 20;
     let bottom = showXAxis ? 40 : 10;
     let left = showYAxis ? 40 : 10;
+
+    // Calculate dynamic left margin based on Y-axis label lengths
+    if (showYAxis && this.data.length > 0) {
+      // Get all Y values to estimate maximum label length
+      const allYValues = this.data.flatMap((d) => d.data.map((item) => item.y));
+      if (allYValues.length > 0) {
+        const yExtent = d3.extent(allYValues) as [number, number];
+        const { niceMin, niceMax } = calculateNiceScale(yExtent[0], yExtent[1]);
+        const maxYValue = Math.max(Math.abs(niceMin), Math.abs(niceMax));
+        
+        // Format the maximum value to estimate its display length using the same logic as axis labels
+        const formattedMax = formatNumber(maxYValue);
+        
+        // Approximate 7 pixels per character + base padding
+        const estimatedWidth = formattedMax.length * 7 + 20;
+        left = Math.max(40, estimatedWidth);
+      }
+    }
 
     // Add space for legend
     if (showLegend) {
@@ -235,7 +254,13 @@ export class AreaChart implements IAreaChart {
     return { xScale, yScale, isOrdinal, isDateScale };
   }
 
-  private createGradient(color: string, index: number, dataset: ChartDataset, yScale: YScale, stacked: boolean): string {
+  private createGradient(
+    color: string,
+    index: number,
+    dataset: ChartDataset,
+    yScale: YScale,
+    stacked: boolean
+  ): string {
     const gradientId = `area-gradient-${index}`;
     const defs = this.svg!.select('defs');
 
@@ -246,8 +271,8 @@ export class AreaChart implements IAreaChart {
 
     if (stacked && dataset.data.length > 0) {
       // For stacked areas, use the actual Y range of this specific area
-      const minY0 = Math.min(...dataset.data.map(d => d.y0 || 0));
-      const maxY1 = Math.max(...dataset.data.map(d => d.y1 || d.y));
+      const minY0 = Math.min(...dataset.data.map((d) => d.y0 || 0));
+      const maxY1 = Math.max(...dataset.data.map((d) => d.y1 || d.y));
       y1 = yScale(maxY1); // Top of the area (lower Y coordinate)
       y2 = yScale(minY0); // Bottom of the area (higher Y coordinate)
     } else {
@@ -302,14 +327,35 @@ export class AreaChart implements IAreaChart {
     const actualShowXGrid = showXGrid !== false;
     const actualShowYGrid = showYGrid !== false;
     if (actualShowXGrid || actualShowYGrid) {
-      addGridLines(this.svg!, xScale, yScale, width!, height!, margin!, actualShowXGrid, actualShowYGrid);
+      addGridLines(
+        this.svg!,
+        xScale,
+        yScale,
+        width!,
+        height!,
+        margin!,
+        actualShowXGrid,
+        actualShowYGrid
+      );
     }
 
     // Add axes
     const actualShowXAxis = showXAxis !== false;
     const actualShowYAxis = showYAxis !== false;
     if (actualShowXAxis || actualShowYAxis) {
-      addAxes(this.svg!, xScale, yScale, width!, height!, margin!, isDateScale, actualShowXAxis, actualShowYAxis);
+      // Flatten data for analysis
+      const flatData = this.data.flatMap((dataset) => dataset.data);
+      addAxes(
+        this.svg!,
+        xScale,
+        yScale,
+        width!,
+        height!,
+        margin!,
+        flatData,
+        actualShowXAxis,
+        actualShowYAxis
+      );
     }
 
     // Add legend
@@ -388,25 +434,26 @@ export class AreaChart implements IAreaChart {
 
     // For overlapping (non-stacked) charts, render from largest area to smallest to minimize visual occlusion
     // For stacked charts, render in normal order
-    const renderOrder = !stacked && this.data.length > 1 
-      ? stackedData.slice().sort((a, b) => {
-          // Sort by maximum Y value descending (largest areas first)
-          const maxA = Math.max(...a.data.map(d => d.y));
-          const maxB = Math.max(...b.data.map(d => d.y));
-          return maxB - maxA;
-        })
-      : stackedData;
+    const renderOrder =
+      !stacked && this.data.length > 1
+        ? stackedData.slice().sort((a, b) => {
+            // Sort by maximum Y value descending (largest areas first)
+            const maxA = Math.max(...a.data.map((d) => d.y));
+            const maxB = Math.max(...b.data.map((d) => d.y));
+            return maxB - maxA;
+          })
+        : stackedData;
 
     // Render each dataset
     renderOrder.forEach((dataset) => {
       // Find original index for color consistency
-      const originalIndex = stackedData.findIndex(d => d === dataset);
+      const originalIndex = stackedData.findIndex((d) => d === dataset);
       const color = getColor(originalIndex, this.options.colors);
-      
+
       // Handle fill style based on solidFill option
       let fillStyle: string;
       let fillOpacity: number;
-      
+
       if (this.options.solidFill) {
         // Solid fill mode: use solid color with full opacity
         fillStyle = color;
@@ -657,7 +704,7 @@ export class AreaChart implements IAreaChart {
               : closestX;
 
           let tooltipContent: string;
-          
+
           if (this.options.tooltipContentCallback) {
             // Use custom tooltip callback
             tooltipContent = this.options.tooltipContentCallback(tooltipData, xDisplayValue);

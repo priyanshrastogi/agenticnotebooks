@@ -20,6 +20,7 @@ import {
   calculateNiceScale,
   createCrosshairTooltip,
   createTooltip,
+  formatNumber,
   hideTooltip,
   showCrosshairTooltip,
   showTooltip,
@@ -40,7 +41,7 @@ export class ScatterChart implements IScatterChart {
     this.data = data;
     // Calculate dynamic margins based on options
     const dynamicMargin = this.calculateMargins(options);
-    
+
     this.options = {
       width: 800,
       height: 400,
@@ -58,24 +59,48 @@ export class ScatterChart implements IScatterChart {
       tooltipSize: 'sm',
       ...options,
     };
-    
+
     // Override margin with dynamic calculation if not explicitly provided
     if (!options.margin) {
       this.options.margin = dynamicMargin;
     }
   }
 
-  private calculateMargins(options: ScatterChartOptions): { top: number; right: number; bottom: number; left: number } {
-    const showXAxis = options.showXAxis !== false; // Default to true  
+  private calculateMargins(options: ScatterChartOptions): {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  } {
+    const showXAxis = options.showXAxis !== false; // Default to true
     const showYAxis = options.showYAxis !== false; // Default to true
     const showLegend = options.showLegend !== false; // Default to true
     const legendPosition = options.legendPosition || 'bottom';
-    
+
     let top = 20;
     let right = 20;
     let bottom = showXAxis ? 40 : 10;
     let left = showYAxis ? 40 : 10;
-    
+
+    // Calculate dynamic left margin based on Y-axis label lengths
+    if (showYAxis && this.data.length > 0) {
+      // Get all Y values to estimate maximum label length
+      const allYValues = this.data.flatMap((d) => d.data.map((item) => item.y));
+      if (allYValues.length > 0) {
+        const yExtent = d3.extent(allYValues) as [number, number];
+        const yMin = options.yAxisStartsFromZero !== false ? 0 : yExtent[0];
+        const { niceMin, niceMax } = calculateNiceScale(yMin, yExtent[1]);
+        const maxYValue = Math.max(Math.abs(niceMin), Math.abs(niceMax));
+        
+        // Format the maximum value to estimate its display length using the same logic as axis labels
+        const formattedMax = formatNumber(maxYValue);
+        
+        // Approximate 7 pixels per character + base padding
+        const estimatedWidth = formattedMax.length * 7 + 20;
+        left = Math.max(40, estimatedWidth);
+      }
+    }
+
     // Add space for legend
     if (showLegend) {
       switch (legendPosition) {
@@ -93,7 +118,7 @@ export class ScatterChart implements IScatterChart {
           break;
       }
     }
-    
+
     return { top, right, bottom, left };
   }
 
@@ -145,7 +170,12 @@ export class ScatterChart implements IScatterChart {
     }
   }
 
-  private setupScales(): { xScale: XScale; yScale: YScale; isOrdinal: boolean; isDateScale: boolean } {
+  private setupScales(): {
+    xScale: XScale;
+    yScale: YScale;
+    isOrdinal: boolean;
+    isDateScale: boolean;
+  } {
     const { width, height, margin } = this.options;
 
     // Determine if x-axis should be ordinal, date, or linear
@@ -195,7 +225,11 @@ export class ScatterChart implements IScatterChart {
     return { xScale, yScale, isOrdinal, isDateScale };
   }
 
-  private calculateTrendLine(data: ChartDataPoint[], xScale: XScale, yScale: YScale): string | null {
+  private calculateTrendLine(
+    data: ChartDataPoint[],
+    xScale: XScale,
+    yScale: YScale
+  ): string | null {
     if (data.length < 2) return null;
 
     // Convert data to numeric values for linear regression
@@ -229,7 +263,7 @@ export class ScatterChart implements IScatterChart {
     const yDomain = yScale.domain();
     const startX = xDomain[0];
     const endX = xDomain[1];
-    
+
     const startY = slope * startX + intercept;
     const endY = slope * endX + intercept;
 
@@ -238,11 +272,15 @@ export class ScatterChart implements IScatterChart {
     const clampedEndY = Math.max(yDomain[0], Math.min(yDomain[1], endY));
 
     // Create line path
-    const line = d3.line<{ x: number; y: number }>()
-      .x(d => (xScale as d3.ScaleLinear<number, number>)(d.x))
-      .y(d => yScale(d.y));
+    const line = d3
+      .line<{ x: number; y: number }>()
+      .x((d) => (xScale as d3.ScaleLinear<number, number>)(d.x))
+      .y((d) => yScale(d.y));
 
-    return line([{ x: startX, y: clampedStartY }, { x: endX, y: clampedEndY }]);
+    return line([
+      { x: startX, y: clampedStartY },
+      { x: endX, y: clampedEndY },
+    ]);
   }
 
   private renderChart(): void {
@@ -266,14 +304,35 @@ export class ScatterChart implements IScatterChart {
     const actualShowXGrid = showXGrid !== false;
     const actualShowYGrid = showYGrid !== false;
     if (actualShowXGrid || actualShowYGrid) {
-      addGridLines(this.svg!, xScale, yScale, width!, height!, margin!, actualShowXGrid, actualShowYGrid);
+      addGridLines(
+        this.svg!,
+        xScale,
+        yScale,
+        width!,
+        height!,
+        margin!,
+        actualShowXGrid,
+        actualShowYGrid
+      );
     }
 
     // Add axes
     const actualShowXAxis = showXAxis !== false;
     const actualShowYAxis = showYAxis !== false;
     if (actualShowXAxis || actualShowYAxis) {
-      addAxes(this.svg!, xScale, yScale, width!, height!, margin!, isDateScale, actualShowXAxis, actualShowYAxis);
+      // Flatten data for analysis
+      const flatData = this.data.flatMap((dataset) => dataset.data);
+      addAxes(
+        this.svg!,
+        xScale,
+        yScale,
+        width!,
+        height!,
+        margin!,
+        flatData,
+        actualShowXAxis,
+        actualShowYAxis
+      );
     }
 
     // Add legend
@@ -407,19 +466,28 @@ export class ScatterChart implements IScatterChart {
         const [mouseX, mouseY] = d3.pointer(event);
 
         // Find the single closest data point
-        let closestPoint: { dataset: ChartDataset; point: ChartDataPoint; distance: number; datasetIndex: number; pointX: number; pointY: number } | undefined;
-        
+        let closestPoint:
+          | {
+              dataset: ChartDataset;
+              point: ChartDataPoint;
+              distance: number;
+              datasetIndex: number;
+              pointX: number;
+              pointY: number;
+            }
+          | undefined;
+
         this.data.forEach((dataset, datasetIndex) => {
           dataset.data.forEach((point) => {
-            const pointX = isOrdinal 
+            const pointX = isOrdinal
               ? (xScale as d3.ScalePoint<string>)(point.x as string)!
               : isDateScale
                 ? (xScale as d3.ScaleTime<number, number>)(new Date(point.x as number))
                 : (xScale as d3.ScaleLinear<number, number>)(point.x as number);
-            
+
             const pointY = yScale(point.y);
             const distance = Math.sqrt(Math.pow(mouseX - pointX, 2) + Math.pow(mouseY - pointY, 2));
-            
+
             if (!closestPoint || distance < closestPoint.distance) {
               closestPoint = { dataset, point, distance, datasetIndex, pointX, pointY };
             }
@@ -430,16 +498,17 @@ export class ScatterChart implements IScatterChart {
         if (closestPoint && closestPoint.distance < 30) {
           const { dataset, point, datasetIndex, pointX, pointY } = closestPoint;
           const color = getColor(datasetIndex, this.options.colors);
-          const xDisplayValue = isDateScale && typeof point.x === 'number'
-            ? new Date(point.x)
-                .toLocaleDateString('en-GB', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: '2-digit',
-                })
-                .replace(/ /g, ' ')
-                .replace(/,/g, " '")
-            : point.x;
+          const xDisplayValue =
+            isDateScale && typeof point.x === 'number'
+              ? new Date(point.x)
+                  .toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: '2-digit',
+                  })
+                  .replace(/ /g, ' ')
+                  .replace(/,/g, " '")
+              : point.x;
 
           // Show highlight ring around the closest point
           highlightRingsGroup.selectAll('*').remove();
@@ -457,14 +526,14 @@ export class ScatterChart implements IScatterChart {
 
           // Show tooltip for the single closest point
           let tooltipContent: string;
-          
+
           if (this.options.tooltipContentCallback) {
             // Use custom tooltip callback
             const scatterTooltipData: ScatterTooltipData = {
               label: dataset.label,
               x: xDisplayValue,
               y: point.y,
-              color: color
+              color: color,
             };
             tooltipContent = this.options.tooltipContentCallback(scatterTooltipData);
           } else {

@@ -84,8 +84,10 @@ export class BarChart implements IBarChart {
 
     // For horizontal bar charts, calculate dynamic left margin based on label lengths
     if (horizontal && showYAxis) {
-      const allXValues = Array.from(new Set(this.data.flatMap((d) => d.data.map((item) => item.x))));
-      const maxLabelLength = Math.max(...allXValues.map(x => String(x).length));
+      const allXValues = Array.from(
+        new Set(this.data.flatMap((d) => d.data.map((item) => item.x)))
+      );
+      const maxLabelLength = Math.max(...allXValues.map((x) => String(x).length));
       // Approximate 7 pixels per character + base padding
       left = Math.max(40, maxLabelLength * 7 + 20);
     }
@@ -183,7 +185,9 @@ export class BarChart implements IBarChart {
       maxY = yExtent[1];
     }
 
-    const yMin = this.options.yAxisStartsFromZero ? 0 : Math.min(...this.data.flatMap((d) => d.data.map((item) => item.y)));
+    const yMin = this.options.yAxisStartsFromZero
+      ? 0
+      : Math.min(...this.data.flatMap((d) => d.data.map((item) => item.y)));
     const { niceMin, niceMax } = calculateNiceScale(yMin, maxY);
 
     if (horizontal) {
@@ -253,7 +257,7 @@ export class BarChart implements IBarChart {
     // For bar charts: vertical bars should only show Y grid, horizontal bars should only show X grid
     let actualShowXGrid = false;
     let actualShowYGrid = false;
-    
+
     if (horizontal) {
       // Horizontal bars: only show X grid (makes sense for comparing values)
       actualShowXGrid = showXGrid !== false;
@@ -261,9 +265,18 @@ export class BarChart implements IBarChart {
       // Vertical bars: only show Y grid (makes sense for comparing values)
       actualShowYGrid = showYGrid !== false;
     }
-    
+
     if (actualShowXGrid || actualShowYGrid) {
-      addGridLines(this.svg!, xScale as XScale, yScale as YScale, width!, height!, margin!, actualShowXGrid, actualShowYGrid);
+      addGridLines(
+        this.svg!,
+        xScale as XScale,
+        yScale as YScale,
+        width!,
+        height!,
+        margin!,
+        actualShowXGrid,
+        actualShowYGrid
+      );
     }
 
     const actualShowXAxis = showXAxis !== false;
@@ -344,11 +357,17 @@ export class BarChart implements IBarChart {
           .duration(800)
           .delay((_, i) => i * 50)
           .attr('y', (d) => (yScale as d3.ScaleLinear<number, number>)(d.y))
-          .attr('height', (d) => height! - margin!.bottom - (yScale as d3.ScaleLinear<number, number>)(d.y));
+          .attr(
+            'height',
+            (d) => height! - margin!.bottom - (yScale as d3.ScaleLinear<number, number>)(d.y)
+          );
       } else {
         bars
           .attr('y', (d) => (yScale as d3.ScaleLinear<number, number>)(d.y))
-          .attr('height', (d) => height! - margin!.bottom - (yScale as d3.ScaleLinear<number, number>)(d.y));
+          .attr(
+            'height',
+            (d) => height! - margin!.bottom - (yScale as d3.ScaleLinear<number, number>)(d.y)
+          );
       }
     }
 
@@ -382,18 +401,21 @@ export class BarChart implements IBarChart {
       .attr('class', 'bar-group');
 
     if (horizontal) {
-      groups.attr('transform', (d) => `translate(0, ${(yScale as d3.ScaleBand<string>)(String(d))})`);
+      groups.attr(
+        'transform',
+        (d) => `translate(0, ${(yScale as d3.ScaleBand<string>)(String(d))})`
+      );
     } else {
-      groups.attr('transform', (d) => `translate(${(xScale as d3.ScaleBand<string>)(String(d))}, 0)`);
+      groups.attr(
+        'transform',
+        (d) => `translate(${(xScale as d3.ScaleBand<string>)(String(d))}, 0)`
+      );
     }
 
     this.data.forEach((dataset, index) => {
       const color = getColor(index, this.options.colors);
 
-      const bars = groups
-        .append('rect')
-        .attr('class', `bar bar-${index}`)
-        .attr('fill', color);
+      const bars = groups.append('rect').attr('class', `bar bar-${index}`).attr('fill', color);
 
       if (horizontal) {
         bars
@@ -414,9 +436,15 @@ export class BarChart implements IBarChart {
             .transition()
             .duration(800)
             .delay((_, i) => i * 50 + index * 100)
-            .attr('width', (d) => (xScale as d3.ScaleLinear<number, number>)(d as number) - margin!.left);
+            .attr(
+              'width',
+              (d) => (xScale as d3.ScaleLinear<number, number>)(d as number) - margin!.left
+            );
         } else {
-          bars.attr('width', (d) => (xScale as d3.ScaleLinear<number, number>)(d as number) - margin!.left);
+          bars.attr(
+            'width',
+            (d) => (xScale as d3.ScaleLinear<number, number>)(d as number) - margin!.left
+          );
         }
       } else {
         bars
@@ -438,11 +466,19 @@ export class BarChart implements IBarChart {
             .duration(800)
             .delay((_, i) => i * 50 + index * 100)
             .attr('y', (d) => (yScale as d3.ScaleLinear<number, number>)(d as number))
-            .attr('height', (d) => height! - margin!.bottom - (yScale as d3.ScaleLinear<number, number>)(d as number));
+            .attr(
+              'height',
+              (d) =>
+                height! - margin!.bottom - (yScale as d3.ScaleLinear<number, number>)(d as number)
+            );
         } else {
           bars
             .attr('y', (d) => (yScale as d3.ScaleLinear<number, number>)(d as number))
-            .attr('height', (d) => height! - margin!.bottom - (yScale as d3.ScaleLinear<number, number>)(d as number));
+            .attr(
+              'height',
+              (d) =>
+                height! - margin!.bottom - (yScale as d3.ScaleLinear<number, number>)(d as number)
+            );
         }
       }
 
@@ -472,33 +508,35 @@ export class BarChart implements IBarChart {
   ): void {
     const { animate, horizontal, margin, height } = this.options;
 
-    const stackedData: { [key: string]: { y0: number; y1: number; dataset: ChartDataset; index: number }[] } = {};
-    
+    const stackedData: {
+      [key: string]: { y0: number; y1: number; dataset: ChartDataset; index: number }[];
+    } = {};
+
     xValues.forEach((xValue) => {
       let cumulative = 0;
       stackedData[String(xValue)] = [];
-      
+
       this.data.forEach((dataset, index) => {
         const dataPoint = dataset.data.find((d) => d.x === xValue);
         const value = dataPoint ? dataPoint.y : 0;
-        
+
         stackedData[String(xValue)].push({
           y0: cumulative,
           y1: cumulative + value,
           dataset,
           index,
         });
-        
+
         cumulative += value;
       });
     });
 
     xValues.forEach((xValue) => {
       const stack = stackedData[String(xValue)];
-      
+
       stack.forEach((item) => {
         const color = getColor(item.index, this.options.colors);
-        
+
         const bar = this.svg!.append('rect')
           .attr('class', `bar bar-${item.index}`)
           .attr('fill', color);
@@ -515,9 +553,17 @@ export class BarChart implements IBarChart {
               .transition()
               .duration(800)
               .delay(item.index * 100)
-              .attr('width', (xScale as d3.ScaleLinear<number, number>)(item.y1) - (xScale as d3.ScaleLinear<number, number>)(item.y0));
+              .attr(
+                'width',
+                (xScale as d3.ScaleLinear<number, number>)(item.y1) -
+                  (xScale as d3.ScaleLinear<number, number>)(item.y0)
+              );
           } else {
-            bar.attr('width', (xScale as d3.ScaleLinear<number, number>)(item.y1) - (xScale as d3.ScaleLinear<number, number>)(item.y0));
+            bar.attr(
+              'width',
+              (xScale as d3.ScaleLinear<number, number>)(item.y1) -
+                (xScale as d3.ScaleLinear<number, number>)(item.y0)
+            );
           }
         } else {
           bar
@@ -532,11 +578,19 @@ export class BarChart implements IBarChart {
               .duration(800)
               .delay(item.index * 100)
               .attr('y', (yScale as d3.ScaleLinear<number, number>)(item.y1))
-              .attr('height', (yScale as d3.ScaleLinear<number, number>)(item.y0) - (yScale as d3.ScaleLinear<number, number>)(item.y1));
+              .attr(
+                'height',
+                (yScale as d3.ScaleLinear<number, number>)(item.y0) -
+                  (yScale as d3.ScaleLinear<number, number>)(item.y1)
+              );
           } else {
             bar
               .attr('y', (yScale as d3.ScaleLinear<number, number>)(item.y1))
-              .attr('height', (yScale as d3.ScaleLinear<number, number>)(item.y0) - (yScale as d3.ScaleLinear<number, number>)(item.y1));
+              .attr(
+                'height',
+                (yScale as d3.ScaleLinear<number, number>)(item.y0) -
+                  (yScale as d3.ScaleLinear<number, number>)(item.y1)
+              );
           }
         }
 
@@ -567,30 +621,32 @@ export class BarChart implements IBarChart {
     const { stacked, horizontal } = this.options;
 
     if (stacked && this.data.length > 1) {
-      const stackedData: { [key: string]: { y0: number; y1: number; dataset: ChartDataset; index: number }[] } = {};
-      
+      const stackedData: {
+        [key: string]: { y0: number; y1: number; dataset: ChartDataset; index: number }[];
+      } = {};
+
       xValues.forEach((xValue) => {
         let cumulative = 0;
         stackedData[String(xValue)] = [];
-        
+
         this.data.forEach((dataset, index) => {
           const dataPoint = dataset.data.find((d) => d.x === xValue);
           const value = dataPoint ? dataPoint.y : 0;
-          
+
           stackedData[String(xValue)].push({
             y0: cumulative,
             y1: cumulative + value,
             dataset,
             index,
           });
-          
+
           cumulative += value;
         });
       });
 
       xValues.forEach((xValue) => {
         const stack = stackedData[String(xValue)];
-        
+
         stack.forEach((item) => {
           const value = item.y1 - item.y0;
           if (value > 0) {
@@ -603,14 +659,24 @@ export class BarChart implements IBarChart {
               .text(value.toFixed(1));
 
             if (horizontal) {
-              const x = (xScale as d3.ScaleLinear<number, number>)(item.y0) + 
-                        ((xScale as d3.ScaleLinear<number, number>)(item.y1) - (xScale as d3.ScaleLinear<number, number>)(item.y0)) / 2;
-              const y = (yScale as d3.ScaleBand<string>)(String(xValue))! + (yScale as d3.ScaleBand<string>).bandwidth() / 2;
+              const x =
+                (xScale as d3.ScaleLinear<number, number>)(item.y0) +
+                ((xScale as d3.ScaleLinear<number, number>)(item.y1) -
+                  (xScale as d3.ScaleLinear<number, number>)(item.y0)) /
+                  2;
+              const y =
+                (yScale as d3.ScaleBand<string>)(String(xValue))! +
+                (yScale as d3.ScaleBand<string>).bandwidth() / 2;
               text.attr('x', x).attr('y', y).attr('dy', '0.35em');
             } else {
-              const x = (xScale as d3.ScaleBand<string>)(String(xValue))! + (xScale as d3.ScaleBand<string>).bandwidth() / 2;
-              const y = (yScale as d3.ScaleLinear<number, number>)(item.y1) + 
-                       ((yScale as d3.ScaleLinear<number, number>)(item.y0) - (yScale as d3.ScaleLinear<number, number>)(item.y1)) / 2;
+              const x =
+                (xScale as d3.ScaleBand<string>)(String(xValue))! +
+                (xScale as d3.ScaleBand<string>).bandwidth() / 2;
+              const y =
+                (yScale as d3.ScaleLinear<number, number>)(item.y1) +
+                ((yScale as d3.ScaleLinear<number, number>)(item.y0) -
+                  (yScale as d3.ScaleLinear<number, number>)(item.y1)) /
+                  2;
               text.attr('x', x).attr('y', y).attr('dy', '0.35em');
             }
           }
@@ -631,23 +697,33 @@ export class BarChart implements IBarChart {
             if (horizontal) {
               const x = (xScale as d3.ScaleLinear<number, number>)(d.y) + 5;
               let y: number;
-              
+
               if (this.data.length > 1 && xSubgroupScale) {
-                y = (yScale as d3.ScaleBand<string>)(String(d.x))! + xSubgroupScale(dataset.label)! + xSubgroupScale.bandwidth() / 2;
+                y =
+                  (yScale as d3.ScaleBand<string>)(String(d.x))! +
+                  xSubgroupScale(dataset.label)! +
+                  xSubgroupScale.bandwidth() / 2;
               } else {
-                y = (yScale as d3.ScaleBand<string>)(String(d.x))! + (yScale as d3.ScaleBand<string>).bandwidth() / 2;
+                y =
+                  (yScale as d3.ScaleBand<string>)(String(d.x))! +
+                  (yScale as d3.ScaleBand<string>).bandwidth() / 2;
               }
-              
+
               text.attr('x', x).attr('y', y).attr('dy', '0.35em').attr('text-anchor', 'start');
             } else {
               let x: number;
-              
+
               if (this.data.length > 1 && xSubgroupScale) {
-                x = (xScale as d3.ScaleBand<string>)(String(d.x))! + xSubgroupScale(dataset.label)! + xSubgroupScale.bandwidth() / 2;
+                x =
+                  (xScale as d3.ScaleBand<string>)(String(d.x))! +
+                  xSubgroupScale(dataset.label)! +
+                  xSubgroupScale.bandwidth() / 2;
               } else {
-                x = (xScale as d3.ScaleBand<string>)(String(d.x))! + (xScale as d3.ScaleBand<string>).bandwidth() / 2;
+                x =
+                  (xScale as d3.ScaleBand<string>)(String(d.x))! +
+                  (xScale as d3.ScaleBand<string>).bandwidth() / 2;
               }
-              
+
               const y = (yScale as d3.ScaleLinear<number, number>)(d.y) - 5;
               text.attr('x', x).attr('y', y);
             }
@@ -680,31 +756,28 @@ export class BarChart implements IBarChart {
       .style('pointer-events', 'none');
 
     if (horizontal) {
-      this.crosshairLine
-        .attr('x1', margin!.left)
-        .attr('x2', width! - margin!.right);
+      this.crosshairLine.attr('x1', margin!.left).attr('x2', width! - margin!.right);
     } else {
-      this.crosshairLine
-        .attr('y1', margin!.top)
-        .attr('y2', height! - margin!.bottom);
+      this.crosshairLine.attr('y1', margin!.top).attr('y2', height! - margin!.bottom);
     }
 
     overlay
       .on('mousemove', (event) => {
         const [mouseX, mouseY] = d3.pointer(event);
-        
+
         let closestX: string | number;
-        
+
         if (horizontal) {
           const yDomain = (yScale as d3.ScaleBand<string>).domain();
           const step = (height! - margin!.top - margin!.bottom) / yDomain.length;
           const relativeY = mouseY - margin!.top;
           const index = Math.floor(relativeY / step);
           closestX = yDomain[Math.max(0, Math.min(index, yDomain.length - 1))];
-          
-          const actualYPosition = (yScale as d3.ScaleBand<string>)(closestX)! + (yScale as d3.ScaleBand<string>).bandwidth() / 2;
-          this.crosshairLine!
-            .attr('y1', actualYPosition)
+
+          const actualYPosition =
+            (yScale as d3.ScaleBand<string>)(closestX)! +
+            (yScale as d3.ScaleBand<string>).bandwidth() / 2;
+          this.crosshairLine!.attr('y1', actualYPosition)
             .attr('y2', actualYPosition)
             .style('opacity', 1);
         } else {
@@ -713,10 +786,11 @@ export class BarChart implements IBarChart {
           const relativeX = mouseX - margin!.left;
           const index = Math.floor(relativeX / step);
           closestX = xDomain[Math.max(0, Math.min(index, xDomain.length - 1))];
-          
-          const actualXPosition = (xScale as d3.ScaleBand<string>)(closestX)! + (xScale as d3.ScaleBand<string>).bandwidth() / 2;
-          this.crosshairLine!
-            .attr('x1', actualXPosition)
+
+          const actualXPosition =
+            (xScale as d3.ScaleBand<string>)(closestX)! +
+            (xScale as d3.ScaleBand<string>).bandwidth() / 2;
+          this.crosshairLine!.attr('x1', actualXPosition)
             .attr('x2', actualXPosition)
             .style('opacity', 1);
         }
@@ -741,7 +815,7 @@ export class BarChart implements IBarChart {
 
         if (tooltipData.length > 0) {
           let tooltipContent: string;
-          
+
           if (this.options.tooltipContentCallback) {
             tooltipContent = this.options.tooltipContentCallback(tooltipData, closestX);
           } else {
@@ -793,13 +867,13 @@ export class BarChart implements IBarChart {
         const linearXScale = xScale as d3.ScaleLinear<number, number>;
         const xDomain = linearXScale.domain();
         const { ticks: tickValues } = calculateNiceScale(xDomain[0], xDomain[1]);
-        
-        const xAxis = this.svg!
-          .append('g')
+
+        const xAxis = this.svg!.append('g')
           .attr('class', 'x-axis')
           .attr('transform', `translate(0,${chartBottom})`)
           .call(
-            d3.axisBottom(linearXScale)
+            d3
+              .axisBottom(linearXScale)
               .tickValues(tickValues)
               .tickSize(5)
               .tickPadding(8)
@@ -813,8 +887,7 @@ export class BarChart implements IBarChart {
 
       if (showYAxis) {
         const bandYScale = yScale as d3.ScaleBand<string>;
-        const yAxis = this.svg!
-          .append('g')
+        const yAxis = this.svg!.append('g')
           .attr('class', 'y-axis')
           .attr('transform', `translate(${chartLeft},0)`)
           .call(d3.axisLeft(bandYScale).tickSize(5).tickPadding(8));
@@ -827,8 +900,7 @@ export class BarChart implements IBarChart {
       // Vertical bars: X-axis is band (categories), Y-axis is linear (values)
       if (showXAxis) {
         const bandXScale = xScale as d3.ScaleBand<string>;
-        const xAxis = this.svg!
-          .append('g')
+        const xAxis = this.svg!.append('g')
           .attr('class', 'x-axis')
           .attr('transform', `translate(0,${chartBottom})`)
           .call(d3.axisBottom(bandXScale).tickSize(5).tickPadding(8));
@@ -842,13 +914,13 @@ export class BarChart implements IBarChart {
         const linearYScale = yScale as d3.ScaleLinear<number, number>;
         const yDomain = linearYScale.domain();
         const { ticks: tickValues } = calculateNiceScale(yDomain[0], yDomain[1]);
-        
-        const yAxis = this.svg!
-          .append('g')
+
+        const yAxis = this.svg!.append('g')
           .attr('class', 'y-axis')
           .attr('transform', `translate(${chartLeft},0)`)
           .call(
-            d3.axisLeft(linearYScale)
+            d3
+              .axisLeft(linearYScale)
               .tickValues(tickValues)
               .tickSize(5)
               .tickPadding(8)
@@ -862,8 +934,7 @@ export class BarChart implements IBarChart {
     }
 
     // Style axis text
-    this.svg!
-      .selectAll('.x-axis text, .y-axis text')
+    this.svg!.selectAll('.x-axis text, .y-axis text')
       .attr('fill', '#666')
       .attr('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
       .attr('font-size', '12px');

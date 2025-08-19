@@ -202,6 +202,7 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
           </label>
         )}
 
+
         {chartType === 'area' && (
           <>
             <label className="option-item">
