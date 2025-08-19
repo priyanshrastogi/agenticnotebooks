@@ -15,6 +15,7 @@ import {
 import {
   addGridLines,
   addLegend,
+  calculateLegendSpace,
   calculateNiceScale,
   createCrosshairTooltip,
   createTooltip,
@@ -92,19 +93,36 @@ export class BarChart implements IBarChart {
       left = Math.max(40, maxLabelLength * 7 + 20);
     }
 
-    if (showLegend) {
+    // Add dynamic space for legend based on actual content and wrapping
+    if (showLegend && this.data.length > 0) {
+      const legendData = this.data.map((dataset, index) => ({
+        label: dataset.label || `Dataset ${index + 1}`,
+        color: '', // We don't need color for space calculation
+      }));
+      
+      // Calculate legend space requirements with current width
+      const currentWidth = options.width || 800;
+      const tempMargin = { top, right, bottom, left };
+      const legendSpace = calculateLegendSpace(legendData, currentWidth, tempMargin, legendPosition);
+      
       switch (legendPosition) {
         case 'bottom':
-          bottom += 50;
-          break;
         case 'top':
-          top += 40;
+          // For horizontal legends, add the calculated height
+          if (legendPosition === 'bottom') {
+            bottom += legendSpace.height;
+          } else {
+            top += legendSpace.height;
+          }
           break;
         case 'left':
-          left += 120;
-          break;
         case 'right':
-          right += 120;
+          // For vertical legends, add the calculated width
+          if (legendPosition === 'left') {
+            left += legendSpace.width;
+          } else {
+            right += legendSpace.width;
+          }
           break;
       }
     }

@@ -8,14 +8,9 @@ interface OptionsPanelProps {
 
 export default function OptionsPanel({ options, onOptionsChange, chartType }: OptionsPanelProps) {
   return (
-    <div className="w-full lg:w-80 lg:flex-shrink-0">
-      <div className="border rounded-lg bg-gray-50">
-        <ChartOptions
-          options={options}
-          onOptionsChange={onOptionsChange}
-          chartType={chartType}
-        />
-      </div>
+    <div className="w-full">
+      <p className="mb-4 font-semibold">Options</p>
+      <ChartOptions options={options} onOptionsChange={onOptionsChange} chartType={chartType} />
     </div>
   );
 }

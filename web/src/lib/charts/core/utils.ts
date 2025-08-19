@@ -149,6 +149,84 @@ export const formatNumber = (num: number): string => {
   return num.toString();
 };
 
+// Helper function to truncate text to fit within specified width
+const truncateText = (textElement: d3.Selection<SVGTextElement, unknown, null, undefined>, maxWidth: number, originalText: string) => {
+  const textNode = textElement.node()!;
+  if (textNode.getBBox().width <= maxWidth) return;
+  
+  let text = originalText;
+  while (textNode.getBBox().width > maxWidth && text.length > 3) {
+    text = text.slice(0, -1);
+    textElement.text(text + '...');
+  }
+};
+
+// Helper function to calculate required legend space
+export const calculateLegendSpace = (
+  datasets: { label: string; color: string }[],
+  width: number,
+  margin: { top: number; right: number; bottom: number; left: number },
+  position: 'bottom' | 'top' | 'left' | 'right' = 'bottom'
+): { width: number; height: number } => {
+  if (datasets.length === 0) return { width: 0, height: 0 };
+
+  const itemHeight = 20;
+  const itemSpacing = 15;
+  const circleRadius = 4;
+  const circleTextGap = 8;
+
+  if (position === 'bottom' || position === 'top') {
+    // Horizontal layout
+    const availableWidth = width - margin.left - margin.right;
+    
+    // Create a temporary DOM element to measure text width
+    const tempDiv = document.createElement('div');
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.visibility = 'hidden';
+    tempDiv.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    tempDiv.style.fontSize = '12px';
+    document.body.appendChild(tempDiv);
+    
+    // Calculate actual widths for each label
+    const maxItemWidth = Math.max(120, availableWidth * 0.4);
+    const itemWidths = datasets.map(d => {
+      tempDiv.textContent = d.label;
+      const textWidth = tempDiv.offsetWidth;
+      const totalItemWidth = textWidth + circleRadius * 2 + circleTextGap + 5;
+      return Math.min(totalItemWidth, maxItemWidth);
+    });
+    
+    document.body.removeChild(tempDiv);
+    
+    // Calculate total width and determine rows needed
+    const totalWidth = itemWidths.reduce((sum, w) => sum + w, 0) + (datasets.length - 1) * itemSpacing;
+    
+    if (totalWidth <= availableWidth) {
+      // Single row
+      return { width: totalWidth, height: itemHeight + 10 }; // 10px padding
+    } else {
+      // Multi-row - calculate number of rows needed
+      let currentX = 0;
+      let rows = 1;
+      
+      itemWidths.forEach((itemWidth) => {
+        if (currentX + itemWidth > availableWidth && currentX > 0) {
+          currentX = 0;
+          rows++;
+        }
+        currentX += itemWidth + itemSpacing;
+      });
+      
+      return { width: availableWidth, height: rows * (itemHeight + 5) + 5 }; // 5px additional padding
+    }
+  } else {
+    // Vertical layout (left/right)
+    const maxWidth = Math.max(...datasets.map(d => d.label.length * 7)); // Rough estimate
+    const totalHeight = datasets.length * (itemHeight + 5);
+    return { width: maxWidth + circleRadius * 2 + circleTextGap + 20, height: totalHeight };
+  }
+};
+
 export const createTooltip = (container: string, size: 'sm' | 'md' = 'sm') => {
   // Remove existing tooltip
   d3.select(`${container}-tooltip`).remove();
@@ -392,8 +470,50 @@ export const addLegend = (
   const circleTextGap = 8;
 
   if (position === 'bottom' || position === 'top') {
-    // Horizontal layout - use flexbox-like approach
-    const y = position === 'bottom' ? height - 15 : margin.top - 30;
+    // Horizontal layout - calculate dynamic Y position based on legend requirements
+    let y: number;
+    if (position === 'bottom') {
+      y = height - 15;
+    } else {
+      // For top position, calculate space needed and position accordingly
+      const availableWidth = width - margin.left - margin.right;
+      const maxItemWidth = Math.max(120, availableWidth * 0.4);
+      
+      // Quick calculation of rows needed for proper positioning
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.visibility = 'hidden';
+      tempDiv.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      tempDiv.style.fontSize = '12px';
+      document.body.appendChild(tempDiv);
+      
+      const itemWidths = datasets.map(d => {
+        tempDiv.textContent = d.label;
+        const textWidth = tempDiv.offsetWidth;
+        const totalItemWidth = textWidth + circleRadius * 2 + circleTextGap + 5;
+        return Math.min(totalItemWidth, maxItemWidth);
+      });
+      
+      document.body.removeChild(tempDiv);
+      
+      const totalWidth = itemWidths.reduce((sum, w) => sum + w, 0) + (datasets.length - 1) * itemSpacing;
+      
+      let rows = 1;
+      if (totalWidth > availableWidth) {
+        let currentX = 0;
+        itemWidths.forEach((itemWidth) => {
+          if (currentX + itemWidth > availableWidth && currentX > 0) {
+            currentX = 0;
+            rows++;
+          }
+          currentX += itemWidth + itemSpacing;
+        });
+      }
+      
+      // Position top legends to give proper spacing - start from allocated margin space
+      const legendHeight = rows * (itemHeight + 5);
+      y = margin.top - legendHeight - 10; // 10px buffer from chart
+    }
     
     // Create a temporary text element to measure text width
     const tempText = svg.append('text')
@@ -401,34 +521,52 @@ export const addLegend = (
       .style('font-size', '12px')
       .style('visibility', 'hidden');
     
-    // Calculate actual widths for each label
+    // Calculate available width first
+    const availableWidth = width - margin.left - margin.right;
+    
+    // Calculate actual widths for each label, with truncation for very wide labels
+    const maxItemWidth = Math.max(120, availableWidth * 0.4); // At most 40% of available width per item
     const itemWidths = datasets.map(d => {
       tempText.text(d.label);
       const bbox = (tempText.node() as SVGTextElement).getBBox();
-      return Math.ceil(bbox.width) + circleRadius * 2 + circleTextGap + 5; // Add padding
+      const textWidth = Math.ceil(bbox.width);
+      const totalItemWidth = textWidth + circleRadius * 2 + circleTextGap + 5;
+      return Math.min(totalItemWidth, maxItemWidth);
     });
     
     tempText.remove();
     
     // Calculate total width and determine if we need to wrap
     const totalWidth = itemWidths.reduce((sum, w) => sum + w, 0) + (datasets.length - 1) * itemSpacing;
-    const availableWidth = width - margin.left - margin.right;
     
     // If total width exceeds available width, use multi-row layout
     if (totalWidth > availableWidth) {
-      // Calculate rows
+      // Calculate rows with proper bounds checking
       let currentX = 0;
       let currentRow = 0;
       const positions: { x: number; y: number }[] = [];
       
       datasets.forEach((d, i) => {
+        // Check if this item would overflow, accounting for margins
         if (currentX + itemWidths[i] > availableWidth && currentX > 0) {
           currentX = 0;
           currentRow++;
         }
+        
+        // Ensure the item doesn't exceed the right boundary
+        const finalX = Math.min(
+          margin.left + currentX, 
+          width - margin.right - itemWidths[i]
+        );
+        
+        // For top legends, additional rows go down (+Y), for bottom legends they go up (-Y)
+        const rowY = position === 'top' 
+          ? y + (currentRow * (itemHeight + 5))
+          : y - (currentRow * (itemHeight + 5));
+        
         positions.push({ 
-          x: margin.left + currentX, 
-          y: y - (currentRow * (itemHeight + 5)) 
+          x: finalX, 
+          y: rowY 
         });
         currentX += itemWidths[i] + itemSpacing;
       });
@@ -452,8 +590,8 @@ export const addLegend = (
             .attr('r', circleRadius)
             .attr('fill', d.color);
 
-          // Label text
-          item
+          // Label text with truncation
+          const labelText = item
             .append('text')
             .attr('x', circleRadius * 2 + circleTextGap)
             .attr('y', 0)
@@ -461,10 +599,14 @@ export const addLegend = (
             .attr('font-size', '12px')
             .attr('fill', '#666')
             .text(d.label);
+          
+          // Truncate text if needed
+          const maxTextWidth = itemWidths[datasets.indexOf(d)] - circleRadius * 2 - circleTextGap - 5;
+          truncateText(labelText, maxTextWidth, d.label);
         });
     } else {
-      // Single row, centered
-      const startX = (width - totalWidth) / 2;
+      // Single row, centered but ensure it doesn't go outside SVG bounds
+      const startX = Math.max(margin.left, (width - totalWidth) / 2);
       let currentX = startX;
       
       legendGroup
@@ -474,7 +616,7 @@ export const addLegend = (
         .append('g')
         .attr('class', 'legend-item')
         .attr('transform', (d, i) => {
-          const x = currentX;
+          const x = Math.min(currentX, width - margin.right - itemWidths[i]);
           currentX += itemWidths[i] + itemSpacing;
           return `translate(${x}, ${y})`;
         })
@@ -489,8 +631,8 @@ export const addLegend = (
             .attr('r', circleRadius)
             .attr('fill', d.color);
 
-          // Label text
-          item
+          // Label text with truncation
+          const labelText = item
             .append('text')
             .attr('x', circleRadius * 2 + circleTextGap)
             .attr('y', 0)
@@ -498,6 +640,10 @@ export const addLegend = (
             .attr('font-size', '12px')
             .attr('fill', '#666')
             .text(d.label);
+          
+          // Truncate text if needed
+          const maxTextWidth = itemWidths[datasets.indexOf(d)] - circleRadius * 2 - circleTextGap - 5;
+          truncateText(labelText, maxTextWidth, d.label);
         });
     }
   } else {
@@ -520,11 +666,11 @@ export const addLegend = (
     
     tempText.remove();
     
-    // Calculate x position based on side and max width
+    // Calculate x position based on side and max width, ensuring it stays within bounds
     const totalLegendWidth = maxWidth + circleRadius * 2 + circleTextGap + 10; // Add padding
     const x = position === 'right' 
-      ? width - totalLegendWidth - 10
-      : 10;
+      ? Math.max(margin.left, width - totalLegendWidth - 10)
+      : Math.min(10, width - totalLegendWidth - margin.right);
 
     legendGroup
       .selectAll('.legend-item')
@@ -544,8 +690,8 @@ export const addLegend = (
           .attr('r', circleRadius)
           .attr('fill', d.color);
 
-        // Label text
-        item
+        // Label text with truncation
+        const labelText = item
           .append('text')
           .attr('x', circleRadius * 2 + circleTextGap)
           .attr('y', 0)
@@ -553,6 +699,10 @@ export const addLegend = (
           .attr('font-size', '12px')
           .attr('fill', '#666')
           .text(d.label);
+          
+        // Truncate text if needed for vertical layout
+        const maxTextWidth = Math.max(maxWidth, 50); // Use calculated max width
+        truncateText(labelText, maxTextWidth, d.label);
       });
   }
 };
@@ -646,7 +796,7 @@ export const addAxes = (
           .attr('class', 'x-axis')
           .attr('transform', `translate(0,${chartBottom})`)
           .call(xAxisGenerator);
-      } else if ('ticks' in xScale && typeof (xScale as any).ticks === 'function') {
+      } else if ('ticks' in xScale && typeof (xScale as d3.ScaleTime<number, number>).ticks === 'function') {
         // Time scale
         const timeScale = xScale as d3.ScaleTime<number, number>;
         const xAxisGenerator = d3

@@ -1,5 +1,15 @@
 import React from 'react';
 
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+
 export interface ChartOptionsConfig {
   showXGrid: boolean;
   showYGrid: boolean;
@@ -49,367 +59,299 @@ export const ChartOptions: React.FC<ChartOptionsProps> = ({
     });
   };
 
+  const OptionSwitch = ({
+    checked,
+    onChange,
+    label,
+    id,
+  }: {
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+    label: string;
+    id: string;
+  }) => (
+    <div className="flex items-center space-x-3 py-1">
+      <Switch id={id} checked={checked} onCheckedChange={onChange} />
+      <Label htmlFor={id} className="cursor-pointer text-sm font-normal text-gray-700">
+        {label}
+      </Label>
+    </div>
+  );
+
+  const OptionSelect = ({
+    value,
+    onChange,
+    options,
+    placeholder = 'Select...',
+    className = '',
+  }: {
+    value: string | number;
+    onChange: (value: string | number) => void;
+    options: { value: string | number; label: string }[];
+    placeholder?: string;
+    className?: string;
+  }) => (
+    <div className={`col-span-2 ${className}`}>
+      <Select value={String(value)} onValueChange={(val) => onChange(val)}>
+        <SelectTrigger className="h-8 w-full">
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map(({ value, label }) => (
+            <SelectItem key={value} value={String(value)}>
+              {label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
   return (
-    <div className="chart-options">
-      <h3 className="options-title">Options</h3>
-
-      <div className="options-grid">
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        {/* Grid Controls */}
         {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
-          <label className="option-item">
-            <input
-              type="checkbox"
-              checked={options.showXGrid}
-              onChange={(e) => handleChange('showXGrid', e.target.checked)}
-            />
-            <span>X Grid</span>
-          </label>
-        )}
-
-        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter') && (
-          <label className="option-item">
-            <input
-              type="checkbox"
-              checked={options.showYGrid}
-              onChange={(e) => handleChange('showYGrid', e.target.checked)}
-            />
-            <span>Y Grid</span>
-          </label>
-        )}
-
-        {chartType === 'bar' && (
-          <label className="option-item">
-            <input
-              type="checkbox"
-              checked={options.horizontal ? options.showXGrid : options.showYGrid}
-              onChange={(e) => handleChange(options.horizontal ? 'showXGrid' : 'showYGrid', e.target.checked)}
-            />
-            <span>Value Grid</span>
-          </label>
-        )}
-
-        {chartType === 'histogram' && (
-          <label className="option-item">
-            <input
-              type="checkbox"
-              checked={options.showYGrid}
-              onChange={(e) => handleChange('showYGrid', e.target.checked)}
-            />
-            <span>Y Grid</span>
-          </label>
-        )}
-
-        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter' || chartType === 'bar' || chartType === 'histogram') && (
-          <label className="option-item">
-            <input
-              type="checkbox"
-              checked={options.showXAxis}
-              onChange={(e) => handleChange('showXAxis', e.target.checked)}
-            />
-            <span>X Axis</span>
-          </label>
-        )}
-
-        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter' || chartType === 'bar' || chartType === 'histogram') && (
-          <label className="option-item">
-            <input
-              type="checkbox"
-              checked={options.showYAxis}
-              onChange={(e) => handleChange('showYAxis', e.target.checked)}
-            />
-            <span>Y Axis</span>
-          </label>
-        )}
-
-        <label className="option-item">
-          <input
-            type="checkbox"
-            checked={options.showTooltip}
-            onChange={(e) => handleChange('showTooltip', e.target.checked)}
-          />
-          <span>Tooltips</span>
-        </label>
-
-        <label className="option-item">
-          <input
-            type="checkbox"
-            checked={options.showLegend}
-            onChange={(e) => handleChange('showLegend', e.target.checked)}
-          />
-          <span>Legend</span>
-        </label>
-
-        {(chartType === 'line' || chartType === 'area') && (
-          <label className="option-item">
-            <input
-              type="checkbox"
-              checked={options.showPoints || false}
-              onChange={(e) => handleChange('showPoints', e.target.checked)}
-            />
-            <span>Points</span>
-          </label>
-        )}
-
-        {(chartType === 'pie' || chartType === 'doughnut') && (
-          <label className="option-item">
-            <input
-              type="checkbox"
-              checked={options.showLabels || false}
-              onChange={(e) => handleChange('showLabels', e.target.checked)}
-            />
-            <span>Labels</span>
-          </label>
-        )}
-
-        {(chartType === 'pie' || chartType === 'doughnut') && (
-          <label className="option-item">
-            <input
-              type="checkbox"
-              checked={options.showValues || false}
-              onChange={(e) => handleChange('showValues', e.target.checked)}
-            />
-            <span>Values</span>
-          </label>
-        )}
-
-        {(chartType === 'pie' || chartType === 'doughnut') && (
-          <label className="option-item">
-            <input
-              type="checkbox"
-              checked={options.showPercentages || false}
-              onChange={(e) => handleChange('showPercentages', e.target.checked)}
-            />
-            <span>Percentages</span>
-          </label>
-        )}
-
-        <label className="option-item">
-          <input
-            type="checkbox"
-            checked={options.animate}
-            onChange={(e) => handleChange('animate', e.target.checked)}
-          />
-          <span>Animate</span>
-        </label>
-
-        {(chartType === 'line' || chartType === 'area' || chartType === 'scatter' || chartType === 'bar' || chartType === 'histogram') && (
-          <label className="option-item">
-            <input
-              type="checkbox"
-              checked={options.yAxisStartsFromZero}
-              onChange={(e) => handleChange('yAxisStartsFromZero', e.target.checked)}
-            />
-            <span>Zero Base</span>
-          </label>
-        )}
-
-
-        {chartType === 'area' && (
           <>
-            <label className="option-item">
-              <input
-                type="checkbox"
-                checked={options.showStackedTotal || false}
-                onChange={(e) => handleChange('showStackedTotal', e.target.checked)}
-              />
-              <span>Stack Total</span>
-            </label>
-            <label className="option-item">
-              <input
-                type="checkbox"
-                checked={options.solidFill || false}
-                onChange={(e) => handleChange('solidFill', e.target.checked)}
-              />
-              <span>Solid Fill</span>
-            </label>
+            <OptionSwitch
+              id="x-grid"
+              checked={options.showXGrid}
+              onChange={(checked) => handleChange('showXGrid', checked)}
+              label="X Grid"
+            />
+            <OptionSwitch
+              id="y-grid"
+              checked={options.showYGrid}
+              onChange={(checked) => handleChange('showYGrid', checked)}
+              label="Y Grid"
+            />
           </>
         )}
 
+        {chartType === 'bar' && (
+          <OptionSwitch
+            id="value-grid"
+            checked={options.horizontal ? options.showXGrid : options.showYGrid}
+            onChange={(checked) =>
+              handleChange(options.horizontal ? 'showXGrid' : 'showYGrid', checked)
+            }
+            label="Value Grid"
+          />
+        )}
+
+        {chartType === 'histogram' && (
+          <OptionSwitch
+            id="histogram-y-grid"
+            checked={options.showYGrid}
+            onChange={(checked) => handleChange('showYGrid', checked)}
+            label="Y Grid"
+          />
+        )}
+
+        {/* Axis Controls */}
+        {(chartType === 'line' ||
+          chartType === 'area' ||
+          chartType === 'scatter' ||
+          chartType === 'bar' ||
+          chartType === 'histogram') && (
+          <>
+            <OptionSwitch
+              id="x-axis"
+              checked={options.showXAxis}
+              onChange={(checked) => handleChange('showXAxis', checked)}
+              label="X Axis"
+            />
+            <OptionSwitch
+              id="y-axis"
+              checked={options.showYAxis}
+              onChange={(checked) => handleChange('showYAxis', checked)}
+              label="Y Axis"
+            />
+          </>
+        )}
+
+        {/* Common Controls */}
+        <OptionSwitch
+          id="tooltips"
+          checked={options.showTooltip}
+          onChange={(checked) => handleChange('showTooltip', checked)}
+          label="Tooltips"
+        />
+
+        <OptionSwitch
+          id="legend"
+          checked={options.showLegend}
+          onChange={(checked) => handleChange('showLegend', checked)}
+          label="Legend"
+        />
+
+        <OptionSwitch
+          id="animate"
+          checked={options.animate}
+          onChange={(checked) => handleChange('animate', checked)}
+          label="Animate"
+        />
+
+        {(chartType === 'line' ||
+          chartType === 'area' ||
+          chartType === 'scatter' ||
+          chartType === 'bar' ||
+          chartType === 'histogram') && (
+          <OptionSwitch
+            id="zero-base"
+            checked={options.yAxisStartsFromZero}
+            onChange={(checked) => handleChange('yAxisStartsFromZero', checked)}
+            label="Zero Base"
+          />
+        )}
+
+        {/* Line/Area Specific */}
+        {(chartType === 'line' || chartType === 'area') && (
+          <OptionSwitch
+            id="points"
+            checked={options.showPoints || false}
+            onChange={(checked) => handleChange('showPoints', checked)}
+            label="Points"
+          />
+        )}
+
+        {/* Pie/Doughnut Specific */}
+        {(chartType === 'pie' || chartType === 'doughnut') && (
+          <>
+            <OptionSwitch
+              id="pie-labels"
+              checked={options.showLabels || false}
+              onChange={(checked) => handleChange('showLabels', checked)}
+              label="Labels"
+            />
+            <OptionSwitch
+              id="pie-values"
+              checked={options.showValues || false}
+              onChange={(checked) => handleChange('showValues', checked)}
+              label="Values"
+            />
+            <OptionSwitch
+              id="pie-percentages"
+              checked={options.showPercentages || false}
+              onChange={(checked) => handleChange('showPercentages', checked)}
+              label="Percentages"
+            />
+          </>
+        )}
+
+        {/* Area Specific */}
+        {chartType === 'area' && (
+          <>
+            <OptionSwitch
+              id="stack-total"
+              checked={options.showStackedTotal || false}
+              onChange={(checked) => handleChange('showStackedTotal', checked)}
+              label="Stack Total"
+            />
+            <OptionSwitch
+              id="solid-fill"
+              checked={options.solidFill || false}
+              onChange={(checked) => handleChange('solidFill', checked)}
+              label="Solid Fill"
+            />
+          </>
+        )}
+
+        {/* Scatter Specific */}
         {chartType === 'scatter' && (
-          <label className="option-item">
-            <input
-              type="checkbox"
-              checked={options.showTrendLine || false}
-              onChange={(e) => handleChange('showTrendLine', e.target.checked)}
-            />
-            <span>Trend Line</span>
-          </label>
+          <OptionSwitch
+            id="trend-line"
+            checked={options.showTrendLine || false}
+            onChange={(checked) => handleChange('showTrendLine', checked)}
+            label="Trend Line"
+          />
         )}
 
+        {/* Bar Specific */}
         {chartType === 'bar' && (
-          <label className="option-item">
-            <input
-              type="checkbox"
+          <>
+            <OptionSwitch
+              id="stacked"
               checked={options.stacked || false}
-              onChange={(e) => handleChange('stacked', e.target.checked)}
+              onChange={(checked) => handleChange('stacked', checked)}
+              label="Stacked"
             />
-            <span>Stacked</span>
-          </label>
-        )}
-
-        {chartType === 'bar' && (
-          <label className="option-item">
-            <input
-              type="checkbox"
+            <OptionSwitch
+              id="horizontal"
               checked={options.horizontal || false}
-              onChange={(e) => handleChange('horizontal', e.target.checked)}
+              onChange={(checked) => handleChange('horizontal', checked)}
+              label="Horizontal"
             />
-            <span>Horizontal</span>
-          </label>
-        )}
-
-        {chartType === 'bar' && (
-          <label className="option-item">
-            <input
-              type="checkbox"
+            <OptionSwitch
+              id="bar-values"
               checked={options.showBarValues || false}
-              onChange={(e) => handleChange('showBarValues', e.target.checked)}
+              onChange={(checked) => handleChange('showBarValues', checked)}
+              label="Show Values"
             />
-            <span>Show Values</span>
-          </label>
+          </>
         )}
 
+        {/* Histogram Specific */}
         {chartType === 'histogram' && (
-          <label className="option-item">
-            <input
-              type="checkbox"
-              checked={options.showDensity || false}
-              onChange={(e) => handleChange('showDensity', e.target.checked)}
-            />
-            <span>Show Density</span>
-          </label>
+          <OptionSwitch
+            id="density"
+            checked={options.showDensity || false}
+            onChange={(checked) => handleChange('showDensity', checked)}
+            label="Show Density"
+          />
         )}
 
+        {/* Select Controls */}
         {chartType === 'histogram' && (
-          <div className="option-item select-item">
-            <select
-              value={options.bins || 10}
-              onChange={(e) => handleChange('bins', parseInt(e.target.value))}
-              className="curve-select"
-            >
-              <option value={5}>Bins: 5</option>
-              <option value={10}>Bins: 10</option>
-              <option value={15}>Bins: 15</option>
-              <option value={20}>Bins: 20</option>
-              <option value={25}>Bins: 25</option>
-              <option value={30}>Bins: 30</option>
-            </select>
-          </div>
+          <OptionSelect
+            value={options.bins || 10}
+            onChange={(value) => handleChange('bins', parseInt(value as string))}
+            options={[
+              { value: 5, label: 'Bins: 5' },
+              { value: 10, label: 'Bins: 10' },
+              { value: 15, label: 'Bins: 15' },
+              { value: 20, label: 'Bins: 20' },
+              { value: 25, label: 'Bins: 25' },
+              { value: 30, label: 'Bins: 30' },
+            ]}
+          />
         )}
 
         {(chartType === 'line' || chartType === 'area') && (
-          <div className="option-item select-item">
-            <select
-              value={options.curve}
-              onChange={(e) => handleChange('curve', e.target.value)}
-              className="curve-select"
-            >
-              <option value="linear">Linear</option>
-              <option value="smooth">Smooth</option>
-            </select>
-          </div>
+          <OptionSelect
+            value={options.curve}
+            onChange={(value) => handleChange('curve', value)}
+            options={[
+              { value: 'linear', label: 'Curve: Linear' },
+              { value: 'smooth', label: 'Curve: Smooth' },
+            ]}
+          />
         )}
 
         {options.showLegend && (
-          <div className="option-item select-item">
-            <select
-              value={options.legendPosition}
-              onChange={(e) => handleChange('legendPosition', e.target.value)}
-              className="curve-select"
-            >
-              <option value="bottom">Legend: Bottom</option>
-              <option value="top">Legend: Top</option>
-              <option value="left">Legend: Left</option>
-              <option value="right">Legend: Right</option>
-            </select>
-          </div>
+          <OptionSelect
+            value={options.legendPosition}
+            onChange={(value) => handleChange('legendPosition', value)}
+            options={[
+              { value: 'bottom', label: 'Legend: Bottom' },
+              { value: 'top', label: 'Legend: Top' },
+              { value: 'left', label: 'Legend: Left' },
+              { value: 'right', label: 'Legend: Right' },
+            ]}
+          />
         )}
 
         {options.showTooltip && (
-          <div className="option-item select-item">
-            <select
-              value={options.tooltipSize || 'sm'}
-              onChange={(e) => handleChange('tooltipSize', e.target.value)}
-              className="curve-select"
-            >
-              <option value="sm">Tooltip: Small</option>
-              <option value="md">Tooltip: Medium</option>
-            </select>
-          </div>
+          <OptionSelect
+            value={options.tooltipSize || 'sm'}
+            onChange={(value) => handleChange('tooltipSize', value)}
+            options={[
+              { value: 'sm', label: 'Tooltip: Small' },
+              { value: 'md', label: 'Tooltip: Medium' },
+            ]}
+          />
         )}
       </div>
-
-      <style jsx>{`
-        .chart-options {
-          background: transparent;
-          border: none;
-          border-radius: 0;
-          padding: 12px;
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        .options-title {
-          margin: 0 0 12px 0;
-          color: #343a40;
-          font-size: 14px;
-          font-weight: 600;
-        }
-
-        .options-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 8px;
-        }
-
-        .option-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          cursor: pointer;
-          font-size: 12px;
-          color: #495057;
-          padding: 4px 6px;
-          border-radius: 4px;
-          transition: background-color 0.1s;
-        }
-
-        .option-item:hover {
-          background: rgba(0, 123, 255, 0.05);
-        }
-
-        .option-item input[type='checkbox'] {
-          width: 14px;
-          height: 14px;
-          accent-color: #007bff;
-          cursor: pointer;
-        }
-
-        .option-item span {
-          user-select: none;
-          white-space: nowrap;
-        }
-
-        .select-item {
-          grid-column: 1 / -1;
-        }
-
-        .curve-select {
-          padding: 4px 8px;
-          border: 1px solid #ced4da;
-          border-radius: 4px;
-          background: white;
-          font-size: 12px;
-          color: #495057;
-          cursor: pointer;
-          width: 100%;
-        }
-
-        .curve-select:focus {
-          outline: none;
-          border-color: #007bff;
-          box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-        }
-      `}</style>
     </div>
   );
 };

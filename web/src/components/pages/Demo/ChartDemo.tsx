@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 
 import { ChartOptionsConfig } from '@/components/ChartOptions';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChartDataset } from '@/lib/charts/core/types';
 
-import ChartViewer from './ChartViewer';
+import ChartContainer from './ChartContainer';
 import OptionsPanel from './OptionsPanel';
 
 interface ChartDemoProps {
@@ -48,28 +49,59 @@ export default function ChartDemo({
     setData(newData);
   }, [dataGenerator]);
 
-  const regenerateData = () => {
-    const newData = dataGenerator();
-    setData(newData);
-  };
-
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col gap-6 lg:flex-row">
-          <ChartViewer
-            data={data}
-            chartId={chartId}
-            options={options}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            onRegenerateData={regenerateData}
-          />
-          <OptionsPanel options={options} onOptionsChange={setOptions} chartType="line" />
+    <Card className="w-full bg-white">
+      <CardContent className="p-6">
+        {/* Header with title, description, and tabs */}
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h2>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">{description}</p>
+          </div>
+          <div className="flex flex-shrink-0 items-center gap-3">
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => setActiveTab(value as 'chart' | 'data')}
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="chart" className="text-xs sm:text-sm">
+                  Chart
+                </TabsTrigger>
+                <TabsTrigger value="data" className="text-xs sm:text-sm">
+                  Data
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </div>
+
+        {/* Content area with chart and options */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+          {/* Chart area - takes most of the space */}
+          <div className="lg:col-span-3">
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => setActiveTab(value as 'chart' | 'data')}
+            >
+              <TabsContent value="chart" className="mt-0">
+                <ChartContainer data={data} chartId={chartId} options={options} />
+              </TabsContent>
+              <TabsContent value="data" className="mt-0">
+                <div className="h-[400px] overflow-auto rounded-lg border bg-gray-50 p-4">
+                  <pre className="font-mono text-sm">{JSON.stringify(data, null, 2)}</pre>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Options panel - right sidebar */}
+          <div className="lg:col-span-1">
+            <div className="space-y-4">
+              <div>
+                <OptionsPanel options={options} onOptionsChange={setOptions} chartType="line" />
+              </div>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

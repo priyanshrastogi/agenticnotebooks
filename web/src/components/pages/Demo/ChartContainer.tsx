@@ -34,7 +34,7 @@ export default function ChartContainer({ data, chartId, options }: ChartContaine
         // Get container dimensions for responsive sizing
         const containerWidth = containerRef.current?.clientWidth || 800;
         const isMobile = containerWidth < 640;
-        
+
         // Create chart options
         const chartOptions: LineChartOptions = {
           width: Math.max(320, containerWidth - 32), // Responsive width with min 320px
@@ -72,8 +72,8 @@ export default function ChartContainer({ data, chartId, options }: ChartContaine
   }, []);
 
   return (
-    <div className="border rounded-lg p-2 sm:p-4 bg-white">
-      <div id={chartId} ref={containerRef} className="w-full h-[280px] sm:h-[400px]" />
+    <div className="w-full">
+      <div id={chartId} ref={containerRef} className="w-full" />
     </div>
   );
 }

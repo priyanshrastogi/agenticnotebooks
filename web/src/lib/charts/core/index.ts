@@ -40,6 +40,7 @@ export {
   addAxes,
   addGridLines,
   addLegend,
+  calculateLegendSpace,
   calculateNiceScale,
   createCrosshairTooltip,
   createTooltip,
