@@ -58,6 +58,7 @@ export class AreaChart implements IAreaChart {
       curve: 'smooth',
       stacked: true,
       showStackedTotal: false,
+      solidFill: false,
       yAxisStartsFromZero: true,
       tooltipSize: 'sm',
       ...options,
@@ -234,33 +235,47 @@ export class AreaChart implements IAreaChart {
     return { xScale, yScale, isOrdinal, isDateScale };
   }
 
-  private createGradient(color: string, index: number): string {
+  private createGradient(color: string, index: number, dataset: ChartDataset, yScale: YScale, stacked: boolean): string {
     const gradientId = `area-gradient-${index}`;
     const defs = this.svg!.select('defs');
 
     // Remove existing gradient
     defs.select(`#${gradientId}`).remove();
 
+    let y1: number, y2: number;
+
+    if (stacked && dataset.data.length > 0) {
+      // For stacked areas, use the actual Y range of this specific area
+      const minY0 = Math.min(...dataset.data.map(d => d.y0 || 0));
+      const maxY1 = Math.max(...dataset.data.map(d => d.y1 || d.y));
+      y1 = yScale(maxY1); // Top of the area (lower Y coordinate)
+      y2 = yScale(minY0); // Bottom of the area (higher Y coordinate)
+    } else {
+      // For non-stacked areas, use full chart height
+      y1 = this.options.margin!.top;
+      y2 = this.options.height! - this.options.margin!.bottom;
+    }
+
     const gradient = defs
       .append('linearGradient')
       .attr('id', gradientId)
       .attr('gradientUnits', 'userSpaceOnUse')
       .attr('x1', 0)
-      .attr('y1', this.options.margin!.top)
+      .attr('y1', y1)
       .attr('x2', 0)
-      .attr('y2', this.options.height! - this.options.margin!.bottom);
+      .attr('y2', y2);
 
     gradient
       .append('stop')
       .attr('offset', '0%')
       .attr('stop-color', color)
-      .attr('stop-opacity', this.options.fillOpacity || 0.3);
+      .attr('stop-opacity', 0.7); // Increased from 0.3 to 0.7 for darker gradient
 
     gradient
       .append('stop')
       .attr('offset', '100%')
       .attr('stop-color', color)
-      .attr('stop-opacity', 0.05);
+      .attr('stop-opacity', 0.1); // Increased from 0.05 to 0.1 for slightly more visible bottom
 
     return `url(#${gradientId})`;
   }
@@ -371,19 +386,50 @@ export class AreaChart implements IAreaChart {
       area.curve(d3.curveCardinal.tension(0.3));
     }
 
+    // For overlapping (non-stacked) charts, render from largest area to smallest to minimize visual occlusion
+    // For stacked charts, render in normal order
+    const renderOrder = !stacked && this.data.length > 1 
+      ? stackedData.slice().sort((a, b) => {
+          // Sort by maximum Y value descending (largest areas first)
+          const maxA = Math.max(...a.data.map(d => d.y));
+          const maxB = Math.max(...b.data.map(d => d.y));
+          return maxB - maxA;
+        })
+      : stackedData;
+
     // Render each dataset
-    stackedData.forEach((dataset, index) => {
-      const color = getColor(index, this.options.colors);
-      const gradientFill = this.createGradient(color, index);
+    renderOrder.forEach((dataset) => {
+      // Find original index for color consistency
+      const originalIndex = stackedData.findIndex(d => d === dataset);
+      const color = getColor(originalIndex, this.options.colors);
+      
+      // Handle fill style based on solidFill option
+      let fillStyle: string;
+      let fillOpacity: number;
+      
+      if (this.options.solidFill) {
+        // Solid fill mode: use solid color with full opacity
+        fillStyle = color;
+        fillOpacity = 1;
+      } else if (!stacked && this.data.length > 1) {
+        // Overlapping areas: use gradient with opacity for natural transparency
+        fillStyle = this.createGradient(color, originalIndex, dataset, yScale, false);
+        fillOpacity = this.options.fillOpacity || 0.3;
+      } else {
+        // Stacked areas or single area: use gradient
+        fillStyle = this.createGradient(color, originalIndex, dataset, yScale, stacked || false);
+        fillOpacity = 1;
+      }
 
       // Create group for this dataset
-      const group = this.svg!.append('g').attr('class', `dataset-${index}`);
+      const group = this.svg!.append('g').attr('class', `dataset-${originalIndex}`);
 
       // Add area path
       const areaPath = group
         .append('path')
         .datum(dataset.data)
-        .attr('fill', gradientFill)
+        .attr('fill', fillStyle)
+        .attr('fill-opacity', fillOpacity)
         .attr('d', area(dataset.data) || '');
 
       // Add line path
@@ -404,7 +450,7 @@ export class AreaChart implements IAreaChart {
           .attr('opacity', 0)
           .transition()
           .duration(1000)
-          .delay(200 + index * 200)
+          .delay(200 + originalIndex * 200)
           .attr('opacity', 1);
 
         // Animate line
@@ -414,7 +460,7 @@ export class AreaChart implements IAreaChart {
           .attr('stroke-dashoffset', totalLength)
           .transition()
           .duration(1500)
-          .delay(index * 200)
+          .delay(originalIndex * 200)
           .ease(d3.easeLinear)
           .attr('stroke-dashoffset', 0);
       }
@@ -422,11 +468,11 @@ export class AreaChart implements IAreaChart {
       // Add points or invisible hover areas for tooltip
       if (showPoints || this.options.showTooltip) {
         const points = group
-          .selectAll(`.point-${index}`)
+          .selectAll(`.point-${originalIndex}`)
           .data(dataset.data)
           .enter()
           .append('circle')
-          .attr('class', `point-${index}`)
+          .attr('class', `point-${originalIndex}`)
           .attr('cx', getXPosition)
           .attr('cy', (d) => yScale(stacked ? d.y1 || d.y : d.y))
           .attr('r', showPoints ? pointRadius || 4 : 6) // Larger invisible hover area if no points
@@ -440,7 +486,7 @@ export class AreaChart implements IAreaChart {
           points
             .attr('r', 0)
             .transition()
-            .delay((d, i) => i * 100 + 1000 + index * 200)
+            .delay((d, i) => i * 100 + 1000 + originalIndex * 200)
             .duration(300)
             .attr('r', pointRadius || 4);
         }
@@ -449,7 +495,7 @@ export class AreaChart implements IAreaChart {
         if (this.options.showTooltip && this.tooltip) {
           points
             .on('mouseover', (event, d) => {
-              const originalData = this.data[index].data.find((item) => item.x === d.x);
+              const originalData = this.data[originalIndex].data.find((item) => item.x === d.x);
               const displayValue = originalData ? originalData.y : d.y;
               const dateLabel = originalData?.date || d.x;
               showTooltip(

@@ -1,6 +1,7 @@
 // Chart implementations exports
 export { AreaChart, createAreaChart } from './area';
 export { BarChart, createBarChart } from './bar';
+export { createHistogramChart, HistogramChart } from './histogram';
 export { createLineChart, LineChart } from './line';
 export { createScatterChart, ScatterChart } from './scatter';
 
@@ -8,5 +9,4 @@ export { createScatterChart, ScatterChart } from './scatter';
 // export { PieChart, createPieChart } from './pie';
 // export { DoughnutChart, createDoughnutChart } from './doughnut';
 // export { RadarChart, createRadarChart } from './radar';
-// export { HistogramChart, createHistogramChart } from './histogram';
 // export { HeatmapChart, createHeatmapChart } from './heatmap';

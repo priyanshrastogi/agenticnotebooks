@@ -8,7 +8,7 @@ import ChartOptions, { type ChartOptionsConfig } from './ChartOptions';
 interface ChartOptionsPopoverProps {
   options: ChartOptionsConfig;
   onOptionsChange: (options: ChartOptionsConfig) => void;
-  chartType: 'line' | 'area' | 'scatter' | 'pie' | 'doughnut' | 'bar';
+  chartType: 'line' | 'area' | 'scatter' | 'pie' | 'doughnut' | 'bar' | 'histogram';
 }
 
 export const ChartOptionsPopover: React.FC<ChartOptionsPopoverProps> = ({
@@ -36,7 +36,7 @@ export const ChartOptionsPopover: React.FC<ChartOptionsPopoverProps> = ({
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
 
           {/* Popover */}
-          <div className="absolute right-0 top-10 z-50 w-64 rounded-lg border bg-white shadow-xl ring-1 ring-black ring-opacity-5">
+          <div className="absolute right-0 top-10 z-50 w-64 rounded-lg border bg-white shadow-xl">
             <div className="p-2">
               <ChartOptions
                 options={options}

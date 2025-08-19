@@ -111,6 +111,7 @@ export interface AreaChartOptions extends BaseChartOptions {
   stacked?: boolean;
   showStackedTotal?: boolean;
   curve?: CurveType;
+  solidFill?: boolean;
   tooltipContentCallback?: (data: TooltipData[], xValue?: string | number) => string;
 }
 
@@ -161,6 +162,17 @@ export interface PieChartOptions
   tooltipContentCallback?: (data: PieTooltipData) => string;
 }
 
+/**
+ * Histogram chart specific configuration
+ */
+export interface HistogramChartOptions extends BaseChartOptions {
+  bins?: number; // Number of bins for the histogram
+  binRange?: 'auto' | [number, number]; // Range for binning (auto-calculated or manual)
+  showDensity?: boolean; // Show density instead of frequency
+  barOpacity?: number; // Opacity for histogram bars
+  tooltipContentCallback?: (bin: { x0: number; x1: number; length: number; frequency: number }) => string;
+}
+
 // ============================================================================
 // CHART INTERFACE CONTRACTS
 // ============================================================================
@@ -207,6 +219,15 @@ export interface IBarChart {
 export interface IPieChart {
   render(): void;
   update(data: PieDataPoint[]): void;
+  destroy(): void;
+}
+
+/**
+ * Histogram chart interface
+ */
+export interface IHistogramChart {
+  render(): void;
+  update(data: number[]): void;
   destroy(): void;
 }
 

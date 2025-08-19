@@ -1,6 +1,7 @@
 // Chart implementations
 export { AreaChart, createAreaChart } from './charts/area';
 export { BarChart, createBarChart } from './charts/bar';
+export { createHistogramChart, HistogramChart } from './charts/histogram';
 export { createLineChart, LineChart } from './charts/line';
 export { createDoughnutChart, createPieChart, PieChart } from './charts/pie';
 export { createScatterChart, ScatterChart } from './charts/scatter';
@@ -17,8 +18,10 @@ export {
   // Configuration types
   type ChartMargin,
   type CurveType,
+  type HistogramChartOptions,
   type IAreaChart,
   type IBarChart,
+  type IHistogramChart,
   // Chart interfaces
   type ILineChart,
   type IPieChart,
@@ -37,26 +40,3 @@ export {
 
 // Color utilities
 export { DEFAULT_COLORS, getColor, hexToRgba } from './core/colors';
-
-// Data generators
-export {
-  generateAppleStockData,
-  generateAppleStockDataWithDates,
-  generateBrowserUsageData,
-  generateCampaignPerformanceScatter,
-  generateCustomerSatisfactionScatter,
-  generateDepartmentRevenueData,
-  generateGlobalTemperatureData,
-  generateHeightWeightData,
-  generateMarketShareData,
-  generateOfficeSatisfactionData,
-  generateQuarterlySalesData,
-  generateRegionalSalesData,
-  generateRevenueBreakdownData,
-  generateSalesMarketingData,
-  // Extended examples with more datasets
-  generateTechRevenueComparison,
-  generateTechStocksData,
-  generateTrafficSourcesData,
-  generateWebsitePerformanceData,
-} from './data';
