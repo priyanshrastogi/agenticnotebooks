@@ -1,22 +1,25 @@
 'use client';
 
+import { Maximize2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { ChartOptionsConfig } from '@/components/ChartOptions';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChartDataset } from '@/lib/charts/core/types';
+import { ChartDataset, PieDataPoint } from '@/lib/charts/core/types';
 
 import ChartContainer from './ChartContainer';
+import FullScreenChartModal from './FullScreenChartModal';
 import OptionsPanel from './OptionsPanel';
 
 interface ChartDemoProps {
   title: string;
   description: string;
-  dataGenerator: () => ChartDataset[];
+  dataGenerator: () => ChartDataset[] | PieDataPoint[] | number[];
   chartId: string;
   defaultOptions?: Partial<ChartOptionsConfig>;
-  chartType?: 'line' | 'area' | 'scatter';
+  chartType?: 'line' | 'area' | 'bar' | 'histogram' | 'scatter' | 'pie' | 'doughnut';
 }
 
 export default function ChartDemo({
@@ -27,8 +30,9 @@ export default function ChartDemo({
   defaultOptions = {},
   chartType = 'line',
 }: ChartDemoProps) {
-  const [data, setData] = useState<ChartDataset[]>([]);
+  const [data, setData] = useState<ChartDataset[] | PieDataPoint[] | number[]>([]);
   const [activeTab, setActiveTab] = useState<'chart' | 'data'>('chart');
+  const [isFullScreenOpen, setIsFullScreenOpen] = useState(false);
   const [options, setOptions] = useState<ChartOptionsConfig>({
     showXGrid: true,
     showYGrid: true,
@@ -61,6 +65,15 @@ export default function ChartDemo({
             <p className="text-muted-foreground mt-1 text-sm sm:text-base">{description}</p>
           </div>
           <div className="flex flex-shrink-0 items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsFullScreenOpen(true)}
+              className="gap-1.5"
+            >
+              <Maximize2 className="h-4 w-4" />
+              View in Full Screen
+            </Button>
             <Tabs
               value={activeTab}
               onValueChange={(value) => setActiveTab(value as 'chart' | 'data')}
@@ -106,6 +119,17 @@ export default function ChartDemo({
           </div>
         </div>
       </CardContent>
+
+      {/* Full Screen Chart Modal */}
+      <FullScreenChartModal
+        isOpen={isFullScreenOpen}
+        onClose={() => setIsFullScreenOpen(false)}
+        title={title}
+        data={data}
+        options={options}
+        chartType={chartType}
+        chartId={chartId}
+      />
     </Card>
   );
 }

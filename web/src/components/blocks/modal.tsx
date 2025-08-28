@@ -74,10 +74,10 @@ export function Modal({
         variant="ghost"
         size="icon"
         onClick={onClose}
-        className="bg-background/80 fixed right-6 top-6 z-[10000] h-10 w-10 rounded-full shadow-md backdrop-blur-sm"
+        className="bg-background/80 fixed right-3 top-3 sm:right-6 sm:top-6 z-[10000] h-8 w-8 sm:h-10 sm:w-10 rounded-full shadow-md backdrop-blur-sm"
         aria-label="Close"
       >
-        <X className="h-6 w-6" />
+        <X className="h-4 w-4 sm:h-6 sm:w-6" />
       </Button>
 
       {/* Modal Content Container */}

@@ -22,7 +22,6 @@ export interface ChartDataPoint {
 export interface PieDataPoint {
   label: string;
   value: number;
-  color?: string;
 }
 
 /**

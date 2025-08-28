@@ -247,7 +247,7 @@ export const createTooltip = (container: string, size: 'sm' | 'md' = 'sm') => {
     .style('pointer-events', 'none')
     .style('opacity', 0)
     .style('box-shadow', isSm ? '0 1px 3px rgba(0, 0, 0, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)')
-    .style('z-index', '1000');
+    .style('z-index', '10001');
 };
 
 export const showTooltip = (
@@ -288,7 +288,7 @@ export const createCrosshairTooltip = (container: string, size: 'sm' | 'md' = 's
     .style('pointer-events', 'none')
     .style('opacity', 0)
     .style('box-shadow', isSm ? '0 1px 4px rgba(0, 0, 0, 0.15)' : '0 2px 6px rgba(0, 0, 0, 0.15)')
-    .style('z-index', '1001')
+    .style('z-index', '10002')
     .style('min-width', isSm ? '80px' : '100px')
     .style('max-width', isSm ? '200px' : '250px');
 };
@@ -647,8 +647,10 @@ export const addLegend = (
         });
     }
   } else {
-    // Vertical layout (left/right)
-    const startY = margin.top + 20;
+    // Vertical layout (left/right) - center vertically in chart area
+    const chartHeight = height - margin.top - margin.bottom;
+    const totalLegendHeight = datasets.length * (itemHeight + 5);
+    const startY = margin.top + (chartHeight - totalLegendHeight) / 2 + 20;
     
     // Create a temporary text element to measure max text width
     const tempText = svg.append('text')

@@ -42,8 +42,8 @@ export class PieChart implements IPieChart {
       showLegend: true,
       legendPosition: 'right',
       innerRadius: 0, // 0 = pie chart, > 0 = doughnut
-      outerRadius: 150,
-      padAngle: 0.02,
+      outerRadius: 140,
+      padAngle: 0,
       cornerRadius: 2,
       showLabels: true,
       showValues: false,
@@ -68,20 +68,20 @@ export class PieChart implements IPieChart {
     let bottom = 20;
     let left = 20;
     
-    // Add space for legend
+    // Add space for legend (smaller margins for pie charts)
     if (showLegend) {
       switch (legendPosition) {
         case 'bottom':
-          bottom += 80;
+          bottom += 40;
           break;
         case 'top':
-          top += 60;
+          top += 30;
           break;
         case 'left':
-          left += 150;
+          left += 80;
           break;
         case 'right':
-          right += 150;
+          right += 80;
           break;
       }
     }
@@ -99,13 +99,14 @@ export class PieChart implements IPieChart {
     const { width, height } = this.options;
     const containerElement = d3.select(this.container).node() as HTMLElement;
     const containerWidth = containerElement?.parentElement?.clientWidth || width!;
+    const containerHeight = height!;
 
     this.svg = d3
       .select(this.container)
       .append('svg')
       .attr('width', containerWidth)
-      .attr('height', height!)
-      .attr('viewBox', `0 0 ${containerWidth} ${height!}`)
+      .attr('height', containerHeight)
+      .attr('viewBox', `0 0 ${containerWidth} ${containerHeight}`)
       .attr('preserveAspectRatio', 'xMidYMid meet')
       .style('width', '100%')
       .style('height', 'auto')
@@ -116,16 +117,18 @@ export class PieChart implements IPieChart {
       this.crosshairTooltip = createCrosshairTooltip(this.container, this.options.tooltipSize);
     }
 
-    // Update width in options to match container
+    // Update width to match container
     this.options.width = containerWidth;
 
     // Add resize listener for responsiveness
     this.resizeListener = () => {
-      const newWidth = containerElement?.parentElement?.clientWidth || width!;
-      if (Math.abs(newWidth - this.options.width!) > 10) {
+      const newContainerWidth = containerElement?.parentElement?.clientWidth || width!;
+      
+      if (Math.abs(newContainerWidth - this.options.width!) > 10) {
         // Only resize if significant change
-        this.options.width = newWidth;
-        this.svg?.attr('width', newWidth).attr('viewBox', `0 0 ${newWidth} ${height!}`);
+        this.options.width = newContainerWidth;
+        this.svg?.attr('width', newContainerWidth)
+          .attr('viewBox', `0 0 ${newContainerWidth} ${containerHeight}`);
         this.svg?.selectAll('*').remove();
         this.renderChart();
       }
@@ -143,7 +146,6 @@ export class PieChart implements IPieChart {
       margin,
       animate,
       innerRadius,
-      outerRadius,
       padAngle,
       cornerRadius,
       showLabels,
@@ -152,9 +154,20 @@ export class PieChart implements IPieChart {
       labelDistance,
     } = this.options;
 
-    // Calculate center position
-    const centerX = width! / 2;
-    const centerY = height! / 2;
+    // Calculate available space for the chart (accounting for margins/legends)
+    const availableWidth = width! - margin!.left - margin!.right;
+    const availableHeight = height! - margin!.top - margin!.bottom;
+    
+    // The chart size should fit within the smaller dimension, with minimum size
+    const chartSize = Math.max(180, Math.min(availableWidth, availableHeight)); // Minimum 180px
+    
+    // Calculate center position within the available space
+    const centerX = margin!.left + availableWidth / 2;
+    const centerY = margin!.top + availableHeight / 2;
+    
+    // Calculate radius with better scaling
+    const maxRadius = chartSize / 2;
+    const outerRadius = Math.max(70, Math.min(this.options.outerRadius || 140, maxRadius - 15)); // Minimum 70px radius, smaller buffer
 
     // Create pie generator
     const pie = d3.pie<PieDataPoint>()
@@ -162,16 +175,22 @@ export class PieChart implements IPieChart {
       .sort(null)
       .padAngle(padAngle || 0);
 
-    // Create arc generator
+    // Create arc generator with adjusted inner radius for small charts
+    let adjustedInnerRadius = innerRadius || 0;
+    if (adjustedInnerRadius > 0 && outerRadius < 100) {
+      // For small doughnuts, reduce inner radius to keep decent thickness
+      adjustedInnerRadius = Math.max(adjustedInnerRadius * 0.7, outerRadius * 0.4);
+    }
+    
     const arc = d3.arc<d3.PieArcDatum<PieDataPoint>>()
-      .innerRadius(innerRadius || 0)
-      .outerRadius(outerRadius || 150)
+      .innerRadius(adjustedInnerRadius)
+      .outerRadius(outerRadius)
       .cornerRadius(cornerRadius || 0);
 
     // Create label arc (for positioning labels)
     const labelArc = d3.arc<d3.PieArcDatum<PieDataPoint>>()
-      .innerRadius((outerRadius || 150) * (labelDistance || 1.2))
-      .outerRadius((outerRadius || 150) * (labelDistance || 1.2));
+      .innerRadius(outerRadius * (labelDistance || 1.2))
+      .outerRadius(outerRadius * (labelDistance || 1.2));
 
     // Calculate total for percentages
     const total = this.data.reduce((sum, d) => sum + d.value, 0);
@@ -195,7 +214,7 @@ export class PieChart implements IPieChart {
     // Add paths (the pie slices)
     const paths = slices
       .append('path')
-      .attr('fill', (d, i) => d.data.color || getColor(i, this.options.colors))
+      .attr('fill', (d, i) => getColor(i, this.options.colors))
       .attr('stroke', 'white')
       .attr('stroke-width', 2)
       .style('cursor', 'pointer');
@@ -318,7 +337,7 @@ export class PieChart implements IPieChart {
     if (this.options.showLegend) {
       const legendData = this.data.map((item, index) => ({
         label: item.label,
-        color: item.color || getColor(index, this.options.colors),
+        color: getColor(index, this.options.colors),
       }));
       addLegend(this.svg!, legendData, width!, height!, margin!, this.options.legendPosition);
     }
@@ -357,14 +376,14 @@ export class PieChart implements IPieChart {
                 label: d.data.label,
                 value: d.data.value,
                 percentage: parseFloat(percentage),
-                color: d.data.color || getColor(d.index, this.options.colors),
+                color: getColor(d.index, this.options.colors),
               };
               tooltipContent = this.options.tooltipContentCallback(pieTooltipData);
             } else {
               // Use default tooltip content
               tooltipContent = `
                 <div style="display: flex; align-items: center;">
-                  <div style="width: 10px; height: 10px; background: ${d.data.color || getColor(d.index, this.options.colors)}; border-radius: 50%; margin-right: 6px;"></div>
+                  <div style="width: 10px; height: 10px; background: ${getColor(d.index, this.options.colors)}; border-radius: 50%; margin-right: 6px;"></div>
                   <span style="color: #e5e7eb; margin-right: 4px;">${d.data.label}:</span>
                   <span style="font-weight: 600; color: white;">${d.data.value.toLocaleString()} (${percentage}%)</span>
                 </div>

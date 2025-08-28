@@ -3,17 +3,39 @@
 import { useEffect, useRef } from 'react';
 
 import { ChartOptionsConfig } from '@/components/ChartOptions';
-import { createAreaChart, createLineChart, createScatterChart } from '@/lib/charts';
-import { AreaChartOptions, ChartDataset, LineChartOptions, ScatterChartOptions } from '@/lib/charts/core/types';
+import {
+  createAreaChart,
+  createBarChart,
+  createDoughnutChart,
+  createHistogramChart,
+  createLineChart,
+  createPieChart,
+  createScatterChart,
+} from '@/lib/charts';
+import {
+  AreaChartOptions,
+  BarChartOptions,
+  ChartDataset,
+  HistogramChartOptions,
+  LineChartOptions,
+  PieChartOptions,
+  PieDataPoint,
+  ScatterChartOptions,
+} from '@/lib/charts/core/types';
 
 interface ChartContainerProps {
-  data: ChartDataset[];
+  data: ChartDataset[] | PieDataPoint[] | number[];
   chartId: string;
   options: ChartOptionsConfig;
-  chartType?: 'line' | 'area' | 'scatter';
+  chartType?: 'line' | 'area' | 'bar' | 'histogram' | 'scatter' | 'pie' | 'doughnut';
 }
 
-export default function ChartContainer({ data, chartId, options, chartType = 'line' }: ChartContainerProps) {
+export default function ChartContainer({
+  data,
+  chartId,
+  options,
+  chartType = 'line',
+}: ChartContainerProps) {
   const chartRef = useRef<{ render: () => void; destroy: () => void } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -63,18 +85,63 @@ export default function ChartContainer({ data, chartId, options, chartType = 'li
             showStackedTotal: options.showStackedTotal,
             solidFill: options.solidFill,
           };
-          chartRef.current = createAreaChart(`#${chartId}`, data, areaOptions);
+          chartRef.current = createAreaChart(`#${chartId}`, data as ChartDataset[], areaOptions);
+        } else if (chartType === 'bar') {
+          const barOptions: BarChartOptions = baseChartOptions;
+          chartRef.current = createBarChart(`#${chartId}`, data as ChartDataset[], barOptions);
+        } else if (chartType === 'histogram') {
+          const histogramOptions: HistogramChartOptions = {
+            ...baseChartOptions,
+            bins: options.bins || 20,
+          };
+          chartRef.current = createHistogramChart(`#${chartId}`, data as number[], histogramOptions);
         } else if (chartType === 'scatter') {
           const scatterOptions: ScatterChartOptions = {
             ...baseChartOptions,
             showTrendLine: options.showTrendLine,
           };
-          chartRef.current = createScatterChart(`#${chartId}`, data, scatterOptions);
+          chartRef.current = createScatterChart(
+            `#${chartId}`,
+            data as ChartDataset[],
+            scatterOptions
+          );
+        } else if (chartType === 'pie') {
+          const pieOptions: PieChartOptions = {
+            width: baseChartOptions.width,
+            height: baseChartOptions.height,
+            showTooltip: baseChartOptions.showTooltip,
+            showLegend: baseChartOptions.showLegend,
+            legendPosition: baseChartOptions.legendPosition,
+            animate: baseChartOptions.animate,
+            tooltipSize: baseChartOptions.tooltipSize,
+            showLabels: options.showLabels !== false,
+            showPercentages: options.showPercentages !== false,
+            showValues: options.showValues === true,
+          };
+          chartRef.current = createPieChart(`#${chartId}`, data as PieDataPoint[], pieOptions);
+        } else if (chartType === 'doughnut') {
+          const doughnutOptions: PieChartOptions = {
+            width: baseChartOptions.width,
+            height: baseChartOptions.height,
+            showTooltip: baseChartOptions.showTooltip,
+            showLegend: baseChartOptions.showLegend,
+            legendPosition: baseChartOptions.legendPosition,
+            animate: baseChartOptions.animate,
+            tooltipSize: baseChartOptions.tooltipSize,
+            showLabels: options.showLabels !== false,
+            showPercentages: options.showPercentages !== false,
+            showValues: options.showValues === true,
+          };
+          chartRef.current = createDoughnutChart(
+            `#${chartId}`,
+            data as PieDataPoint[],
+            doughnutOptions
+          );
         } else {
           const lineOptions: LineChartOptions = baseChartOptions;
-          chartRef.current = createLineChart(`#${chartId}`, data, lineOptions);
+          chartRef.current = createLineChart(`#${chartId}`, data as ChartDataset[], lineOptions);
         }
-        
+
         chartRef.current.render();
       }, 100);
 
@@ -92,7 +159,7 @@ export default function ChartContainer({ data, chartId, options, chartType = 'li
   }, []);
 
   return (
-    <div className="w-full">
+    <div className="max-h-[280px] w-full sm:max-h-[400px]">
       <div id={chartId} ref={containerRef} className="w-full" />
     </div>
   );

@@ -403,12 +403,13 @@ export class HistogramChart implements IHistogramChart {
       .enter()
       .append('rect')
       .attr('class', 'histogram-bar')
-      .attr('x', (d) => xScale(d.x0))
-      .attr('width', (d) => Math.max(0, xScale(d.x1) - xScale(d.x0))) // No gaps between bars
+      .attr('x', (d) => Math.floor(xScale(d.x0))) // Round to whole pixels
+      .attr('width', (d) => Math.max(0, Math.ceil(xScale(d.x1) - xScale(d.x0)) + 0.5)) // Slight overlap to eliminate gaps
       .attr('y', height - margin.bottom)
       .attr('height', 0)
       .attr('fill', barColor)
       .attr('stroke', 'none')
+      .attr('shape-rendering', 'crispEdges') // Prevent anti-aliasing gaps
       .style('cursor', this.options.showTooltip ? 'pointer' : 'default');
 
     // Animate bars

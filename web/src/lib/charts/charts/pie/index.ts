@@ -30,7 +30,7 @@ export function createDoughnutChart(
   data: PieDataPoint[],
   options?: PieChartOptions
 ): PieChart {
-  const defaultInnerRadius = (options?.outerRadius || 150) * 0.5;
+  const defaultInnerRadius = (options?.outerRadius || 140) * 0.65;
   return new PieChart(container, data, { 
     ...options, 
     innerRadius: options?.innerRadius ?? defaultInnerRadius 

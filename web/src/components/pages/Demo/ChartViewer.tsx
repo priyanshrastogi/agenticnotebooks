@@ -16,18 +16,17 @@ interface ChartViewerProps {
   onRegenerateData: () => void;
 }
 
-export default function ChartViewer({ 
-  data, 
-  chartId, 
-  options, 
-  activeTab, 
-  onTabChange, 
-  onRegenerateData 
+export default function ChartViewer({
+  data,
+  chartId,
+  options,
+  activeTab,
+  onTabChange,
+  onRegenerateData,
 }: ChartViewerProps) {
-
   return (
     <div className="flex-1">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+      <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <Tabs value={activeTab} onValueChange={(value) => onTabChange(value as 'chart' | 'data')}>
           <TabsList>
             <TabsTrigger value="chart">Chart</TabsTrigger>
@@ -44,8 +43,8 @@ export default function ChartViewer({
           <ChartContainer data={data} chartId={chartId} options={options} />
         </TabsContent>
         <TabsContent value="data">
-          <div className="border rounded-lg p-2 sm:p-4 bg-gray-50 max-h-[280px] sm:max-h-[400px] overflow-auto">
-            <pre className="text-xs sm:text-sm font-mono break-all sm:break-normal">
+          <div className="max-h-[280px] overflow-auto rounded-lg border bg-gray-50 p-2 sm:max-h-[400px] sm:p-4">
+            <pre className="break-all font-mono text-xs sm:break-normal sm:text-sm">
               {JSON.stringify(data, null, 2)}
             </pre>
           </div>
