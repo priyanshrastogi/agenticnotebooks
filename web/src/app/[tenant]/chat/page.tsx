@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 
-import Chat from '@/components/pages/Chat';
+import Chat from '@/components/pages/AgenticRows/Chat';
 
 export const metadata: Metadata = {
   title: 'Data Analysis | Intellicharts',

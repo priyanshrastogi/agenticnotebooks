@@ -21,7 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/lib/hooks/use-user';
 import { cn } from '@/lib/utils';
 
-import Logo from '../ui/logo';
+import ClientTenantLogo from '../ui/client-tenant-logo';
 
 export interface NavItem {
   label: string;
@@ -95,7 +95,7 @@ export function AppNavbar({
         <div className="flex h-12 items-center justify-between">
           <div className="flex items-center gap-1 sm:min-w-[220px]">
             <Link href={logoHref} className="flex items-center gap-1">
-              <Logo />
+              <ClientTenantLogo />
             </Link>
           </div>
 

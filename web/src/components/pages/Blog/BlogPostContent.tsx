@@ -130,94 +130,99 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
   };
 
   return (
-    <article className="mx-auto max-w-5xl">
-      {/* Back link at top */}
-      <div className="mb-8">
-        <Link
-          href="/blog"
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
-        >
-          <span>←</span> <span>Back to blog</span>
-        </Link>
-      </div>
-
-      {/* Main title */}
-      <h1 className="mb-8 text-center text-2xl font-bold sm:text-4xl md:text-5xl">{post.title}</h1>
-
-      {/* Cover image */}
-      {post.coverImage && (
-        <div className="relative mb-8 aspect-[16/9] h-auto max-h-[300px] w-full overflow-hidden rounded-lg sm:max-h-[350px] md:max-h-[500px]">
-          <Image src={post.coverImage} alt={post.title} fill className="object-cover" priority />
-        </div>
-      )}
-
-      {/* Meta information */}
-      <div className="text-muted-foreground mb-12 flex flex-wrap items-center gap-5 text-sm">
-        <div className="flex items-center">
-          <Calendar className="mr-2 h-4 w-4" />
-          <time>{post.formattedDate}</time>
+    <div>
+      {/* Header section */}
+      <div className="mx-auto max-w-5xl">
+        {/* Back link at top */}
+        <div className="mb-8">
+          <Link
+            href="/blog"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
+          >
+            <span>←</span> <span>Back to blog</span>
+          </Link>
         </div>
 
-        <div className="flex items-center">
-          <User className="mr-2 h-4 w-4" />
-          <span>{post.author.name}</span>
-        </div>
+        {/* Main title */}
+        <h1 className="mb-8 text-center text-2xl font-bold sm:text-4xl md:text-5xl">{post.title}</h1>
 
-        {post.tags && post.tags.length > 0 && (
-          <div className="flex items-center gap-2">
-            <Tag className="h-4 w-4" />
-            <div className="flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
-                <Link
-                  key={tag}
-                  href={`/blog/category/${tag.toLowerCase()}`}
-                  className="bg-muted hover:bg-muted/80 rounded-full px-2 py-1 text-xs"
-                >
-                  {tag}
-                </Link>
-              ))}
-            </div>
+        {/* Cover image */}
+        {post.coverImage && (
+          <div className="relative mb-8 aspect-[16/9] h-auto max-h-[300px] w-full overflow-hidden rounded-lg sm:max-h-[350px] md:max-h-[500px]">
+            <Image src={post.coverImage} alt={post.title} fill className="object-cover" priority />
           </div>
         )}
-      </div>
 
-      {/* Content and sidebar container */}
-      <div className="flex flex-col gap-12 lg:flex-row">
-        {/* Main content */}
-        <div
-          ref={contentRef}
-          className="prose prose-zinc dark:prose-invert max-w-none lg:max-w-2xl"
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
-
-        {/* Sidebar with TOC - hidden on mobile and tablet */}
-        <aside className="hidden w-full lg:block">
-          <div
-            className={`rounded-lg border p-6 lg:sticky lg:top-24 ${toc.length === 0 ? 'hidden' : ''}`}
-          >
-            <h3 className="mb-4 text-base font-medium">On this page</h3>
-            <nav className="text-sm">
-              <ul className="space-y-3">
-                {toc.map((item) => (
-                  <li key={item.id} style={{ marginLeft: `${(item.level - 2) * 12}px` }}>
-                    <a
-                      href={`#${item.id}`}
-                      onClick={(e) => handleTocClick(e, item.id)}
-                      className={`block border-l-2 py-1 pl-3 transition-colors ${
-                        activeId === item.id
-                          ? 'border-primary text-primary font-medium'
-                          : 'text-muted-foreground hover:text-foreground hover:border-muted-foreground border-transparent'
-                      }`}
-                    >
-                      {item.text}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+        {/* Meta information */}
+        <div className="text-muted-foreground mb-12 flex flex-wrap items-center gap-5 text-sm">
+          <div className="flex items-center">
+            <Calendar className="mr-2 h-4 w-4" />
+            <time>{post.formattedDate}</time>
           </div>
-        </aside>
+
+          <div className="flex items-center">
+            <User className="mr-2 h-4 w-4" />
+            <span>{post.author.name}</span>
+          </div>
+
+          {post.tags && post.tags.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              <div className="flex flex-wrap gap-2">
+                {post.tags.map((tag) => (
+                  <Link
+                    key={tag}
+                    href={`/blog/category/${tag.toLowerCase()}`}
+                    className="bg-muted hover:bg-muted/80 rounded-full px-2 py-1 text-xs"
+                  >
+                    {tag}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </article>
+
+      {/* Content and sidebar container - full width */}
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-col gap-12 lg:flex-row lg:gap-16">
+          {/* Main content */}
+          <article
+            ref={contentRef}
+            className="prose prose-zinc dark:prose-invert mx-auto max-w-none lg:max-w-3xl"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+
+          {/* Sidebar with TOC */}
+          {toc.length > 0 && (
+            <aside className="hidden lg:block lg:w-80">
+              <div className="sticky top-24 rounded-lg border p-6">
+                <h3 className="mb-4 text-base font-medium">On this page</h3>
+                <nav className="text-sm">
+                  <ul className="space-y-3">
+                    {toc.map((item) => (
+                      <li key={item.id} style={{ marginLeft: `${(item.level - 2) * 12}px` }}>
+                        <a
+                          href={`#${item.id}`}
+                          onClick={(e) => handleTocClick(e, item.id)}
+                          className={`block border-l-2 py-1 pl-3 transition-colors ${
+                            activeId === item.id
+                              ? 'border-primary text-primary font-medium'
+                              : 'text-muted-foreground hover:text-foreground hover:border-muted-foreground border-transparent'
+                          }`}
+                        >
+                          {item.text}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              </div>
+            </aside>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

@@ -4,14 +4,21 @@ import React from 'react';
 
 import Link from '@/components/blocks/custom-link';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import Logo from '@/components/ui/logo';
+import ClientTenantLogo from '@/components/ui/client-tenant-logo';
 import { handleSmoothScroll } from '@/lib/scroll-utils';
+import { getTenantFromUrl, type TenantInfo } from '@/lib/tenant';
 
 interface PublicFooterProps {
   showSmoothScroll?: boolean;
 }
 
 export function PublicFooter({ showSmoothScroll = false }: PublicFooterProps) {
+  const [tenant, setTenant] = React.useState<TenantInfo | null>(null);
+
+  React.useEffect(() => {
+    setTenant(getTenantFromUrl());
+  }, []);
+
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (showSmoothScroll && href.startsWith('#')) {
       handleSmoothScroll(e, href);
@@ -24,10 +31,10 @@ export function PublicFooter({ showSmoothScroll = false }: PublicFooterProps) {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div>
             <div className="mb-4 flex items-center gap-1">
-              <Logo />
+              <ClientTenantLogo />
             </div>
             <p className="text-muted-foreground text-sm">
-              Analyze spreadsheets with natural language, with full data privacy.
+              {tenant?.description || 'Analyze spreadsheets with natural language, with full data privacy.'}
             </p>
             <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
               <div className="flex space-x-6">

@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 
-import NewChat from '@/components/pages/New';
+import NewChat from '@/components/pages/AgenticRows/New';
 
 export const metadata: Metadata = {
   title: 'New Analysis | Intellicharts',

@@ -6,6 +6,8 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import html from 'remark-html';
 
+import type { Tenant } from './tenant';
+
 const postsDirectory = path.join(process.cwd(), 'content/blog');
 
 export type BlogPost = {
@@ -23,9 +25,19 @@ export type BlogPost = {
   tags?: string[];
 };
 
-export function getSortedPostsData(): BlogPost[] {
-  // Get file names under /content/blog
-  const fileNames = fs.readdirSync(postsDirectory);
+export function getSortedPostsData(tenant?: Tenant): BlogPost[] {
+  // If tenant is provided, use tenant-specific directory
+  const targetDirectory = tenant 
+    ? path.join(postsDirectory, tenant)
+    : postsDirectory;
+
+  // Check if directory exists, return empty array if not
+  if (!fs.existsSync(targetDirectory)) {
+    return [];
+  }
+
+  // Get file names under the target directory
+  const fileNames = fs.readdirSync(targetDirectory);
   const allPostsData = fileNames
     .filter((fileName) => fileName.endsWith('.md'))
     .map((fileName) => {
@@ -33,7 +45,7 @@ export function getSortedPostsData(): BlogPost[] {
       const slug = fileName.replace(/\.md$/, '');
 
       // Read markdown file as string
-      const fullPath = path.join(postsDirectory, fileName);
+      const fullPath = path.join(targetDirectory, fileName);
       const fileContents = fs.readFileSync(fullPath, 'utf8');
 
       // Use gray-matter to parse the post metadata section
@@ -62,17 +74,34 @@ export function getSortedPostsData(): BlogPost[] {
   });
 }
 
-export function getAllPostSlugs(): { slug: string }[] {
-  const fileNames = fs.readdirSync(postsDirectory);
-  return fileNames.map((fileName) => {
-    return {
-      slug: fileName.replace(/\.md$/, ''),
-    };
-  });
+export function getAllPostSlugs(tenant?: Tenant): { slug: string }[] {
+  // If tenant is provided, use tenant-specific directory
+  const targetDirectory = tenant 
+    ? path.join(postsDirectory, tenant)
+    : postsDirectory;
+
+  // Check if directory exists, return empty array if not
+  if (!fs.existsSync(targetDirectory)) {
+    return [];
+  }
+
+  const fileNames = fs.readdirSync(targetDirectory);
+  return fileNames
+    .filter((fileName) => fileName.endsWith('.md'))
+    .map((fileName) => {
+      return {
+        slug: fileName.replace(/\.md$/, ''),
+      };
+    });
 }
 
-export async function getPostData(slug: string): Promise<BlogPost> {
-  const fullPath = path.join(postsDirectory, `${slug}.md`);
+export async function getPostData(slug: string, tenant?: Tenant): Promise<BlogPost> {
+  // If tenant is provided, use tenant-specific directory
+  const targetDirectory = tenant 
+    ? path.join(postsDirectory, tenant)
+    : postsDirectory;
+
+  const fullPath = path.join(targetDirectory, `${slug}.md`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
 
   // Use gray-matter to parse the post metadata section
@@ -112,8 +141,8 @@ export async function getPostData(slug: string): Promise<BlogPost> {
   } as BlogPost;
 }
 
-export function getCategoryPosts(category: string): BlogPost[] {
-  const allPosts = getSortedPostsData();
+export function getCategoryPosts(category: string, tenant?: Tenant): BlogPost[] {
+  const allPosts = getSortedPostsData(tenant);
   return allPosts.filter(
     (post) => post.tags && post.tags.map((t) => t.toLowerCase()).includes(category.toLowerCase())
   );
