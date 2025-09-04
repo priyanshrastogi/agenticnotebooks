@@ -6,11 +6,7 @@ export type PlanType = 'free' | 'pro' | 'lifetime' | 'pro+lifetime';
 /**
  * Subscription status types
  */
-export type SubscriptionStatus =
-  | 'active'
-  | 'canceled'
-  | 'expired'
-  | 'payment_failed';
+export type SubscriptionStatus = 'active' | 'canceled' | 'expired' | 'payment_failed';
 
 /**
  * Payment provider types

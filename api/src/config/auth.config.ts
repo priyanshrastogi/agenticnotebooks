@@ -7,14 +7,8 @@ export default registerAs('auth', () => ({
     refreshTokenExpiration: process.env.JWT_REFRESH_TOKEN_EXPIRATION || '30d',
   },
   email: {
-    verificationExpiration: parseInt(
-      process.env.EMAIL_VERIFICATION_TOKEN_EXPIRE_HOURS || '24',
-      10,
-    ),
-    passwordResetExpiration: parseInt(
-      process.env.PASSWORD_RESET_TOKEN_EXPIRE_HOURS || '1',
-      10,
-    ),
+    verificationExpiration: parseInt(process.env.EMAIL_VERIFICATION_TOKEN_EXPIRE_HOURS || '24', 10),
+    passwordResetExpiration: parseInt(process.env.PASSWORD_RESET_TOKEN_EXPIRE_HOURS || '1', 10),
   },
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID || '',

@@ -15,8 +15,7 @@ export class SheetsResponseDto {
   conversationId: string;
 
   @ApiProperty({
-    description:
-      'The generated code that can be executed to analyze the spreadsheet data',
+    description: 'The generated code that can be executed to analyze the spreadsheet data',
     example:
       'const data = workbook.getSheet("Sheet1"); const filteredData = data.filter(row => row.Revenue > 1000);',
     required: false,

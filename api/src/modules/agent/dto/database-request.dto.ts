@@ -1,13 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsArray,
-  IsEnum,
-  IsObject,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { IsArray, IsEnum, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 export class TableMetadataDto {
   @ApiProperty({
@@ -19,8 +12,7 @@ export class TableMetadataDto {
 
   @ApiProperty({
     description: 'Optional description explaining what this table contains',
-    example:
-      'User account information including personal details and preferences',
+    example: 'User account information including personal details and preferences',
     required: false,
   })
   @IsString()
@@ -29,8 +21,7 @@ export class TableMetadataDto {
 
   @ApiProperty({
     description: 'Optional descriptions for table columns',
-    example:
-      'user_id: Primary key for user identification, email: User email address for login',
+    example: 'user_id: Primary key for user identification, email: User email address for login',
     required: false,
   })
   @IsString()
@@ -123,8 +114,7 @@ export class DatabaseRequestDto {
   history?: MessageDto[];
 
   @ApiProperty({
-    description:
-      'Optional conversation ID to continue an existing conversation',
+    description: 'Optional conversation ID to continue an existing conversation',
     example: 'abc123xyz789',
     required: false,
   })

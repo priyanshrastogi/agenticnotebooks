@@ -24,26 +24,20 @@ export class DatabaseAgent {
     try {
       this.openAIModel = new ChatOpenAI({
         modelName: this.configService.get<string>('agent.openaiModel'),
-        openAIApiKey:
-          this.configService.getOrThrow<string>('agent.openaiApiKey'),
+        openAIApiKey: this.configService.getOrThrow<string>('agent.openaiApiKey'),
         temperature: 0.1,
       });
 
       this.anthropicModel = new ChatAnthropic({
         modelName: this.configService.get<string>('agent.anthropicModel'),
-        anthropicApiKey: this.configService.getOrThrow<string>(
-          'agent.anthropicApiKey',
-        ),
+        anthropicApiKey: this.configService.getOrThrow<string>('agent.anthropicApiKey'),
         temperature: 0.1,
       });
 
       this.logger.log('DatabaseAgent initialized');
     } catch (error) {
       if (error instanceof Error) {
-        this.logger.error(
-          `Error initializing DatabaseAgent: ${error.message}`,
-          error.stack,
-        );
+        this.logger.error(`Error initializing DatabaseAgent: ${error.message}`, error.stack);
       } else {
         this.logger.error(`Error initializing DatabaseAgent: ${String(error)}`);
       }
@@ -55,7 +49,7 @@ export class DatabaseAgent {
     metadata: DatabaseMetadataDto,
     conversationId: string,
     history?: MessageDto[],
-    preferredLLMProvider?: string,
+    preferredLLMProvider?: string
   ): Promise<{
     response: string;
     conversationId: string;
@@ -66,17 +60,13 @@ export class DatabaseAgent {
     };
   }> {
     try {
-      this.logger.log(
-        `Processing database query for conversation ${conversationId}`,
-      );
+      this.logger.log(`Processing database query for conversation ${conversationId}`);
 
       const totalUsage = { inputTokens: 0, outputTokens: 0 };
 
       // Extract database type from metadata
       const databaseType = metadata.type || 'postgres';
-      this.logger.log(
-        `[Conv: ${conversationId}] Database type: ${databaseType}`,
-      );
+      this.logger.log(`[Conv: ${conversationId}] Database type: ${databaseType}`);
 
       // Select model based on preferredLLMProvider
       let model: ChatOpenAI | ChatAnthropic;
@@ -89,14 +79,13 @@ export class DatabaseAgent {
       // Stage 1: Table Selection
       const allTableNames: string[] = [];
       for (const schemaName in metadata.schemas) {
-        const schemaContents = metadata.schemas[
-          schemaName
-        ] as unknown as Record<string, TableMetadataDto>;
+        const schemaContents = metadata.schemas[schemaName] as unknown as Record<
+          string,
+          TableMetadataDto
+        >;
         if (schemaContents) {
           for (const tableName in schemaContents) {
-            if (
-              Object.prototype.hasOwnProperty.call(schemaContents, tableName)
-            ) {
+            if (Object.prototype.hasOwnProperty.call(schemaContents, tableName)) {
               if (databaseType === 'sqlite') {
                 allTableNames.push(tableName);
               } else {
@@ -106,7 +95,7 @@ export class DatabaseAgent {
           }
         } else {
           this.logger.warn(
-            `[Conv: ${conversationId}] Schema ${schemaName} found but content is undefined.`,
+            `[Conv: ${conversationId}] Schema ${schemaName} found but content is undefined.`
           );
         }
       }
@@ -130,10 +119,7 @@ export class DatabaseAgent {
         content: `Given the following tables:\n        ${allTableNames.join('\\n')}\n        \n        And the user's question: "${query}"\n        \n        Which tables are most relevant to answer this question? Please provide a comma-separated list of their ${databaseType === 'sqlite' ? 'names' : 'fully qualified names'}.`,
       };
 
-      const tableSelectorPrompts = [
-        tableSelectorSystemPrompt,
-        tableSelectorUserPrompt,
-      ];
+      const tableSelectorPrompts = [tableSelectorSystemPrompt, tableSelectorUserPrompt];
 
       if (history && history.length > 0) {
         const historyMessages = history.map((msg) => ({
@@ -144,25 +130,20 @@ export class DatabaseAgent {
       }
 
       const tableSelectorResult = await model.invoke(tableSelectorPrompts);
-      totalUsage.inputTokens +=
-        tableSelectorResult.usage_metadata?.input_tokens || 0;
-      totalUsage.outputTokens +=
-        tableSelectorResult.usage_metadata?.output_tokens || 0;
+      totalUsage.inputTokens += tableSelectorResult.usage_metadata?.input_tokens || 0;
+      totalUsage.outputTokens += tableSelectorResult.usage_metadata?.output_tokens || 0;
 
       let selectedTableNamesString = '';
       if (typeof tableSelectorResult.content === 'string') {
         selectedTableNamesString = tableSelectorResult.content.trim();
       } else {
         this.logger.warn(
-          `[Conv: ${conversationId}] Stage 1: Table selector response was not a string.`,
+          `[Conv: ${conversationId}] Stage 1: Table selector response was not a string.`
         );
       }
 
       let selectedTableNames: string[] = [];
-      if (
-        selectedTableNamesString &&
-        selectedTableNamesString.toUpperCase() !== 'NONE'
-      ) {
+      if (selectedTableNamesString && selectedTableNamesString.toUpperCase() !== 'NONE') {
         selectedTableNames = selectedTableNamesString
           .split(',')
           .map((name) => name.trim())
@@ -187,16 +168,14 @@ export class DatabaseAgent {
             tableName = parts.length > 1 ? parts[1] : parts[0];
           }
 
-          const sourceSchemaContents = metadata.schemas[
-            schemaName
-          ] as unknown as Record<string, TableMetadataDto>;
+          const sourceSchemaContents = metadata.schemas[schemaName] as unknown as Record<
+            string,
+            TableMetadataDto
+          >;
 
           if (
             sourceSchemaContents &&
-            Object.prototype.hasOwnProperty.call(
-              sourceSchemaContents,
-              tableName,
-            ) &&
+            Object.prototype.hasOwnProperty.call(sourceSchemaContents, tableName) &&
             sourceSchemaContents[tableName]
           ) {
             if (!filteredMetadata.schemas[schemaName]) {
@@ -206,14 +185,12 @@ export class DatabaseAgent {
               sourceSchemaContents[tableName];
           } else {
             this.logger.warn(
-              `[Conv: ${conversationId}] Table ${qualifiedTableName} selected but not found in metadata.`,
+              `[Conv: ${conversationId}] Table ${qualifiedTableName} selected but not found in metadata.`
             );
           }
         }
       } else {
-        this.logger.log(
-          `[Conv: ${conversationId}] Stage 1: No tables selected.`,
-        );
+        this.logger.log(`[Conv: ${conversationId}] Stage 1: No tables selected.`);
       }
 
       // Stage 2: Response Generation (SQL + Natural Language)
@@ -243,16 +220,14 @@ export class DatabaseAgent {
           ...history.map((msg) => ({
             role: msg.role,
             content: msg.content,
-          })),
+          }))
         );
       }
       responseGeneratorPrompts.push(responseGeneratorUserPrompt);
 
       const responseResult = await model.invoke(responseGeneratorPrompts);
-      totalUsage.inputTokens +=
-        responseResult.usage_metadata?.input_tokens || 0;
-      totalUsage.outputTokens +=
-        responseResult.usage_metadata?.output_tokens || 0;
+      totalUsage.inputTokens += responseResult.usage_metadata?.input_tokens || 0;
+      totalUsage.outputTokens += responseResult.usage_metadata?.output_tokens || 0;
 
       let response = '';
       let sql: string | undefined;
@@ -263,7 +238,7 @@ export class DatabaseAgent {
           resultContent = responseResult.content.trim();
         } else {
           this.logger.warn(
-            `[Conv: ${conversationId}] Response generator response was not a string.`,
+            `[Conv: ${conversationId}] Response generator response was not a string.`
           );
           resultContent = 'Error extracting response from model';
         }
@@ -273,24 +248,13 @@ export class DatabaseAgent {
           const jsonMatch = resultContent.match(/```json\s*([\s\S]*?)```/);
           if (jsonMatch && jsonMatch[1]) {
             resultContent = jsonMatch[1].trim();
-            this.logger.debug(
-              `[Conv: ${conversationId}] Extracted from JSON code block`,
-            );
+            this.logger.debug(`[Conv: ${conversationId}] Extracted from JSON code block`);
           }
-        } else if (
-          resultContent.includes('```') &&
-          !resultContent.trim().startsWith('{')
-        ) {
+        } else if (resultContent.includes('```') && !resultContent.trim().startsWith('{')) {
           const jsonMatch = resultContent.match(/```\s*([\s\S]*?)```/);
-          if (
-            jsonMatch &&
-            jsonMatch[1] &&
-            jsonMatch[1].trim().startsWith('{')
-          ) {
+          if (jsonMatch && jsonMatch[1] && jsonMatch[1].trim().startsWith('{')) {
             resultContent = jsonMatch[1].trim();
-            this.logger.debug(
-              `[Conv: ${conversationId}] Extracted from generic code block`,
-            );
+            this.logger.debug(`[Conv: ${conversationId}] Extracted from generic code block`);
           }
         }
 
@@ -323,7 +287,7 @@ export class DatabaseAgent {
         } else {
           this.logger.warn(
             `[Conv: ${conversationId}] Invalid JSON structure received:`,
-            parsedResponse,
+            parsedResponse
           );
           response = "I apologize, but I couldn't generate a proper response.";
         }
@@ -334,10 +298,10 @@ export class DatabaseAgent {
         }
 
         this.logger.warn(
-          `[Conv: ${conversationId}] Error parsing JSON response: ${error instanceof Error ? error.message : String(error)}`,
+          `[Conv: ${conversationId}] Error parsing JSON response: ${error instanceof Error ? error.message : String(error)}`
         );
         this.logger.debug(
-          `[Conv: ${conversationId}] Failed JSON content: ${fallbackContent || 'undefined'}`,
+          `[Conv: ${conversationId}] Failed JSON content: ${fallbackContent || 'undefined'}`
         );
 
         const responseMatch = fallbackContent.match(/"response":\s*"([^"]+)"/);
@@ -377,12 +341,10 @@ export class DatabaseAgent {
       if (error instanceof Error) {
         this.logger.error(
           `[Conv: ${conversationId}] Error in chatWithDatabase: ${error.message}`,
-          error.stack,
+          error.stack
         );
       } else {
-        this.logger.error(
-          `[Conv: ${conversationId}] Error in chatWithDatabase: ${String(error)}`,
-        );
+        this.logger.error(`[Conv: ${conversationId}] Error in chatWithDatabase: ${String(error)}`);
       }
 
       return {
@@ -394,9 +356,7 @@ export class DatabaseAgent {
     }
   }
 
-  private getDatabaseSpecificSystemPrompt(
-    databaseType: 'postgres' | 'mysql' | 'sqlite',
-  ): string {
+  private getDatabaseSpecificSystemPrompt(databaseType: 'postgres' | 'mysql' | 'sqlite'): string {
     const basePrompt = `You are an expert ${databaseType.toUpperCase()} database assistant. 
     
     Your task is to:

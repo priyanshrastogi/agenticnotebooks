@@ -39,13 +39,11 @@ export class DependencyResolver {
 
     while (remaining.length > 0) {
       const currentLevel = remaining.filter((step) =>
-        step.dependsOn.every((depId) => completed.has(depId)),
+        step.dependsOn.every((depId) => completed.has(depId))
       );
 
       if (currentLevel.length === 0) {
-        throw new Error(
-          'Invalid execution plan - circular dependency detected',
-        );
+        throw new Error('Invalid execution plan - circular dependency detected');
       }
 
       levels.push(currentLevel);
@@ -80,7 +78,7 @@ export class DependencyResolver {
   updateDependentSteps(
     completedStepId: string,
     plan: ExecutionPlan,
-    completedSteps: Set<string>,
+    completedSteps: Set<string>
   ): void {
     const dependentIds = plan.dependencies.get(completedStepId) || [];
 
@@ -89,9 +87,7 @@ export class DependencyResolver {
       if (!step) return;
 
       // Check if all dependencies are met
-      const allDependenciesMet = step.dependsOn.every((depId) =>
-        completedSteps.has(depId),
-      );
+      const allDependenciesMet = step.dependsOn.every((depId) => completedSteps.has(depId));
 
       if (allDependenciesMet && step.status === StepStatus.PENDING) {
         step.status = StepStatus.READY;

@@ -8,12 +8,7 @@ import { SheetsAgent } from './services/sheets-agent.service';
 
 @Module({
   imports: [ConfigModule],
-  providers: [
-    DatabaseAgent,
-    SheetsAgent,
-    CoordinatorAgent,
-    ExecutionPlanBuilder,
-  ],
+  providers: [DatabaseAgent, SheetsAgent, CoordinatorAgent, ExecutionPlanBuilder],
   exports: [DatabaseAgent, SheetsAgent, CoordinatorAgent, ExecutionPlanBuilder],
 })
 export class AgentV2Module {}

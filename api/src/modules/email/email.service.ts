@@ -17,23 +17,15 @@ export class EmailService {
   private passwordResetTokenExpireHours: number = 24;
 
   constructor(private readonly configService: ConfigService) {
-    const resendApiKey = this.configService.getOrThrow<string>(
-      'email.resend.apiKey',
-    );
-    this.emailsFromName =
-      this.configService.getOrThrow<string>('email.from.name');
-    this.emailsFromEmail =
-      this.configService.getOrThrow<string>('email.from.email');
+    const resendApiKey = this.configService.getOrThrow<string>('email.resend.apiKey');
+    this.emailsFromName = this.configService.getOrThrow<string>('email.from.name');
+    this.emailsFromEmail = this.configService.getOrThrow<string>('email.from.email');
 
     this.resend = new Resend(resendApiKey);
     this.logger.log('Email service initialized with Resend');
   }
 
-  private async sendEmail(
-    emailTo: string,
-    subject: string,
-    htmlContent: string,
-  ): Promise<boolean> {
+  private async sendEmail(emailTo: string, subject: string, htmlContent: string): Promise<boolean> {
     try {
       const params = {
         from: `${this.emailsFromName} <${this.emailsFromEmail}>`,
@@ -45,9 +37,7 @@ export class EmailService {
       const { data, error } = await this.resend.emails.send(params);
 
       if (error) {
-        this.logger.error(
-          `Error sending email to ${emailTo}: ${error.message}`,
-        );
+        this.logger.error(`Error sending email to ${emailTo}: ${error.message}`);
         return false;
       }
 
@@ -55,19 +45,12 @@ export class EmailService {
       return true;
     } catch (error) {
       const typedError = error as ErrorWithMessage;
-      this.logger.error(
-        `Failed to send email: ${typedError.message}`,
-        typedError.stack,
-      );
+      this.logger.error(`Failed to send email: ${typedError.message}`, typedError.stack);
       return false;
     }
   }
 
-  async sendVerificationEmail(
-    appName: string,
-    emailTo: string,
-    code: string,
-  ): Promise<boolean> {
+  async sendVerificationEmail(appName: string, emailTo: string, code: string): Promise<boolean> {
     try {
       const subject = `Verify your email for ${appName}`;
       const htmlContent = `
@@ -83,26 +66,20 @@ export class EmailService {
       </html>
       `;
 
-      this.logger.log(
-        `Sending verification email to ${emailTo} with code ${code}`,
-      );
+      this.logger.log(`Sending verification email to ${emailTo} with code ${code}`);
 
       return this.sendEmail(emailTo, subject, htmlContent);
     } catch (error) {
       const typedError = error as ErrorWithMessage;
       this.logger.error(
         `Failed to send verification email: ${typedError.message}`,
-        typedError.stack,
+        typedError.stack
       );
       return false;
     }
   }
 
-  async sendPasswordResetEmail(
-    appName: string,
-    emailTo: string,
-    code: string,
-  ): Promise<boolean> {
+  async sendPasswordResetEmail(appName: string, emailTo: string, code: string): Promise<boolean> {
     try {
       const subject = `${appName} - Password Reset Request`;
       const htmlContent = `
@@ -119,16 +96,14 @@ export class EmailService {
       </html>
       `;
 
-      this.logger.log(
-        `Sending password reset email to ${emailTo} with code ${code}`,
-      );
+      this.logger.log(`Sending password reset email to ${emailTo} with code ${code}`);
 
       return this.sendEmail(emailTo, subject, htmlContent);
     } catch (error) {
       const typedError = error as ErrorWithMessage;
       this.logger.error(
         `Failed to send password reset email: ${typedError.message}`,
-        typedError.stack,
+        typedError.stack
       );
       return false;
     }

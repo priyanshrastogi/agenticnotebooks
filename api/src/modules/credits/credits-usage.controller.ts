@@ -1,10 +1,5 @@
 import { Controller, Get, HttpStatus, Req, UseGuards } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { RequestWithUser } from '@/common/types/request.types';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
@@ -26,9 +21,7 @@ export class CreditsUsageController {
   })
   @UseGuards(JwtAuthGuard)
   @Get('usage')
-  async getUsageSummary(
-    @Req() request: RequestWithUser,
-  ): Promise<CreditsUsageResponseDto> {
+  async getUsageSummary(@Req() request: RequestWithUser): Promise<CreditsUsageResponseDto> {
     const userId = request.user.id;
     const activePlan = request.user.activePlan;
     return this.creditsUsageService.getUserUsageSummary(userId, activePlan);

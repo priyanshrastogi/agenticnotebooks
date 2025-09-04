@@ -9,12 +9,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { RequestWithUser } from '@/common/types/request.types';
 
@@ -39,9 +34,7 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getUserProfile(
-    @Request() req: RequestWithUser,
-  ): Promise<UserResponseDto> {
+  async getUserProfile(@Request() req: RequestWithUser): Promise<UserResponseDto> {
     return this.usersService.getUserDetails(req.user.id);
   }
 
@@ -56,7 +49,7 @@ export class UsersController {
   @Patch('me')
   async updateUserProfile(
     @Request() req: RequestWithUser,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() updateUserDto: UpdateUserDto
   ): Promise<UserResponseDto> {
     return this.usersService.updateUserProfile(req.user.id, updateUserDto);
   }
@@ -82,7 +75,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   async updatePassword(
     @Request() req: RequestWithUser,
-    @Body() updatePasswordDto: UpdatePasswordDto,
+    @Body() updatePasswordDto: UpdatePasswordDto
   ): Promise<{ message: string }> {
     await this.usersService.updateUserPassword(req.user.id, updatePasswordDto);
     return { message: 'Password updated successfully' };

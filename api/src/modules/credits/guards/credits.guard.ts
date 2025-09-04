@@ -25,7 +25,7 @@ export class CreditsGuard implements CanActivate {
     // Check if the user can use 1 credit (default count)
     const allowed = await this.creditsUsageService.validateUsageAllowed(
       request.user.id,
-      request.user.activePlan,
+      request.user.activePlan
     );
 
     if (!allowed) {
@@ -34,7 +34,7 @@ export class CreditsGuard implements CanActivate {
           message: 'Usage limit exceeded',
           code: 'CREDITS_LIMIT_EXCEEDED',
         },
-        HttpStatus.TOO_MANY_REQUESTS,
+        HttpStatus.TOO_MANY_REQUESTS
       );
     }
 

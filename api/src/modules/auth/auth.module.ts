@@ -33,9 +33,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       useFactory: (configService: ConfigService) => ({
         secret: configService.getOrThrow<string>('auth.jwt.secret'),
         signOptions: {
-          expiresIn: configService.getOrThrow<string>(
-            'auth.jwt.accessTokenExpiration',
-          ),
+          expiresIn: configService.getOrThrow<string>('auth.jwt.accessTokenExpiration'),
         },
       }),
     }),

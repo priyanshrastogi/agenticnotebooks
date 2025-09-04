@@ -18,7 +18,7 @@ export class ConversationsService {
     @InjectRepository(Conversation)
     private conversationsRepository: Repository<Conversation>,
     @InjectRepository(ConversationMessage)
-    private conversationMessagesRepository: Repository<ConversationMessage>,
+    private conversationMessagesRepository: Repository<ConversationMessage>
   ) {}
 
   /**
@@ -57,9 +57,7 @@ export class ConversationsService {
     const conversationDto = this.mapToDto(conversation);
 
     // Add messages to the DTO
-    conversationDto.messages = messages.map((message) =>
-      this.mapToMessageDto(message),
-    );
+    conversationDto.messages = messages.map((message) => this.mapToMessageDto(message));
 
     return conversationDto;
   }
@@ -80,11 +78,7 @@ export class ConversationsService {
   /**
    * Update a conversation
    */
-  async update(
-    id: string,
-    userId: string,
-    data: UpdateConversationDto,
-  ): Promise<ConversationDto> {
+  async update(id: string, userId: string, data: UpdateConversationDto): Promise<ConversationDto> {
     const entity = await this.conversationsRepository.findOne({
       where: { id, userId },
     });
@@ -126,9 +120,7 @@ export class ConversationsService {
     });
 
     if (!conversation) {
-      throw new NotFoundException(
-        `Conversation with ID ${params.conversationId} not found`,
-      );
+      throw new NotFoundException(`Conversation with ID ${params.conversationId} not found`);
     }
 
     // Update last message timestamp
@@ -145,27 +137,21 @@ export class ConversationsService {
       metadata: params.metadata,
     });
 
-    const savedMessage =
-      await this.conversationMessagesRepository.save(message);
+    const savedMessage = await this.conversationMessagesRepository.save(message);
     return this.mapToMessageDto(savedMessage);
   }
 
   /**
    * Get all messages for a conversation
    */
-  async getMessages(
-    conversationId: string,
-    userId: string,
-  ): Promise<ConversationMessageDto[]> {
+  async getMessages(conversationId: string, userId: string): Promise<ConversationMessageDto[]> {
     // First check if the conversation belongs to the user
     const conversation = await this.conversationsRepository.findOne({
       where: { id: conversationId, userId },
     });
 
     if (!conversation) {
-      throw new NotFoundException(
-        `Conversation with ID ${conversationId} not found`,
-      );
+      throw new NotFoundException(`Conversation with ID ${conversationId} not found`);
     }
 
     const messages = await this.conversationMessagesRepository.find({
@@ -194,9 +180,7 @@ export class ConversationsService {
   /**
    * Map message entity to DTO
    */
-  private mapToMessageDto(
-    message: ConversationMessage,
-  ): ConversationMessageDto {
+  private mapToMessageDto(message: ConversationMessage): ConversationMessageDto {
     return {
       id: message.id,
       conversationId: message.conversationId,

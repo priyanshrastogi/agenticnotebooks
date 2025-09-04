@@ -96,8 +96,7 @@ export class SheetsRequestDto {
   history?: MessageDto[];
 
   @ApiProperty({
-    description:
-      'Optional conversation ID to continue an existing conversation',
+    description: 'Optional conversation ID to continue an existing conversation',
     example: 'abc123xyz789',
     required: false,
   })

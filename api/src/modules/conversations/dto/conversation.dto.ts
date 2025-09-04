@@ -40,8 +40,7 @@ export class ConversationDto {
   lastMessageAt: Date;
 
   @ApiProperty({
-    description:
-      'Messages associated with this conversation (only included in detail view)',
+    description: 'Messages associated with this conversation (only included in detail view)',
     type: [ConversationMessageDto],
     required: false,
   })

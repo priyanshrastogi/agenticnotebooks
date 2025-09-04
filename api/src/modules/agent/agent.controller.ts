@@ -8,13 +8,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { RequestWithUser } from '@/common/types/request.types';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
@@ -40,7 +34,7 @@ export class AgentController {
     private readonly agentService: AgentService,
     private readonly conversationsService: ConversationsService,
     private readonly creditsUsageService: CreditsUsageService,
-    private readonly usersService: UsersService,
+    private readonly usersService: UsersService
   ) {}
 
   @ApiOperation({ summary: 'Chat with the AI agent' })
@@ -61,16 +55,13 @@ export class AgentController {
   async chat(
     @Param('type') type: AgentType,
     @Body() chatRequestDto: SheetsRequestDto | DatabaseRequestDto,
-    @Req() req: RequestWithUser,
+    @Req() req: RequestWithUser
   ): Promise<AgentResponse> {
     let conversationId = chatRequestDto.conversationId || '';
 
     // Create a new conversation if conversationId is empty
     if (!conversationId) {
-      const conversation = await this.conversationsService.create(
-        req.user.id,
-        'New Chat',
-      );
+      const conversation = await this.conversationsService.create(req.user.id, 'New Chat');
       conversationId = conversation.id;
     }
 
@@ -84,20 +75,15 @@ export class AgentController {
       metadata:
         type === 'sheets'
           ? {
-              files: (chatRequestDto as SheetsRequestDto).files.map(
-                (file) => file.fileName,
-              ),
+              files: (chatRequestDto as SheetsRequestDto).files.map((file) => file.fileName),
             }
           : {
-              schemas: Object.keys(
-                (chatRequestDto as DatabaseRequestDto).metadata.schemas,
-              ),
+              schemas: Object.keys((chatRequestDto as DatabaseRequestDto).metadata.schemas),
             },
     });
 
     // Fetch preferred LLM provider for the user
-    const preferredLLMProvider =
-      await this.usersService.getPreferredLLMProvider(req.user.id);
+    const preferredLLMProvider = await this.usersService.getPreferredLLMProvider(req.user.id);
 
     // Process the chat request based on agent type
     const result =
@@ -107,14 +93,14 @@ export class AgentController {
             (chatRequestDto as SheetsRequestDto).files,
             conversationId,
             chatRequestDto.history,
-            preferredLLMProvider,
+            preferredLLMProvider
           )
         : await this.agentService.chatWithDatabase(
             chatRequestDto.query,
             (chatRequestDto as DatabaseRequestDto).metadata,
             conversationId,
             chatRequestDto.history,
-            preferredLLMProvider,
+            preferredLLMProvider
           );
 
     // Save assistant message to the conversation
@@ -138,11 +124,7 @@ export class AgentController {
     }
 
     // Record credit usage for the user - each chat message counts as 1 credit
-    await this.creditsUsageService.recordUsage(
-      req.user.id,
-      req.user.activePlan,
-      1,
-    );
+    await this.creditsUsageService.recordUsage(req.user.id, req.user.activePlan, 1);
 
     return result;
   }

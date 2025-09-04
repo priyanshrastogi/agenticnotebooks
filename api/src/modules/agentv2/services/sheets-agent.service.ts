@@ -4,10 +4,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { nanoid } from 'nanoid';
 
-import {
-  FileMetadataDto,
-  MessageDto,
-} from '@/modules/agent/dto/sheets-request.dto';
+import { FileMetadataDto, MessageDto } from '@/modules/agent/dto/sheets-request.dto';
 
 @Injectable()
 export class SheetsAgent {
@@ -23,26 +20,20 @@ export class SheetsAgent {
     try {
       this.openAIModel = new ChatOpenAI({
         modelName: this.configService.get<string>('agent.openaiModel'),
-        openAIApiKey:
-          this.configService.getOrThrow<string>('agent.openaiApiKey'),
+        openAIApiKey: this.configService.getOrThrow<string>('agent.openaiApiKey'),
         temperature: 0.1,
       });
 
       this.anthropicModel = new ChatAnthropic({
         modelName: this.configService.get<string>('agent.anthropicModel'),
-        anthropicApiKey: this.configService.getOrThrow<string>(
-          'agent.anthropicApiKey',
-        ),
+        anthropicApiKey: this.configService.getOrThrow<string>('agent.anthropicApiKey'),
         temperature: 0.1,
       });
 
       this.logger.log('SheetsAgent initialized');
     } catch (error) {
       if (error instanceof Error) {
-        this.logger.error(
-          `Error initializing SheetsAgent: ${error.message}`,
-          error.stack,
-        );
+        this.logger.error(`Error initializing SheetsAgent: ${error.message}`, error.stack);
       } else {
         this.logger.error(`Error initializing SheetsAgent: ${String(error)}`);
       }
@@ -54,7 +45,7 @@ export class SheetsAgent {
     files: FileMetadataDto[],
     conversationId: string,
     history?: MessageDto[],
-    preferredLLMProvider?: string,
+    preferredLLMProvider?: string
   ): Promise<{
     response: string;
     conversationId: string;
@@ -66,9 +57,7 @@ export class SheetsAgent {
     };
   }> {
     try {
-      this.logger.log(
-        `Processing sheets message for conversation ${conversationId}`,
-      );
+      this.logger.log(`Processing sheets message for conversation ${conversationId}`);
 
       // System prompt that instructs the model to generate code
       const systemPrompt = {
@@ -294,7 +283,7 @@ export class SheetsAgent {
           ...messages.map((msg) => ({
             role: msg.role,
             content: msg.content,
-          })),
+          }))
         );
       }
 
@@ -327,18 +316,13 @@ export class SheetsAgent {
           throw new Error('Unable to extract text content from LLM response');
         }
       } catch (error) {
-        this.logger.warn(
-          'Error extracting code from model response content',
-          error,
-        );
+        this.logger.warn('Error extracting code from model response content', error);
         code = 'Error extracting code from model response';
       }
 
       // Clean up code if it contains markdown code blocks
       if (code.includes('```')) {
-        const codeMatch = code.match(
-          /```(?:javascript|typescript|js|ts)?\s*([\s\S]*?)```/,
-        );
+        const codeMatch = code.match(/```(?:javascript|typescript|js|ts)?\s*([\s\S]*?)```/);
         if (codeMatch && codeMatch[1]) {
           code = codeMatch[1].trim();
         }
@@ -378,10 +362,7 @@ export class SheetsAgent {
       };
     } catch (error: unknown) {
       if (error instanceof Error) {
-        this.logger.error(
-          `Error in chatWithSheets: ${error.message}`,
-          error.stack,
-        );
+        this.logger.error(`Error in chatWithSheets: ${error.message}`, error.stack);
       } else {
         this.logger.error(`Error in chatWithSheets: ${String(error)}`);
       }

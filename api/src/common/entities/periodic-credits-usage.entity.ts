@@ -12,11 +12,7 @@ import { User } from './user.entity';
 import { UserSubscription } from './user-subscription.entity';
 
 @Entity({ name: 'PeriodicCreditsUsage' })
-@Index('idx_periodic_credits_user_current_plan', [
-  'userId',
-  'currentPeriod',
-  'plan',
-])
+@Index('idx_periodic_credits_user_current_plan', ['userId', 'currentPeriod', 'plan'])
 export class PeriodicCreditsUsage {
   @PrimaryGeneratedColumn('uuid')
   id: string;

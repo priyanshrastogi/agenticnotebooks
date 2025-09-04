@@ -35,7 +35,7 @@ declare module 'fastify' {
 export function appIdentifierMiddleware(
   request: FastifyRequest,
   _: any,
-  done: HookHandlerDoneFunction,
+  done: HookHandlerDoneFunction
 ): void {
   const host = request.hostname;
 

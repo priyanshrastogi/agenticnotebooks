@@ -34,7 +34,7 @@ export class CoordinatorAgent {
     private readonly planBuilder: ExecutionPlanBuilder,
     private readonly databaseAgent: DatabaseAgent,
     private readonly sheetsAgent: SheetsAgent,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {
     this.initialize();
   }
@@ -48,9 +48,7 @@ export class CoordinatorAgent {
 
     this.anthropicModel = new ChatAnthropic({
       modelName: this.configService.get<string>('agent.anthropicModel'),
-      anthropicApiKey: this.configService.getOrThrow<string>(
-        'agent.anthropicApiKey',
-      ),
+      anthropicApiKey: this.configService.getOrThrow<string>('agent.anthropicApiKey'),
       temperature: 0.1,
     });
   }
@@ -62,7 +60,7 @@ export class CoordinatorAgent {
     query: string,
     context: TaskContext,
     conversationId: string,
-    userId: string,
+    userId: string
   ): Promise<TaskState> {
     const taskId = `task_${Date.now()}_${nanoid(6)}`;
 
@@ -70,11 +68,7 @@ export class CoordinatorAgent {
       this.logger.log(`Processing task ${taskId} for user ${userId}`);
 
       // 1. Build intelligent execution plan using LLMs (this also determines task type)
-      const plan = await this.planBuilder.buildPlan(
-        query,
-        context,
-        context.preferredLLM,
-      );
+      const plan = await this.planBuilder.buildPlan(query, context, context.preferredLLM);
 
       // 2. Extract task type from the plan
       const taskType = this.determineTaskType(plan);
@@ -99,8 +93,7 @@ export class CoordinatorAgent {
       // 4. Execute plan
       return await this.executePlan(state);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Task processing error: ${errorMessage}`);
       throw error;
     }
@@ -116,12 +109,7 @@ export class CoordinatorAgent {
   /**
    * Complete a step with client results
    */
-  completeStep(
-    state: TaskState,
-    stepId: string,
-    result: unknown,
-    executionTime: number,
-  ): void {
+  completeStep(state: TaskState, stepId: string, result: unknown, executionTime: number): void {
     const step = state.plan.steps.find((s) => s.id === stepId);
     if (!step) {
       throw new Error(`Step ${stepId} not found`);
@@ -139,11 +127,7 @@ export class CoordinatorAgent {
     state.stepResults.set(step.id, result);
 
     // Update dependent steps
-    this.dependencyResolver.updateDependentSteps(
-      step.id,
-      state.plan,
-      state.completedSteps,
-    );
+    this.dependencyResolver.updateDependentSteps(step.id, state.plan, state.completedSteps);
 
     this.logger.log(`Step ${stepId} completed in ${executionTime}ms`);
   }
@@ -181,14 +165,12 @@ export class CoordinatorAgent {
         // Get next executable steps
         const executableSteps = this.dependencyResolver.getExecutableSteps(
           state.plan,
-          state.completedSteps,
+          state.completedSteps
         );
 
         if (executableSteps.length === 0) {
           // Check if waiting for client
-          const executingSteps = state.plan.steps.filter(
-            (s) => s.status === StepStatus.EXECUTING,
-          );
+          const executingSteps = state.plan.steps.filter((s) => s.status === StepStatus.EXECUTING);
 
           if (executingSteps.length > 0) {
             state.status = TaskStatus.WAITING_FOR_CLIENT;
@@ -196,9 +178,7 @@ export class CoordinatorAgent {
           }
 
           // No progress possible
-          throw new Error(
-            'No executable steps found - possible circular dependency',
-          );
+          throw new Error('No executable steps found - possible circular dependency');
         }
 
         // Execute steps sequentially (can be parallel in future)
@@ -219,8 +199,7 @@ export class CoordinatorAgent {
       state.finalResponse = this.generateFinalResponse(state);
       state.endTime = new Date();
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       state.status = TaskStatus.ERROR;
       state.error = {
         message: errorMessage,
@@ -246,7 +225,7 @@ export class CoordinatorAgent {
             state.query,
             state.context.databases,
             state.conversationId,
-            state.context.preferredLLM,
+            state.context.preferredLLM
           );
           break;
 
@@ -256,7 +235,7 @@ export class CoordinatorAgent {
             state.context.spreadsheets || [],
             state.conversationId,
             state.context.preferredLLM,
-            state,
+            state
           );
           break;
 
@@ -280,8 +259,7 @@ export class CoordinatorAgent {
       // Otherwise, mark as completed
       this.completeStepInternal(step, state);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       step.status = StepStatus.ERROR;
       step.result = {
         success: false,
@@ -302,11 +280,7 @@ export class CoordinatorAgent {
     }
 
     // Update dependent steps
-    this.dependencyResolver.updateDependentSteps(
-      step.id,
-      state.plan,
-      state.completedSteps,
-    );
+    this.dependencyResolver.updateDependentSteps(step.id, state.plan, state.completedSteps);
   }
 
   private determineTaskType(plan: ExecutionPlan): TaskType {
@@ -317,9 +291,7 @@ export class CoordinatorAgent {
     }
 
     // For multiple steps, check if it's a transfer operation or comparison
-    const hasTransfer = plan.steps.some(
-      (s) => s.type === StepType.EXECUTE_TRANSFER,
-    );
+    const hasTransfer = plan.steps.some((s) => s.type === StepType.EXECUTE_TRANSFER);
     return hasTransfer ? TaskType.TRANSFER_DATA : TaskType.COMPARE_DATA;
   }
 
@@ -342,7 +314,7 @@ export class CoordinatorAgent {
     query: string,
     metadata: unknown,
     conversationId: string,
-    preferredLLM?: string,
+    preferredLLM?: string
   ): Promise<StepResult> {
     if (!metadata) {
       throw new Error('Database metadata is required');
@@ -354,7 +326,7 @@ export class CoordinatorAgent {
       metadata as DatabaseMetadataDto,
       conversationId,
       [],
-      preferredLLM,
+      preferredLLM
     );
 
     return {
@@ -374,7 +346,7 @@ export class CoordinatorAgent {
     spreadsheets: unknown[],
     conversationId: string,
     preferredLLM?: string,
-    state?: TaskState,
+    state?: TaskState
   ): Promise<StepResult> {
     // For hybrid operations, check if we have database results to include
     let enhancedQuery = query;
@@ -397,9 +369,7 @@ CONTEXT: You also have access to database results that were queried previously. 
 
     // Spreadsheets are optional now - can work with database results only
     if (!spreadsheets.length && !databaseResult) {
-      throw new Error(
-        'Either spreadsheet files or database results are required',
-      );
+      throw new Error('Either spreadsheet files or database results are required');
     }
 
     // Use dedicated sheets agent with proper typing
@@ -408,7 +378,7 @@ CONTEXT: You also have access to database results that were queried previously. 
       (spreadsheets as FileMetadataDto[]) || [],
       conversationId,
       [],
-      preferredLLM,
+      preferredLLM
     );
 
     return {
@@ -441,7 +411,7 @@ CONTEXT: You also have access to database results that were queried previously. 
 
   private generateFinalResponse(state: TaskState): string {
     const successfulSteps = state.plan.steps.filter(
-      (s) => s.status === StepStatus.COMPLETED,
+      (s) => s.status === StepStatus.COMPLETED
     ).length;
 
     const responses: string[] = [];
@@ -451,7 +421,7 @@ CONTEXT: You also have access to database results that were queried previously. 
         responses.push(
           "I've completed the data comparison between your database and spreadsheet.",
           `Successfully executed ${successfulSteps} steps to analyze the data.`,
-          'The comparison results show the matches, mismatches, and unique records from each source.',
+          'The comparison results show the matches, mismatches, and unique records from each source.'
         );
         break;
 
@@ -459,14 +429,12 @@ CONTEXT: You also have access to database results that were queried previously. 
         responses.push(
           "I've prepared the data transfer from your spreadsheet to the database.",
           `The process involved ${successfulSteps} steps including extraction, transformation, and loading.`,
-          'Review the results to see how many records were processed.',
+          'Review the results to see how many records were processed.'
         );
         break;
 
       default:
-        responses.push(
-          `Task completed successfully with ${successfulSteps} steps executed.`,
-        );
+        responses.push(`Task completed successfully with ${successfulSteps} steps executed.`);
     }
 
     return responses.join(' ');

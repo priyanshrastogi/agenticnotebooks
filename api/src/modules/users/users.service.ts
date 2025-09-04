@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
@@ -17,7 +13,7 @@ import { UserResponseDto } from './dto/user-response.dto';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private userRepository: Repository<User>
   ) {}
 
   async getUserById(userId: string): Promise<User> {
@@ -46,10 +42,7 @@ export class UsersService {
     };
   }
 
-  async updateUserProfile(
-    userId: string,
-    updateUserDto: UpdateUserDto,
-  ): Promise<UserResponseDto> {
+  async updateUserProfile(userId: string, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
     const user = await this.getUserById(userId);
 
     if (updateUserDto.name !== undefined) {
@@ -69,16 +62,13 @@ export class UsersService {
     };
   }
 
-  async updateUserPassword(
-    userId: string,
-    updatePasswordDto: UpdatePasswordDto,
-  ): Promise<boolean> {
+  async updateUserPassword(userId: string, updatePasswordDto: UpdatePasswordDto): Promise<boolean> {
     const user = await this.getUserById(userId);
 
     // Verify current password
     const isPasswordValid = await this.comparePasswords(
       updatePasswordDto.currentPassword,
-      user.passwordHash,
+      user.passwordHash
     );
 
     if (!isPasswordValid) {
@@ -97,10 +87,7 @@ export class UsersService {
     return bcrypt.hash(password, saltRounds);
   }
 
-  private async comparePasswords(
-    plainPassword: string,
-    hashedPassword: string,
-  ): Promise<boolean> {
+  private async comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(plainPassword, hashedPassword);
   }
 

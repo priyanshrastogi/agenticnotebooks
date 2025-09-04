@@ -102,15 +102,12 @@ export class AuthController {
   })
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(
-    @Req() req: FastifyRequest,
-    @Body() loginDto: LoginDto,
-  ): Promise<TokenResponseDto> {
+  async login(@Req() req: FastifyRequest, @Body() loginDto: LoginDto): Promise<TokenResponseDto> {
     return this.authService.login(
       loginDto,
       req.app.name,
       req.ip,
-      req.headers['user-agent'] as string,
+      req.headers['user-agent'] as string
     );
   }
 
@@ -126,9 +123,7 @@ export class AuthController {
   })
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refreshToken(
-    @Body() tokenRefreshDto: TokenRefreshDto,
-  ): Promise<TokenResponseDto> {
+  async refreshToken(@Body() tokenRefreshDto: TokenRefreshDto): Promise<TokenResponseDto> {
     return this.authService.refreshToken(tokenRefreshDto);
   }
 
@@ -162,8 +157,7 @@ export class AuthController {
       properties: {
         message: {
           type: 'string',
-          example:
-            'If your email is registered, you will receive a password reset code shortly.',
+          example: 'If your email is registered, you will receive a password reset code shortly.',
         },
         verificationId: {
           type: 'string',
@@ -174,10 +168,7 @@ export class AuthController {
   })
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
-  async forgotPassword(
-    @Req() req: FastifyRequest,
-    @Body() forgotPasswordDto: ForgotPasswordDto,
-  ) {
+  async forgotPassword(@Req() req: FastifyRequest, @Body() forgotPasswordDto: ForgotPasswordDto) {
     return this.authService.forgotPassword(forgotPasswordDto, req.app.name);
   }
 
@@ -226,18 +217,13 @@ export class AuthController {
   async verifyEmail(
     @Param('id') id: string,
     @Param('code') code: string,
-    @Req() req: FastifyRequest,
+    @Req() req: FastifyRequest
   ) {
     if (!code || !id) {
       throw new BadRequestException('Verification ID and code are required');
     }
 
-    return this.authService.verifyEmail(
-      id,
-      code,
-      req.ip,
-      req.headers['user-agent'] as string,
-    );
+    return this.authService.verifyEmail(id, code, req.ip, req.headers['user-agent'] as string);
   }
 
   @ApiOperation({ summary: 'Reset password using token' })
@@ -249,8 +235,7 @@ export class AuthController {
       properties: {
         message: {
           type: 'string',
-          example:
-            'Password reset successful. You can now log in with your new password.',
+          example: 'Password reset successful. You can now log in with your new password.',
         },
       },
     },
@@ -313,12 +298,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async googleAuthCodeExchange(
     @Body() googleAuthDto: GoogleAuthDto,
-    @Req() req: FastifyRequest,
+    @Req() req: FastifyRequest
   ): Promise<TokenResponseDto> {
     // Exchange the auth code for Google tokens and user profile
     const googleUserData = await this.authService.exchangeGoogleAuthCode(
       googleAuthDto.code,
-      req.app.url,
+      req.app.url
     );
 
     // Validate or create user and return tokens
@@ -326,7 +311,7 @@ export class AuthController {
       googleUserData,
       req.app.name,
       req.ip,
-      req.headers['user-agent'] as string,
+      req.headers['user-agent'] as string
     );
   }
 
@@ -373,18 +358,12 @@ export class AuthController {
     status: 401,
     description: 'Unauthorized - Invalid or missing JWT token',
   })
-  async createAuthorizationToken(
-    @Req() req: RequestWithUser,
-    @Body('clientId') clientId: string,
-  ) {
+  async createAuthorizationToken(@Req() req: RequestWithUser, @Body('clientId') clientId: string) {
     if (!clientId) {
       throw new BadRequestException('Client ID is required');
     }
     const user = req.user;
-    const token = await this.authService.createAuthorizationToken(
-      user.id,
-      clientId,
-    );
+    const token = await this.authService.createAuthorizationToken(user.id, clientId);
     return { authorizationToken: token };
   }
 
@@ -399,14 +378,12 @@ export class AuthController {
       properties: {
         authorizationToken: {
           type: 'string',
-          description:
-            'One-time authorization token received from /authorize endpoint',
+          description: 'One-time authorization token received from /authorize endpoint',
           example: 'auth_token_123',
         },
         clientId: {
           type: 'string',
-          description:
-            'Client ID that was used to create the authorization token',
+          description: 'Client ID that was used to create the authorization token',
           example: 'desktop_app_v1',
         },
       },
@@ -419,18 +396,17 @@ export class AuthController {
   })
   @ApiResponse({
     status: 401,
-    description:
-      'Invalid or expired authorization token, or client ID mismatch',
+    description: 'Invalid or expired authorization token, or client ID mismatch',
   })
   async exchangeToken(
     @Body() tokensDto: TokensDto,
-    @Req() req: FastifyRequest,
+    @Req() req: FastifyRequest
   ): Promise<TokenResponseDto> {
     return this.authService.exchangeAuthorizationToken(
       tokensDto.authorizationToken,
       tokensDto.clientId,
       req.ip,
-      req.headers['user-agent'] as string,
+      req.headers['user-agent'] as string
     );
   }
 }

@@ -63,12 +63,12 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private dataSource: DataSource,
-    private emailService: EmailService,
+    private emailService: EmailService
   ) {}
 
   async register(
     registerDto: RegisterDto,
-    appName: string,
+    appName: string
   ): Promise<{ message: string; verificationId: string }> {
     // Check if user already exists
     const existingUser = await this.userRepository.findOne({
@@ -112,7 +112,7 @@ export class AuthService {
       const verificationToken = await this.createVerificationCode(
         savedUser.id,
         TokenType.EMAIL_VERIFICATION,
-        queryRunner.manager,
+        queryRunner.manager
       );
 
       await queryRunner.commitTransaction();
@@ -121,12 +121,11 @@ export class AuthService {
       await this.emailService.sendVerificationEmail(
         appName,
         savedUser.email,
-        verificationToken.code,
+        verificationToken.code
       );
 
       return {
-        message:
-          'User registered successfully. Please check your email for the verification code.',
+        message: 'User registered successfully. Please check your email for the verification code.',
         verificationId: verificationToken.id,
       };
     } catch (error) {
@@ -141,7 +140,7 @@ export class AuthService {
     loginDto: LoginDto,
     appName: string,
     ip?: string,
-    userAgent?: string,
+    userAgent?: string
   ): Promise<TokenResponseDto> {
     // Find user
     const user = await this.userRepository.findOne({
@@ -153,10 +152,7 @@ export class AuthService {
     }
 
     // Check password
-    const passwordValid = await this.comparePasswords(
-      loginDto.password,
-      user.passwordHash,
-    );
+    const passwordValid = await this.comparePasswords(loginDto.password, user.passwordHash);
 
     if (!passwordValid) {
       throw new UnauthorizedException('Invalid credentials');
@@ -172,15 +168,11 @@ export class AuthService {
       // Generate a new verification token
       const verificationToken = await this.createVerificationCode(
         user.id,
-        TokenType.EMAIL_VERIFICATION,
+        TokenType.EMAIL_VERIFICATION
       );
 
       // Send verification email
-      await this.emailService.sendVerificationEmail(
-        appName,
-        user.email,
-        verificationToken.code,
-      );
+      await this.emailService.sendVerificationEmail(appName, user.email, verificationToken.code);
 
       throw new BadRequestException({
         message: 'Email not verified. A new verification code has been sent.',
@@ -204,21 +196,16 @@ export class AuthService {
     return this.generateTokens(
       user,
       userRoles.map((role) => role.role),
-      session.id,
+      session.id
     );
   }
 
-  async refreshToken(
-    tokenRefreshDto: TokenRefreshDto,
-  ): Promise<TokenResponseDto> {
+  async refreshToken(tokenRefreshDto: TokenRefreshDto): Promise<TokenResponseDto> {
     try {
       // Decode refresh token
-      const decoded = this.jwtService.verify<JwtPayload>(
-        tokenRefreshDto.refreshToken,
-        {
-          secret: this.configService.getOrThrow<string>('auth.jwt.secret'),
-        },
-      );
+      const decoded = this.jwtService.verify<JwtPayload>(tokenRefreshDto.refreshToken, {
+        secret: this.configService.getOrThrow<string>('auth.jwt.secret'),
+      });
 
       // Check token type
       if (decoded.tokenType !== 'refresh') {
@@ -257,7 +244,7 @@ export class AuthService {
       return this.generateTokens(
         session.user,
         userRoles.map((role) => role.role),
-        session.id,
+        session.id
       );
     } catch (error) {
       throw new UnauthorizedException(error);
@@ -296,7 +283,7 @@ export class AuthService {
 
   async forgotPassword(
     forgotPasswordDto: ForgotPasswordDto,
-    appName: string,
+    appName: string
   ): Promise<{ message: string; verificationId?: string }> {
     // Find user
     const user = await this.userRepository.findOne({
@@ -306,34 +293,23 @@ export class AuthService {
     // Don't reveal if user exists
     if (!user) {
       return {
-        message:
-          'If your email is registered, you will receive a password reset code shortly.',
+        message: 'If your email is registered, you will receive a password reset code shortly.',
       };
     }
 
     // Create password reset token
-    const resetToken = await this.createVerificationCode(
-      user.id,
-      TokenType.PASSWORD_RESET,
-    );
+    const resetToken = await this.createVerificationCode(user.id, TokenType.PASSWORD_RESET);
 
     // Send password reset email
-    await this.emailService.sendPasswordResetEmail(
-      appName,
-      user.email,
-      resetToken.code,
-    );
+    await this.emailService.sendPasswordResetEmail(appName, user.email, resetToken.code);
 
     return {
-      message:
-        'If your email is registered, you will receive a password reset code shortly.',
+      message: 'If your email is registered, you will receive a password reset code shortly.',
       verificationId: resetToken.id,
     };
   }
 
-  async resetPassword(
-    resetPasswordDto: ResetPasswordDto,
-  ): Promise<{ message: string }> {
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
     // Find token by ID only
     const verificationToken = await this.tokenRepository.findOne({
       where: {
@@ -355,9 +331,7 @@ export class AuthService {
 
     // Check if max attempts reached
     if (verificationToken.attempts >= 5) {
-      throw new BadRequestException(
-        'Maximum attempts reached. Please request a new code.',
-      );
+      throw new BadRequestException('Maximum attempts reached. Please request a new code.');
     }
 
     // Increment attempts
@@ -387,8 +361,7 @@ export class AuthService {
     await this.sessionRepository.delete({ userId: user.id });
 
     return {
-      message:
-        'Password reset successful. You can now log in with your new password.',
+      message: 'Password reset successful. You can now log in with your new password.',
     };
   }
 
@@ -396,7 +369,7 @@ export class AuthService {
     id: string,
     code: string,
     ip?: string,
-    userAgent?: string,
+    userAgent?: string
   ): Promise<TokenResponseDto> {
     // Find token by ID only
     const verificationToken = await this.tokenRepository.findOne({
@@ -420,7 +393,7 @@ export class AuthService {
     // Check if max attempts reached
     if (verificationToken.attempts >= 5) {
       throw new BadRequestException(
-        'Maximum attempts reached. Please request a new verification code.',
+        'Maximum attempts reached. Please request a new verification code.'
       );
     }
 
@@ -463,7 +436,7 @@ export class AuthService {
     return this.generateTokens(
       user,
       userRoles.map((role) => role.role),
-      session.id,
+      session.id
     );
   }
 
@@ -476,7 +449,7 @@ export class AuthService {
     userData: GoogleUserData,
     appName: string,
     ip?: string,
-    userAgent?: string,
+    userAgent?: string
   ): Promise<TokenResponseDto> {
     // Look for existing OAuth connection
     const existingOAuth = await this.userOAuthRepository.findOne({
@@ -519,7 +492,7 @@ export class AuthService {
       return this.generateTokens(
         user,
         userRoles.map((role) => role.role),
-        session.id,
+        session.id
       );
     }
 
@@ -585,12 +558,7 @@ export class AuthService {
       });
 
       // Create new session using the transaction
-      const session = await this.createSession(
-        user.id,
-        ip,
-        userAgent,
-        queryRunner.manager,
-      );
+      const session = await this.createSession(user.id, ip, userAgent, queryRunner.manager);
 
       // Update last login
       user.lastLogin = new Date();
@@ -602,7 +570,7 @@ export class AuthService {
       return this.generateTokens(
         user,
         userRoles.map((role) => role.role),
-        session.id,
+        session.id
       );
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -612,19 +580,15 @@ export class AuthService {
     }
   }
 
-  public generateTokens(
-    user: User,
-    roles: string[],
-    sessionId: string,
-  ): TokenResponseDto {
+  public generateTokens(user: User, roles: string[], sessionId: string): TokenResponseDto {
     // Access token configuration
     const accessTokenExpiration = this.configService.getOrThrow<string>(
-      'auth.jwt.accessTokenExpiration',
+      'auth.jwt.accessTokenExpiration'
     );
 
     // Refresh token configuration
     const refreshTokenExpiration = this.configService.getOrThrow<string>(
-      'auth.jwt.refreshTokenExpiration',
+      'auth.jwt.refreshTokenExpiration'
     );
 
     // Generate access token
@@ -640,7 +604,7 @@ export class AuthService {
       {
         secret: this.configService.getOrThrow<string>('auth.jwt.secret'),
         expiresIn: accessTokenExpiration,
-      },
+      }
     );
 
     // Generate refresh token
@@ -653,7 +617,7 @@ export class AuthService {
       {
         secret: this.configService.getOrThrow<string>('auth.jwt.secret'),
         expiresIn: refreshTokenExpiration,
-      },
+      }
     );
 
     return {
@@ -686,7 +650,7 @@ export class AuthService {
     userId: string,
     ip?: string,
     userAgent?: string,
-    manager?: EntityManager,
+    manager?: EntityManager
   ): Promise<Session> {
     const session = new Session();
     session.userId = userId;
@@ -706,7 +670,7 @@ export class AuthService {
   private async createVerificationCode(
     userId: string,
     type: TokenType,
-    manager?: EntityManager,
+    manager?: EntityManager
   ): Promise<VerificationToken> {
     const token = new VerificationToken();
     token.userId = userId;
@@ -717,12 +681,8 @@ export class AuthService {
     // Set expiration based on token type
     const expiresAt =
       type === TokenType.PASSWORD_RESET
-        ? this.configService.getOrThrow<number>(
-            'auth.email.passwordResetExpiration',
-          )
-        : this.configService.getOrThrow<number>(
-            'auth.email.verificationExpiration',
-          );
+        ? this.configService.getOrThrow<number>('auth.email.passwordResetExpiration')
+        : this.configService.getOrThrow<number>('auth.email.verificationExpiration');
 
     token.expiresAt = addHours(new Date(), expiresAt);
 
@@ -743,10 +703,7 @@ export class AuthService {
     return bcrypt.hash(password, saltRounds);
   }
 
-  private async comparePasswords(
-    plainPassword: string,
-    hashedPassword: string,
-  ): Promise<boolean> {
+  private async comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(plainPassword, hashedPassword);
   }
 
@@ -756,22 +713,12 @@ export class AuthService {
    */
   getGoogleAuthUrl(appUrl: string): string {
     // Get Google OAuth config
-    const clientId = this.configService.getOrThrow<string>(
-      'auth.google.clientId',
-    );
-    const clientSecret = this.configService.getOrThrow<string>(
-      'auth.google.clientSecret',
-    );
-    const redirectUri = this.configService.getOrThrow<string>(
-      'auth.google.redirectUrl',
-    );
+    const clientId = this.configService.getOrThrow<string>('auth.google.clientId');
+    const clientSecret = this.configService.getOrThrow<string>('auth.google.clientSecret');
+    const redirectUri = this.configService.getOrThrow<string>('auth.google.redirectUrl');
 
     // Create OAuth client
-    const oAuth2Client = new OAuth2Client(
-      clientId,
-      clientSecret,
-      appUrl + redirectUri,
-    );
+    const oAuth2Client = new OAuth2Client(clientId, clientSecret, appUrl + redirectUri);
 
     // Generate auth URL
     const authorizeUrl = oAuth2Client.generateAuthUrl({
@@ -791,28 +738,15 @@ export class AuthService {
    * @param code The authorization code from Google redirect
    * @returns Google user data needed for authentication
    */
-  async exchangeGoogleAuthCode(
-    code: string,
-    appUrl: string,
-  ): Promise<GoogleUserData> {
+  async exchangeGoogleAuthCode(code: string, appUrl: string): Promise<GoogleUserData> {
     try {
       // Get Google OAuth config
-      const clientId = this.configService.getOrThrow<string>(
-        'auth.google.clientId',
-      );
-      const clientSecret = this.configService.getOrThrow<string>(
-        'auth.google.clientSecret',
-      );
-      const redirectUri = this.configService.getOrThrow<string>(
-        'auth.google.redirectUrl',
-      );
+      const clientId = this.configService.getOrThrow<string>('auth.google.clientId');
+      const clientSecret = this.configService.getOrThrow<string>('auth.google.clientSecret');
+      const redirectUri = this.configService.getOrThrow<string>('auth.google.redirectUrl');
 
       // Create OAuth client
-      const oAuth2Client = new OAuth2Client(
-        clientId,
-        clientSecret,
-        appUrl + redirectUri,
-      );
+      const oAuth2Client = new OAuth2Client(clientId, clientSecret, appUrl + redirectUri);
 
       // Exchange code for tokens
       const { tokens } = await oAuth2Client.getToken(code);
@@ -858,19 +792,14 @@ export class AuthService {
     } catch (error) {
       if (error instanceof Error) {
         throw new BadRequestException(
-          `Failed to exchange Google authorization code: ${error.message}`,
+          `Failed to exchange Google authorization code: ${error.message}`
         );
       }
-      throw new BadRequestException(
-        'Failed to exchange Google authorization code',
-      );
+      throw new BadRequestException('Failed to exchange Google authorization code');
     }
   }
 
-  async createAuthorizationToken(
-    userId: string,
-    clientId: string,
-  ): Promise<string> {
+  async createAuthorizationToken(userId: string, clientId: string): Promise<string> {
     // Generate a random token
     const token = nanoid(32);
 
@@ -892,10 +821,7 @@ export class AuthService {
     return token;
   }
 
-  async validateAuthorizationToken(
-    token: string,
-    clientId: string,
-  ): Promise<{ userId: string }> {
+  async validateAuthorizationToken(token: string, clientId: string): Promise<{ userId: string }> {
     // Find the token
     const authToken = await this.authorizationTokenRepository.findOne({
       where: { token, used: false },
@@ -926,13 +852,10 @@ export class AuthService {
     authorizationToken: string,
     clientId: string,
     ip?: string,
-    userAgent?: string,
+    userAgent?: string
   ): Promise<TokenResponseDto> {
     // Validate the authorization token
-    const { userId } = await this.validateAuthorizationToken(
-      authorizationToken,
-      clientId,
-    );
+    const { userId } = await this.validateAuthorizationToken(authorizationToken, clientId);
 
     // Get user and roles
     const user = await this.userRepository.findOne({ where: { id: userId } });

@@ -4,10 +4,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { nanoid } from 'nanoid';
 
-import {
-  DatabaseMetadataDto,
-  TableMetadataDto,
-} from './dto/database-request.dto';
+import { DatabaseMetadataDto, TableMetadataDto } from './dto/database-request.dto';
 import { FileMetadataDto, MessageDto } from './dto/sheets-request.dto';
 
 @Injectable()
@@ -25,26 +22,20 @@ export class AgentService {
       // Initialize OpenAI chat model
       this.openAIModel = new ChatOpenAI({
         modelName: this.configService.get<string>('agent.openaiModel'),
-        openAIApiKey:
-          this.configService.getOrThrow<string>('agent.openaiApiKey'),
+        openAIApiKey: this.configService.getOrThrow<string>('agent.openaiApiKey'),
         temperature: 0.1, // Lower temperature for more deterministic code generation
       });
 
       this.anthropicModel = new ChatAnthropic({
         modelName: this.configService.get<string>('agent.anthropicModel'),
-        anthropicApiKey: this.configService.getOrThrow<string>(
-          'agent.anthropicApiKey',
-        ),
+        anthropicApiKey: this.configService.getOrThrow<string>('agent.anthropicApiKey'),
         temperature: 0.1,
       });
 
       this.logger.log('Agent service initialized');
     } catch (error) {
       if (error instanceof Error) {
-        this.logger.error(
-          `Error initializing agent service: ${error.message}`,
-          error.stack,
-        );
+        this.logger.error(`Error initializing agent service: ${error.message}`, error.stack);
       } else {
         this.logger.error(`Error initializing agent service: ${String(error)}`);
       }
@@ -59,7 +50,7 @@ export class AgentService {
     files: FileMetadataDto[],
     conversationId: string,
     history?: MessageDto[],
-    preferredLLMProvider?: string,
+    preferredLLMProvider?: string
   ): Promise<{
     response: string;
     conversationId: string;
@@ -252,7 +243,7 @@ export class AgentService {
           ...messages.map((msg) => ({
             role: msg.role,
             content: msg.content,
-          })),
+          }))
         );
       }
 
@@ -282,9 +273,7 @@ export class AgentService {
 
       // Clean up code if it contains markdown code blocks
       if (code.includes('```')) {
-        const codeMatch = code.match(
-          /```(?:javascript|typescript|js|ts)?\s*([\s\S]*?)```/,
-        );
+        const codeMatch = code.match(/```(?:javascript|typescript|js|ts)?\s*([\s\S]*?)```/);
         if (codeMatch && codeMatch[1]) {
           code = codeMatch[1].trim();
         }
@@ -341,9 +330,7 @@ export class AgentService {
   /**
    * Get database-specific system prompt for SQL generation
    */
-  private getDatabaseSpecificSystemPrompt(
-    databaseType: 'postgres' | 'mysql' | 'sqlite',
-  ): string {
+  private getDatabaseSpecificSystemPrompt(databaseType: 'postgres' | 'mysql' | 'sqlite'): string {
     const basePrompt = `You are a database expert specialized in helping users with their database questions.
         
         Your task is to analyze the user's question and determine if they need:
@@ -484,7 +471,7 @@ export class AgentService {
     metadata: DatabaseMetadataDto,
     conversationId: string,
     history?: MessageDto[],
-    preferredLLMProvider?: string,
+    preferredLLMProvider?: string
   ): Promise<{
     response: string;
     conversationId: string;
@@ -495,17 +482,13 @@ export class AgentService {
     };
   }> {
     try {
-      this.logger.log(
-        `Processing database query for conversation ${conversationId}`,
-      );
+      this.logger.log(`Processing database query for conversation ${conversationId}`);
 
       const totalUsage = { inputTokens: 0, outputTokens: 0 };
 
       // Extract database type from metadata
       const databaseType = metadata.type || 'postgres'; // fallback to postgres
-      this.logger.log(
-        `[Conv: ${conversationId}] Database type: ${databaseType}`,
-      );
+      this.logger.log(`[Conv: ${conversationId}] Database type: ${databaseType}`);
 
       // Select model based on preferredLLMProvider
       let model: ChatOpenAI | ChatAnthropic;
@@ -520,33 +503,29 @@ export class AgentService {
       const tableDescriptions: Record<string, string> = {};
 
       for (const schemaName in metadata.schemas) {
-        const schemaContents = metadata.schemas[
-          schemaName
-        ] as unknown as Record<string, TableMetadataDto>;
+        const schemaContents = metadata.schemas[schemaName] as unknown as Record<
+          string,
+          TableMetadataDto
+        >;
         if (schemaContents) {
           for (const tableName in schemaContents) {
-            if (
-              Object.prototype.hasOwnProperty.call(schemaContents, tableName)
-            ) {
+            if (Object.prototype.hasOwnProperty.call(schemaContents, tableName)) {
               // Format table names based on database type
               const qualifiedTableName =
-                databaseType === 'sqlite'
-                  ? tableName
-                  : `${schemaName}.${tableName}`;
+                databaseType === 'sqlite' ? tableName : `${schemaName}.${tableName}`;
 
               allTableNames.push(qualifiedTableName);
 
               // Collect table descriptions if available
               const tableMetadata = schemaContents[tableName];
               if (tableMetadata?.description) {
-                tableDescriptions[qualifiedTableName] =
-                  tableMetadata.description;
+                tableDescriptions[qualifiedTableName] = tableMetadata.description;
               }
             }
           }
         } else {
           this.logger.warn(
-            `[Conv: ${conversationId}] Schema ${schemaName} found in metadata.schemas but its content is undefined or null.`,
+            `[Conv: ${conversationId}] Schema ${schemaName} found in metadata.schemas but its content is undefined or null.`
           );
         }
       }
@@ -583,10 +562,7 @@ export class AgentService {
         content: `Given the following tables with their descriptions:\n${tableListWithDescriptions}\n\nAnd the user's question: "${query}"\n\nWhich tables are most relevant to answer this question? Please provide a comma-separated list of their ${databaseType === 'sqlite' ? 'names' : 'fully qualified names'}.`,
       };
 
-      const tableSelectorPrompts = [
-        tableSelectorSystemPrompt,
-        tableSelectorUserPrompt,
-      ];
+      const tableSelectorPrompts = [tableSelectorSystemPrompt, tableSelectorUserPrompt];
 
       if (history && history.length > 0) {
         const historyMessages = history.map((msg) => ({
@@ -597,27 +573,22 @@ export class AgentService {
       }
 
       const tableSelectorResult = await model.invoke(tableSelectorPrompts);
-      totalUsage.inputTokens +=
-        tableSelectorResult.usage_metadata?.input_tokens || 0;
-      totalUsage.outputTokens +=
-        tableSelectorResult.usage_metadata?.output_tokens || 0;
+      totalUsage.inputTokens += tableSelectorResult.usage_metadata?.input_tokens || 0;
+      totalUsage.outputTokens += tableSelectorResult.usage_metadata?.output_tokens || 0;
 
       let selectedTableNamesString = '';
       if (typeof tableSelectorResult.content === 'string') {
         selectedTableNamesString = tableSelectorResult.content.trim();
       } else {
         this.logger.warn(
-          `[Conv: ${conversationId}] Stage 1: Table selector model response content was not a string.`,
+          `[Conv: ${conversationId}] Stage 1: Table selector model response content was not a string.`
         );
       }
 
       console.log('selectedTableNamesString', selectedTableNamesString);
 
       let selectedTableNames: string[] = [];
-      if (
-        selectedTableNamesString &&
-        selectedTableNamesString.toUpperCase() !== 'NONE'
-      ) {
+      if (selectedTableNamesString && selectedTableNamesString.toUpperCase() !== 'NONE') {
         selectedTableNames = selectedTableNamesString
           .split(',')
           .map((name) => name.trim())
@@ -644,16 +615,14 @@ export class AgentService {
             tableName = parts.length > 1 ? parts[1] : parts[0];
           }
 
-          const sourceSchemaContents = metadata.schemas[
-            schemaName
-          ] as unknown as Record<string, TableMetadataDto>;
+          const sourceSchemaContents = metadata.schemas[schemaName] as unknown as Record<
+            string,
+            TableMetadataDto
+          >;
 
           if (
             sourceSchemaContents &&
-            Object.prototype.hasOwnProperty.call(
-              sourceSchemaContents,
-              tableName,
-            ) &&
+            Object.prototype.hasOwnProperty.call(sourceSchemaContents, tableName) &&
             sourceSchemaContents[tableName]
           ) {
             if (!filteredMetadata.schemas[schemaName]) {
@@ -663,13 +632,13 @@ export class AgentService {
               sourceSchemaContents[tableName];
           } else {
             this.logger.warn(
-              `[Conv: ${conversationId}] Table ${qualifiedTableName} selected by LLM but not found in original metadata.`,
+              `[Conv: ${conversationId}] Table ${qualifiedTableName} selected by LLM but not found in original metadata.`
             );
           }
         }
       } else {
         this.logger.log(
-          `[Conv: ${conversationId}] Stage 1: No tables selected or 'NONE' returned by table selector.`,
+          `[Conv: ${conversationId}] Stage 1: No tables selected or 'NONE' returned by table selector.`
         );
       }
 
@@ -701,16 +670,14 @@ export class AgentService {
           ...history.map((msg) => ({
             role: msg.role,
             content: msg.content,
-          })),
+          }))
         );
       }
       responseGeneratorPrompts.push(responseGeneratorUserPrompt);
 
       const responseResult = await model.invoke(responseGeneratorPrompts);
-      totalUsage.inputTokens +=
-        responseResult.usage_metadata?.input_tokens || 0;
-      totalUsage.outputTokens +=
-        responseResult.usage_metadata?.output_tokens || 0;
+      totalUsage.inputTokens += responseResult.usage_metadata?.input_tokens || 0;
+      totalUsage.outputTokens += responseResult.usage_metadata?.output_tokens || 0;
 
       let response = '';
       let sql: string | undefined;
@@ -721,7 +688,7 @@ export class AgentService {
           resultContent = responseResult.content.trim();
         } else {
           this.logger.warn(
-            `[Conv: ${conversationId}] Response generator model response content was not a string.`,
+            `[Conv: ${conversationId}] Response generator model response content was not a string.`
           );
           resultContent = 'Error extracting response from model';
         }
@@ -752,7 +719,7 @@ export class AgentService {
         } else {
           this.logger.warn(
             `[Conv: ${conversationId}] Invalid JSON structure received:`,
-            parsedResponse,
+            parsedResponse
           );
           response = "I apologize, but I couldn't generate a proper response.";
         }
@@ -764,10 +731,10 @@ export class AgentService {
         }
 
         this.logger.warn(
-          `[Conv: ${conversationId}] Error parsing JSON response from model: ${error instanceof Error ? error.message : String(error)}`,
+          `[Conv: ${conversationId}] Error parsing JSON response from model: ${error instanceof Error ? error.message : String(error)}`
         );
         this.logger.debug(
-          `[Conv: ${conversationId}] Failed JSON content: ${fallbackContent || 'undefined'}`,
+          `[Conv: ${conversationId}] Failed JSON content: ${fallbackContent || 'undefined'}`
         );
 
         // Try to extract response text
@@ -809,12 +776,10 @@ export class AgentService {
       if (error instanceof Error) {
         this.logger.error(
           `[Conv: ${conversationId}] Error in chatDatabase: ${error.message}`,
-          error.stack,
+          error.stack
         );
       } else {
-        this.logger.error(
-          `[Conv: ${conversationId}] Error in chatDatabase: ${String(error)}`,
-        );
+        this.logger.error(`[Conv: ${conversationId}] Error in chatDatabase: ${String(error)}`);
       }
 
       return {

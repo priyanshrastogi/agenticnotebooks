@@ -5,12 +5,7 @@ import * as utc from 'dayjs/plugin/utc';
 import { Repository } from 'typeorm';
 
 import { PLANS } from '@/common/constants/plans';
-import {
-  DailyCreditsUsage,
-  PeriodicCreditsUsage,
-  User,
-  UserRole,
-} from '@/common/entities';
+import { DailyCreditsUsage, PeriodicCreditsUsage, User, UserRole } from '@/common/entities';
 
 import { CreditsUsageResponseDto } from './dto/credits-usage-response.dto';
 
@@ -29,7 +24,7 @@ export class CreditsUsageService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(UserRole)
-    private userRoleRepository: Repository<UserRole>,
+    private userRoleRepository: Repository<UserRole>
   ) {}
 
   /**
@@ -39,11 +34,7 @@ export class CreditsUsageService {
    * @param count Number of credits to use
    * @returns Success status
    */
-  async recordUsage(
-    userId: string,
-    activePlan: string,
-    count: number,
-  ): Promise<boolean> {
+  async recordUsage(userId: string, activePlan: string, count: number): Promise<boolean> {
     // Record usage for free plans (both daily and monthly)
     if (activePlan === 'free') {
       await this.recordFreeUsage(userId, count);
@@ -71,10 +62,7 @@ export class CreditsUsageService {
    * @param activePlan Active plan
    * @returns Usage summary
    */
-  async getUserUsageSummary(
-    userId: string,
-    activePlan: string,
-  ): Promise<CreditsUsageResponseDto> {
+  async getUserUsageSummary(userId: string, activePlan: string): Promise<CreditsUsageResponseDto> {
     const response: CreditsUsageResponseDto = {
       activePlan: activePlan,
       periodicUsage: [],
@@ -117,7 +105,7 @@ export class CreditsUsageService {
         'free',
         PLANS.free.features.monthlyLimit,
         firstDayOfMonth,
-        lastDayOfMonth,
+        lastDayOfMonth
       );
 
       response.periodicUsage = [
@@ -128,9 +116,7 @@ export class CreditsUsageService {
           used: periodicUsage.used,
           limit: periodicUsage.limit,
           remaining: Math.max(0, periodicUsage.limit - periodicUsage.used),
-          usagePercentage: Math.round(
-            (periodicUsage.used / periodicUsage.limit) * 100,
-          ),
+          usagePercentage: Math.round((periodicUsage.used / periodicUsage.limit) * 100),
         },
       ];
     }
@@ -167,14 +153,11 @@ export class CreditsUsageService {
         const ltUsage = periodicUsages.find((u) => u.plan === 'lt_credits');
 
         if (proUsage && ltUsage) {
-          response.isRateLimited =
-            proUsage.used >= proUsage.limit && ltUsage.used >= ltUsage.limit;
+          response.isRateLimited = proUsage.used >= proUsage.limit && ltUsage.used >= ltUsage.limit;
         }
       } else {
         // For single plan users, check if any plan is at limit
-        response.isRateLimited = periodicUsages.some(
-          (usage) => usage.used >= usage.limit,
-        );
+        response.isRateLimited = periodicUsages.some((usage) => usage.used >= usage.limit);
       }
     }
 
@@ -189,7 +172,7 @@ export class CreditsUsageService {
    */
   async getDailyUsage(
     userId: string,
-    date: Date = dayjs.utc().toDate(),
+    date: Date = dayjs.utc().toDate()
   ): Promise<DailyCreditsUsage | null> {
     // Normalize the date to midnight UTC
     const normalizedDate = dayjs.utc(date).startOf('day').toDate();
@@ -212,7 +195,7 @@ export class CreditsUsageService {
   async validateUsageAllowed(
     userId: string,
     activePlan: string,
-    count: number = 1,
+    count: number = 1
   ): Promise<boolean> {
     // For free plan users, check both daily and monthly limits
     if (activePlan === 'free') {
@@ -247,7 +230,7 @@ export class CreditsUsageService {
         'free',
         PLANS.free.features.monthlyLimit,
         firstDayOfMonth,
-        lastDayOfMonth,
+        lastDayOfMonth
       );
 
       return periodicUsage.used + count <= periodicUsage.limit;
@@ -292,13 +275,13 @@ export class CreditsUsageService {
     plan: string,
     limit: number,
     periodStart: Date,
-    periodEnd: Date,
+    periodEnd: Date
   ): Promise<PeriodicCreditsUsage> {
     // Set any current period to false for this user and plan
     if (subscriptionId) {
       await this.periodicCreditsUsageRepository.update(
         { subscriptionId, currentPeriod: true },
-        { currentPeriod: false },
+        { currentPeriod: false }
       );
     } else {
       // For free users, update based on userId and plan only
@@ -308,7 +291,7 @@ export class CreditsUsageService {
           plan,
           currentPeriod: true,
         },
-        { currentPeriod: false },
+        { currentPeriod: false }
       );
     }
 
@@ -336,7 +319,7 @@ export class CreditsUsageService {
    */
   private async getCurrentPeriodicUsage(
     userId: string,
-    plan: string,
+    plan: string
   ): Promise<PeriodicCreditsUsage | null> {
     return this.periodicCreditsUsageRepository.findOne({
       where: {
@@ -363,7 +346,7 @@ export class CreditsUsageService {
     plan: string,
     limit: number,
     periodStart: Date,
-    periodEnd: Date,
+    periodEnd: Date
   ): Promise<PeriodicCreditsUsage> {
     // Try to find an existing record - create where query
     const whereQuery: Record<string, any> = {
@@ -387,7 +370,7 @@ export class CreditsUsageService {
       plan,
       limit,
       periodStart,
-      periodEnd,
+      periodEnd
     );
   }
 
@@ -426,7 +409,7 @@ export class CreditsUsageService {
       'free',
       PLANS.free.features.monthlyLimit,
       firstDayOfMonth,
-      lastDayOfMonth,
+      lastDayOfMonth
     );
 
     periodicUsage.used += count;
@@ -439,10 +422,7 @@ export class CreditsUsageService {
    * @param count Number of credits to use
    * @returns Whether the usage was successfully recorded
    */
-  private async recordProUsage(
-    userId: string,
-    count: number,
-  ): Promise<boolean> {
+  private async recordProUsage(userId: string, count: number): Promise<boolean> {
     const proUsage = await this.getCurrentPeriodicUsage(userId, 'pro');
 
     if (!proUsage) {
@@ -466,10 +446,7 @@ export class CreditsUsageService {
    * @param userId User ID
    * @param count Number of credits to use
    */
-  private async recordLifetimeUsage(
-    userId: string,
-    count: number,
-  ): Promise<void> {
+  private async recordLifetimeUsage(userId: string, count: number): Promise<void> {
     const ltUsage = await this.getCurrentPeriodicUsage(userId, 'lt_credits');
 
     if (!ltUsage) {

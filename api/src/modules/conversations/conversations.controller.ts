@@ -1,30 +1,11 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { RequestWithUser } from '@/common/types/request.types';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 
 import { ConversationsService } from './conversations.service';
-import {
-  ConversationDto,
-  CreateConversationDto,
-  UpdateConversationDto,
-} from './dto';
+import { ConversationDto, CreateConversationDto, UpdateConversationDto } from './dto';
 
 @ApiTags('Conversations')
 @ApiBearerAuth('JWT-auth')
@@ -36,8 +17,7 @@ export class ConversationsController {
   @Get()
   @ApiOperation({
     summary: 'Get all conversations for the authenticated user',
-    description:
-      'Returns a list of conversation summaries without message content',
+    description: 'Returns a list of conversation summaries without message content',
   })
   @ApiResponse({
     status: 200,
@@ -59,10 +39,7 @@ export class ConversationsController {
     type: ConversationDto,
   })
   @ApiResponse({ status: 404, description: 'Conversation not found' })
-  async findOne(
-    @Param('id') id: string,
-    @Req() req: RequestWithUser,
-  ): Promise<ConversationDto> {
+  async findOne(@Param('id') id: string, @Req() req: RequestWithUser): Promise<ConversationDto> {
     return this.conversationsService.findById(id, req.user.id);
   }
 
@@ -78,12 +55,9 @@ export class ConversationsController {
   })
   async create(
     @Req() req: RequestWithUser,
-    @Body() createConversationDto: CreateConversationDto,
+    @Body() createConversationDto: CreateConversationDto
   ): Promise<ConversationDto> {
-    return this.conversationsService.create(
-      req.user.id,
-      createConversationDto.title,
-    );
+    return this.conversationsService.create(req.user.id, createConversationDto.title);
   }
 
   @Patch(':id')
@@ -100,13 +74,9 @@ export class ConversationsController {
   async update(
     @Param('id') id: string,
     @Req() req: RequestWithUser,
-    @Body() updateConversationDto: UpdateConversationDto,
+    @Body() updateConversationDto: UpdateConversationDto
   ): Promise<ConversationDto> {
-    return this.conversationsService.update(
-      id,
-      req.user.id,
-      updateConversationDto,
-    );
+    return this.conversationsService.update(id, req.user.id, updateConversationDto);
   }
 
   @Delete(':id')
@@ -121,7 +91,7 @@ export class ConversationsController {
   @ApiResponse({ status: 404, description: 'Conversation not found' })
   async remove(
     @Param('id') id: string,
-    @Req() req: RequestWithUser,
+    @Req() req: RequestWithUser
   ): Promise<{ success: boolean }> {
     await this.conversationsService.delete(id, req.user.id);
     return { success: true };

@@ -18,5 +18,5 @@ export default registerAs(
             rejectUnauthorized: false,
           }
         : false,
-  }),
+  })
 );

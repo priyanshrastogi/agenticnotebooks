@@ -21,7 +21,7 @@ export function setupSwagger(app: INestApplication, apiPrefix: string): void {
         description: 'Enter JWT token',
         in: 'header',
       },
-      'JWT-auth',
+      'JWT-auth'
     )
     .build();
 
@@ -33,9 +33,7 @@ export function setupSwagger(app: INestApplication, apiPrefix: string): void {
     const swaggerPassword = 'ApiDocs2025';
 
     // Get the underlying Fastify instance
-    const fastifyInstance = app
-      .getHttpAdapter()
-      .getInstance() as FastifyInstance;
+    const fastifyInstance = app.getHttpAdapter().getInstance() as FastifyInstance;
 
     // Register basic auth for the Swagger documentation route
     fastifyInstance.addHook('preHandler', (request, reply, done) => {
@@ -52,9 +50,7 @@ export function setupSwagger(app: INestApplication, apiPrefix: string): void {
         }
 
         const base64Credentials = authHeader.split(' ')[1];
-        const credentials = Buffer.from(base64Credentials, 'base64').toString(
-          'utf-8',
-        );
+        const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
         const [username, password] = credentials.split(':');
 
         if (username !== swaggerUser || password !== swaggerPassword) {
