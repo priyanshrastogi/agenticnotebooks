@@ -1,8 +1,8 @@
 {
-  "name": "intellicharts-api",
+  "name": "agenticnotebooks-api",
   "version": "0.0.1",
   "description": "",
-  "author": "Priyansh Rastogi <priyansh@intellicharts.com>",
+  "author": "Priyansh Rastogi <priyansh@agenticnotebooks.com>",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

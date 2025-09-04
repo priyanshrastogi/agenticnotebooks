@@ -1,15 +1,15 @@
 ---
-title: 'Comparing AgenticRows, ChatGPT, and Claude for Advanced Data Analysis'
+title: 'Comparing AgenticNotebooks, ChatGPT, and Claude for Advanced Data Analysis'
 date: '2025-05-17'
-excerpt: 'AgenticRows outperforms ChatGPT and Claude in XIRR spreadsheet analysis, delivering accurate results in 25 seconds while keeping your data private in your browser.'
+excerpt: 'AgenticNotebooks outperforms ChatGPT and Claude in XIRR spreadsheet analysis, delivering accurate results in 25 seconds while keeping your data private in your browser.'
 author:
   name: 'Priyansh Rastogi'
   image: '/images/blog/authors/priyansh.jpg'
-coverImage: 'https://assets.agenticrows.com/covers/glass-1.png'
+coverImage: 'https://assets.agenticnotebooks.com/covers/glass-1.png'
 tags: ['Comparisons']
 ---
 
-Have you ever struggled to quickly and accurately analyze data across multiple spreadsheets and complex datasets? You're not alone! Today, we're comparing our newly launched platform AgenticRows with two established AI assistants—ChatGPT and Claude—by using a challenging real-world example: calculating the Extended Internal Rate of Return (XIRR) for a stock portfolio. Let's see how they stacked up!
+Have you ever struggled to quickly and accurately analyze data across multiple spreadsheets and complex datasets? You're not alone! Today, we're comparing our newly launched platform AgenticNotebooks with two established AI assistants—ChatGPT and Claude—by using a challenging real-world example: calculating the Extended Internal Rate of Return (XIRR) for a stock portfolio. Let's see how they stacked up!
 
 ## The Challenge
 
@@ -34,7 +34,7 @@ XIRR (Extended Internal Rate of Return) measures investment performance accounti
 
 Here's how each platform performed:
 
-| Feature                | ChatGPT Free   | ChatGPT Plus              | Claude Pro            | AgenticRows Free     |
+| Feature                | ChatGPT Free   | ChatGPT Plus              | Claude Pro            | AgenticNotebooks Free     |
 | ---------------------- | -------------- | ------------------------- | --------------------- | -------------------- |
 | File Processing        | Server         | Server                    | Local (Browser-only)  | Local (Browser-only) |
 | Calculation Accuracy   | Errors Out     | Incorrect (6-digit XIRRs) | Mostly Correct        | Highly Accurate      |
@@ -69,24 +69,24 @@ Claude took a privacy-conscious approach by analyzing the files locally with Jav
 
 **Verdict:** ✓ Produces generally correct values with good privacy protection, but the process is slow and exporting results is awkward.
 
-### AgenticRows
+### AgenticNotebooks
 
-#### AgenticRows Free
+#### AgenticNotebooks Free
 
-AgenticRows handled the task differently. After quickly importing the files (which never left the browser), it completed the entire XIRR analysis in approximately 25 seconds. It automatically created an updated spreadsheet with the sorted XIRR values and included a visualization chart for immediate insights.
+AgenticNotebooks handled the task differently. After quickly importing the files (which never left the browser), it completed the entire XIRR analysis in approximately 25 seconds. It automatically created an updated spreadsheet with the sorted XIRR values and included a visualization chart for immediate insights.
 
 <video controls muted class="w-full rounded-lg my-6">
-  <source src="https://assets.AgenticRows.com/videos/AgenticRows-xirr-demo.mp4" type="video/mp4">
+  <source src="https://assets.AgenticNotebooks.com/videos/AgenticNotebooks-xirr-demo.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 
-When checking accuracy, AgenticRows couldn't compute XIRR for four stocks with extreme negative returns (around -80%), which Claude managed to calculate. For one stock (AXP), AgenticRows calculated a 690% XIRR while Claude showed 99%. After manual verification, AgenticRows proved accurate (689% when calculated by hand) due to the short holding period (44 days) and substantial returns.
+When checking accuracy, AgenticNotebooks couldn't compute XIRR for four stocks with extreme negative returns (around -80%), which Claude managed to calculate. For one stock (AXP), AgenticNotebooks calculated a 690% XIRR while Claude showed 99%. After manual verification, AgenticNotebooks proved accurate (689% when calculated by hand) due to the short holding period (44 days) and substantial returns.
 
-For the stocks AgenticRows skipped, further research confirmed that XIRR calculations often struggle with extreme negative returns or unusual data patterns.
+For the stocks AgenticNotebooks skipped, further research confirmed that XIRR calculations often struggle with extreme negative returns or unusual data patterns.
 
 **Verdict:** ✓ Fast, accurate, user-friendly, and completely privacy-focused.
 
-## Why AgenticRows Wins This Challenge
+## Why AgenticNotebooks Wins This Challenge
 
 - **True Privacy Protection:** Your spreadsheet data never leaves your browser - only metadata (column names and data types) is transmitted, unlike other platforms that require uploading your financial information.
 - **Superior Speed:** From import to results in under 30 seconds, compared to several minutes with other platforms.
@@ -96,6 +96,6 @@ For the stocks AgenticRows skipped, further research confirmed that XIRR calcula
 
 ## Final Thoughts
 
-While ChatGPT and Claude excel as general-purpose AI assistants, AgenticRows demonstrates clear superiority for specialized spreadsheet analysis. Its unique design allows you to transform how you interact with and analyze spreadsheet data through natural language conversation, regardless of your technical background. The combination of speed, accuracy, privacy protection, and intuitive results presentation makes it the standout choice for financial and data analysis tasks.
+While ChatGPT and Claude excel as general-purpose AI assistants, AgenticNotebooks demonstrates clear superiority for specialized spreadsheet analysis. Its unique design allows you to transform how you interact with and analyze spreadsheet data through natural language conversation, regardless of your technical background. The combination of speed, accuracy, privacy protection, and intuitive results presentation makes it the standout choice for financial and data analysis tasks.
 
-Try AgenticRows today at [AgenticRows.com/new](https://AgenticRows.com/new) and see how it can transform your approach to spreadsheet analysis!
+Try AgenticNotebooks today at [AgenticNotebooks.com/new](https://AgenticNotebooks.com/new) and see how it can transform your approach to spreadsheet analysis!

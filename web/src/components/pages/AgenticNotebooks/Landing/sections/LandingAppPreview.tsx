@@ -67,7 +67,7 @@ export function LandingAppPreview() {
     document.getElementById('landing-file-upload')?.click();
   };
 
-  // Sample prompts to showcase AgenticRows capabilities
+  // Sample prompts to showcase AgenticNotebooks capabilities
   const samplePrompts = [
     {
       icon: <FileSpreadsheet className="text-primary h-5 w-5 flex-shrink-0" />,

@@ -28,7 +28,7 @@ export function LandingPrivacy() {
         <div className="mb-16 text-center">
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">Privacy-First Data Analysis</h2>
           <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-            Unlike other tools, AgenticRows processes your data entirely within your browser.
+            Unlike other tools, AgenticNotebooks processes your data entirely within your browser.
           </p>
         </div>
 
@@ -111,7 +111,7 @@ export function LandingPrivacy() {
 
             {/* Server Side */}
             <div className="flex w-full flex-col rounded-3xl border border-blue-200 bg-blue-100/50 p-6 md:w-[45%] md:p-8 dark:border-blue-800/50 dark:bg-blue-900/10">
-              <h3 className="mb-6 text-center text-xl font-semibold">AgenticRows Servers</h3>
+              <h3 className="mb-6 text-center text-xl font-semibold">AgenticNotebooks Servers</h3>
 
               <div className="bg-background border-border mb-8 flex-grow rounded-xl border p-6 shadow-sm">
                 <div className="mb-5 flex justify-center">

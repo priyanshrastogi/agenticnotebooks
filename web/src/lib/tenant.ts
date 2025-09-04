@@ -1,29 +1,29 @@
-import { BarChart3, Grid2X2CheckIcon } from 'lucide-react';
+import { BookOpen, TrendingUp } from 'lucide-react';
 
-export type Tenant = 'intellicharts' | 'agenticrows';
+export type Tenant = 'agenticnotebooks' | 'intellicharts';
 
 export interface TenantInfo {
   id: Tenant;
   name: string;
   domain: string;
-  logoIcon: typeof Grid2X2CheckIcon;
+  logoIcon: typeof TrendingUp;
   description: string;
 }
 
 export const TENANT_CONFIG: Record<Tenant, TenantInfo> = {
+  agenticnotebooks: {
+    id: 'agenticnotebooks',
+    name: 'AgenticNotebooks',
+    domain: 'agenticnotebooks.com',
+    logoIcon: BookOpen,
+    description: 'AI agent for notebook analysis',
+  },
   intellicharts: {
     id: 'intellicharts',
     name: 'IntelliCharts',
     domain: 'intellicharts.com',
-    logoIcon: Grid2X2CheckIcon,
+    logoIcon: TrendingUp,
     description: 'AI-powered data visualization platform',
-  },
-  agenticrows: {
-    id: 'agenticrows',
-    name: 'AgenticRows',
-    domain: 'agenticrows.com',
-    logoIcon: BarChart3,
-    description: 'AI agent for data analysis',
   },
 };
 
@@ -41,17 +41,21 @@ export async function getTenant(): Promise<TenantInfo> {
 // Client-side function to get tenant from window location
 export function getTenantFromUrl(): TenantInfo {
   if (typeof window === 'undefined') {
-    return TENANT_CONFIG.intellicharts;
+    return TENANT_CONFIG.agenticnotebooks;
   }
   
   const hostname = window.location.hostname;
   
-  if (hostname.includes('agenticrows')) {
-    return TENANT_CONFIG.agenticrows;
+  if (hostname.includes('agenticnotebooks')) {
+    return TENANT_CONFIG.agenticnotebooks;
   }
   
-  // Default to intellicharts
-  return TENANT_CONFIG.intellicharts;
+  if (hostname.includes('intellicharts')) {
+    return TENANT_CONFIG.intellicharts;
+  }
+  
+  // Default to agenticnotebooks
+  return TENANT_CONFIG.agenticnotebooks;
 }
 
 export async function isIntellicharts(): Promise<boolean> {
@@ -59,7 +63,7 @@ export async function isIntellicharts(): Promise<boolean> {
   return tenant.id === 'intellicharts';
 }
 
-export async function isAgenticRows(): Promise<boolean> {
+export async function isAgenticNotebooks(): Promise<boolean> {
   const tenant = await getTenant();
-  return tenant.id === 'agenticrows';
+  return tenant.id === 'agenticnotebooks';
 }

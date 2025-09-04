@@ -1,15 +1,15 @@
 ---
-title: 'Introducing AgenticRows: Chat With Your Data While Keeping It Private'
+title: 'Introducing AgenticNotebooks: Chat With Your Data While Keeping It Private'
 date: '2025-05-16'
-excerpt: "I'm launching the beta of AgenticRows, a conversation-based spreadsheet analysis tool that lets you chat with your Excel and CSV files while keeping your data completely private in your browser."
+excerpt: "I'm launching the beta of AgenticNotebooks, a conversation-based notebook analysis tool that lets you chat with your Jupyter notebooks, Excel and CSV files while keeping your data completely private in your browser."
 author:
   name: 'Priyansh Rastogi'
   image: '/images/blog/authors/priyansh.jpg'
-coverImage: 'https://assets.AgenticRows.com/covers/blue-1.png'
+coverImage: 'https://assets.agenticnotebooks.com/covers/blue-1.png'
 tags: ['Announcement']
 ---
 
-Hey there! After weeks of late nights, countless cups of coffee, and more spreadsheet formulas than I care to remember, I'm beyond excited to invite you to try the beta version of AgenticRows — a new tool that lets you chat with your spreadsheets in plain English while keeping your data completely private.
+Hey there! After weeks of late nights, countless cups of coffee, and more notebook analysis than I care to remember, I'm beyond excited to invite you to try the beta version of AgenticNotebooks — a new tool that lets you chat with your notebooks and spreadsheets in plain English while keeping your data completely private.
 
 ## Why I Built This
 
@@ -23,15 +23,15 @@ First, I realized my data had been uploaded to OpenAI's servers — not ideal fo
 
 Even when I did get it to work on simpler datasets, crafting the perfect prompt felt like learning a new skill in itself. And downloading the processed data? Another headache entirely.
 
-I knew there had to be a better solution. That's what led me to build AgenticRows. As I started building, I focused on solving two key problems: making data analysis truly conversational and keeping your data private.
+I knew there had to be a better solution. That's what led me to build AgenticNotebooks. As I started building, I focused on solving two key problems: making data analysis truly conversational and keeping your data private.
 
 Most AI analysis tools require sending your entire dataset to their servers. For many businesses (including mine!), that's a complete non-starter when dealing with sensitive information.
 
 So I challenged myself: Could I build something that offers the power of AI analysis without the prompt engineering frustration and without compromising data privacy?
 
-## How AgenticRows Works (The Privacy-First Way)
+## How AgenticNotebooks Works (The Privacy-First Way)
 
-Here's where AgenticRows gets interesting. When you upload a spreadsheet, your actual data stays right in your browser — it never leaves your computer. The only things I process on my servers are:
+Here's where AgenticNotebooks gets interesting. When you upload a spreadsheet, your actual data stays right in your browser — it never leaves your computer. The only things I process on my servers are:
 
 1. The structure of your spreadsheet (column names, data types)
 2. Your questions about the data
@@ -40,7 +40,7 @@ The AI then generates JavaScript code that runs in your browser to analyze your 
 
 This approach gives you the best of both worlds: powerful AI-assisted analysis with complete data privacy.
 
-## What You Can Do With AgenticRows
+## What You Can Do With AgenticNotebooks
 
 So what does this look like in practice? Imagine you've just uploaded your spreadsheet. Now you can simply ask:
 
@@ -76,7 +76,7 @@ And since all the processing happens in your browser, it's fast — no waiting f
 
 ## The Technical Details (How It Actually Works)
 
-For those curious about what's happening behind the scenes, here's a simplified look at how AgenticRows works:
+For those curious about what's happening behind the scenes, here's a simplified look at how AgenticNotebooks works:
 
 1. **Browser-Based Processing**: When you upload an Excel or CSV file, JavaScript in your browser processes the file entirely locally. No data is sent to any server.
 
@@ -92,7 +92,7 @@ What makes this approach unique is that the "heavy lifting" of data processing h
 
 ## It's Beta, and I'm Just Getting Started
 
-I want to be upfront — this is a beta launch. You'll encounter some rough edges, and there are features I'm still working on. Currently, AgenticRows supports:
+I want to be upfront — this is a beta launch. You'll encounter some rough edges, and there are features I'm still working on. Currently, AgenticNotebooks supports:
 
 - Excel files (.xlsx, .xls) and CSV files up to 30MB
 - Finding insights using single or multiple files
@@ -107,14 +107,14 @@ Your feedback during this beta will be invaluable in helping me refine the produ
 
 ## Try It Out (It's Free During Beta)
 
-I'm offering AgenticRows free during the beta period. I want as many people as possible to try it out and tell me what they think.
+I'm offering AgenticNotebooks free during the beta period. I want as many people as possible to try it out and tell me what they think.
 
-[Try AgenticRows Beta →](https://AgenticRows.com/new)
+[Try AgenticNotebooks Beta →](https://AgenticNotebooks.com/new)
 
-After you've given it a spin, please share your thoughts! What worked well? What was confusing? What features would make this indispensable for you? Your input will directly shape what AgenticRows becomes.
+After you've given it a spin, please share your thoughts! What worked well? What was confusing? What features would make this indispensable for you? Your input will directly shape what AgenticNotebooks becomes.
 
 It's not perfect yet, but I think it's already pretty useful, and with your help, it'll get even better.
 
 ---
 
-Have questions or feedback? I'd love to hear from you personally. Reach out to me directly at priyansh@AgenticRows.com. I'm building this for everyone who's ever been frustrated by spreadsheets and databases!
+Have questions or feedback? I'd love to hear from you personally. Reach out to me directly at priyansh@AgenticNotebooks.com. I'm building this for everyone who's ever been frustrated by spreadsheets and databases!

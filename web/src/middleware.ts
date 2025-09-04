@@ -19,14 +19,14 @@ type TenantConfig = {
 
 const TENANTS: TenantConfig[] = [
   {
+    domain: 'agenticnotebooks',
+    name: 'AgenticNotebooks',
+    landingPage: 'agenticnotebooks',
+  },
+  {
     domain: 'intellicharts',
     name: 'IntelliCharts',
     landingPage: 'intellicharts',
-  },
-  {
-    domain: 'agenticrows',
-    name: 'AgenticRows',
-    landingPage: 'agenticrows',
   },
 ];
 
@@ -61,7 +61,7 @@ const extractSubdomain = (request: NextRequest): string | null => {
   }
   
   // Production environment
-  // Check for subdomains like subdomain.intellicharts.com or subdomain.agenticrows.com
+  // Check for subdomains like subdomain.intellicharts.com or subdomain.agenticnotebooks.com
   const parts = hostname.split('.');
   if (parts.length >= 3) {
     // Has subdomain
@@ -76,7 +76,7 @@ const extractSubdomain = (request: NextRequest): string | null => {
 // Get tenant from subdomain
 const getTenantFromSubdomain = (subdomain: string | null): TenantConfig => {
   if (!subdomain) {
-    return TENANTS[0]; // Default to IntelliCharts
+    return TENANTS[0]; // Default to AgenticNotebooks
   }
   
   const tenant = TENANTS.find((t) => t.domain === subdomain);

@@ -1,13 +1,25 @@
-# IntelliCharts - Claude Code Instructions
+# AgenticNotebooks & IntelliCharts - Claude Code Instructions
 
-This document provides comprehensive instructions for Claude Code when working on the IntelliCharts project.
+This document provides comprehensive instructions for Claude Code when working on the multi-tenant AgenticNotebooks project.
 
 ## Project Overview
 
+This is a **multi-tenant application** hosting two distinct AI-powered platforms:
+
+**AgenticNotebooks** is an AI agent for notebook analysis that allows users to chat with their Jupyter notebooks, Excel and CSV files while keeping data completely private in their browser.
+
 **IntelliCharts** is an AI-powered data visualization platform that transforms any data into beautiful, customizable charts instantly. Users can feed various data sources (JSON, CSV, APIs, XML, HTML) and watch the AI agent automatically parse, analyze, and create stunning charts in seconds.
 
-### Key Value Proposition
+### Key Value Propositions
 
+#### AgenticNotebooks
+- **Privacy-First**: Data never leaves your browser - complete local processing
+- **Notebook Analysis**: Specialized for Jupyter notebooks and spreadsheet analysis
+- **Conversational**: Natural language interface for data exploration
+- **Fast Processing**: Browser-based analysis for instant results
+- **Secure**: No data uploaded to external servers
+
+#### IntelliCharts
 - **AI-Powered**: Intelligent data parsing and chart generation
 - **Any Data Source**: Supports JSON, CSV, APIs, XML, HTML
 - **Instant Results**: Automatic parsing, analysis, and visualization
@@ -40,6 +52,34 @@ This is a monorepo with two main components:
 - **PostgreSQL** with TypeORM
 - **LangChain** for AI agent functionality
 - **Yarn** as package manager
+
+## Multi-Tenant Architecture
+
+This application uses a sophisticated multi-tenant architecture to serve both IntelliCharts and AgenticNotebooks from the same codebase:
+
+### Tenant Configuration
+- **Tenant Types**: `'agenticnotebooks' | 'intellicharts'`
+- **Domain Mapping**: 
+  - `agenticnotebooks.localhost:3000` → AgenticNotebooks experience
+  - `intellicharts.localhost:3000` → IntelliCharts experience
+- **Production Domains**:
+  - `agenticnotebooks.com` → AgenticNotebooks
+  - `intellicharts.com` → IntelliCharts
+
+### Key Implementation Details
+- **Dynamic Routing**: Uses `[tenant]` dynamic routes for all pages
+- **Middleware**: Detects subdomain and rewrites URLs to tenant-specific routes
+- **Tenant-Aware Components**: Logo, branding, and content adapt based on tenant
+- **Separate Landing Pages**: Each tenant has its own landing page components
+- **Blog Separation**: Tenant-specific blog content in separate folders
+- **Asset URLs**: Different asset domains for each tenant
+
+### Important Files
+- `src/lib/tenant.ts` - Tenant configuration and utilities
+- `src/middleware.ts` - Subdomain detection and URL rewriting
+- `src/app/[tenant]/` - All tenant-scoped routes
+- `content/blog/agenticnotebooks/` - AgenticNotebooks blog posts
+- `content/blog/intellicharts/` - IntelliCharts blog posts
 
 ## Development Guidelines
 
@@ -85,37 +125,58 @@ This is a monorepo with two main components:
 ```
 /web/src
 ├── app/                    # Next.js App Router
-│   ├── (app)/             # Authenticated app routes
-│   │   ├── chat/          # Main chat interface
-│   │   ├── demo/          # Chart library demo
-│   │   └── new/           # New chart creation
-│   ├── (auth)/           # Authentication routes
-│   ├── (blog)/           # Blog section
-│   ├── (marketing)/      # Marketing pages
-│   └── page.tsx          # Landing page
+│   ├── [tenant]/          # Tenant-scoped routes (dynamic routing)
+│   │   ├── (app)/         # Authenticated app routes
+│   │   │   ├── chat/      # Main chat interface
+│   │   │   ├── demo/      # Chart library demo
+│   │   │   └── new/       # New chart creation
+│   │   ├── (auth)/       # Authentication routes
+│   │   ├── (blog)/       # Blog section
+│   │   ├── (marketing)/  # Marketing pages
+│   │   └── page.tsx      # Tenant-specific landing page
+│   ├── layout.tsx        # Root layout
+│   └── globals.css       # Global styles
 ├── components/           # React components
 │   ├── pages/           # Page-specific components
+│   │   ├── AgenticNotebooks/  # AgenticNotebooks-specific components
+│   │   ├── IntelliCharts/  # IntelliCharts-specific components
+│   │   ├── Landing/       # Shared landing components
+│   │   └── Blog/          # Blog components
 │   ├── blocks/          # Reusable UI blocks
 │   ├── ui/              # Radix UI components
 │   └── magicui/         # Magic UI effects
 ├── lib/                 # Utilities and services
+│   ├── tenant.ts        # Tenant configuration and utilities
+│   ├── blog.ts          # Tenant-aware blog functionality
 │   ├── charts/          # D3.js chart library
 │   ├── hooks/           # Custom React hooks
 │   ├── stores/          # Zustand stores
 │   ├── fetch/           # API client functions
 │   └── contexts/        # React contexts
-└── middleware.ts        # Next.js middleware
+├── middleware.ts        # Multi-tenant middleware
+└── content/             # Blog content (outside src)
+    └── blog/
+        ├── agenticnotebooks/  # AgenticNotebooks blog posts
+        └── intellicharts/     # IntelliCharts blog posts
 ```
 
 ### Core Features
 
-#### Landing Page (`/`)
+#### Multi-Tenant Landing Pages (`/[tenant]`)
 
+**AgenticNotebooks Landing:**
+- Hero section with notebook analysis messaging
+- Features showcase for notebook and spreadsheet analysis
+- Privacy-first data processing emphasis
+- Notebook-focused use cases and FAQs
+- Call-to-action to try notebook analysis
+
+**IntelliCharts Landing:**
 - Hero section with AI-powered data visualization messaging
-- Features showcase
-- How it works section
-- Use cases and FAQs
-- Call-to-action to try the product
+- Features showcase for chart generation
+- How it works section for data visualization
+- Chart-focused use cases and FAQs
+- Call-to-action to try chart creation
 
 #### Main App (`/chat`)
 

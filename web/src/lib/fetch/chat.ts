@@ -1,4 +1,4 @@
-import { type Message } from '@/components/pages/AgenticRows/Chat/MessageList';
+import { type Message } from '@/components/pages/AgenticNotebooks/Chat/MessageList';
 import { FileMetadata } from '@/lib/file-handling/types';
 
 import { instance } from '../axios';

@@ -7,39 +7,39 @@ export function LandingUseCases() {
         <div className="mb-16 text-center">
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">Who Can Benefit</h2>
           <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-            Intellicharts transforms raw data from any source into professional visualizations
-            that tell your story clearly.
+            AgenticNotebooks helps anyone who works with spreadsheet data—all while keeping your
+            information private.
           </p>
         </div>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {/* Use Case 1 */}
           <div className="bg-background border-border flex h-full flex-col rounded-xl border p-8 shadow-sm">
-            <h3 className="mb-3 text-xl font-semibold">For Data Scientists</h3>
+            <h3 className="mb-3 text-xl font-semibold">For Business Analysts</h3>
             <p className="text-muted-foreground mb-4 flex-grow">
-              Quickly visualize complex datasets from APIs, databases, or files without writing visualization code.
+              Speed up your workflow and focus on insights instead of data prep.
             </p>
             <div className="bg-secondary/30 rounded-lg p-4 text-sm italic">
-              &ldquo;Create a heatmap from this JSON API response&rdquo;
+              &ldquo;Compare quarterly performance across all regions&rdquo;
             </div>
           </div>
           {/* Use Case 2 */}
           <div className="bg-background border-border flex h-full flex-col rounded-xl border p-8 shadow-sm">
-            <h3 className="mb-3 text-xl font-semibold">For Product Managers</h3>
+            <h3 className="mb-3 text-xl font-semibold">For Marketing Teams</h3>
             <p className="text-muted-foreground mb-4 flex-grow">
-              Turn user analytics and product metrics into compelling charts for stakeholder presentations.
+              Understand campaign performance without waiting for analyst support.
             </p>
             <div className="bg-secondary/30 rounded-lg p-4 text-sm italic">
-              &ldquo;Visualize user engagement trends from this CSV export&rdquo;
+              &ldquo;Show me which campaigns had the highest ROI last month&rdquo;
             </div>
           </div>
           {/* Use Case 3 */}
           <div className="bg-background border-border flex h-full flex-col rounded-xl border p-8 shadow-sm">
-            <h3 className="mb-3 text-xl font-semibold">For Developers</h3>
+            <h3 className="mb-3 text-xl font-semibold">For Business Professionals</h3>
             <p className="text-muted-foreground mb-4 flex-grow">
-              Create charts from API responses, logs, or any structured data format instantly.
+              Get the data insights you need without Excel expertise.
             </p>
             <div className="bg-secondary/30 rounded-lg p-4 text-sm italic">
-              &ldquo;Parse this XML response and show trends over time&rdquo;
+              &ldquo;What&rsquo;s driving our customer churn rate?&rdquo;
             </div>
           </div>
         </div>

@@ -17,11 +17,11 @@ export async function generateMetadata({
     const post = await getPostData(slug, tenant);
     
     const siteNames = {
+      agenticnotebooks: 'AgenticNotebooks',
       intellicharts: 'IntelliCharts',
-      agenticrows: 'AgenticRows',
     };
     
-    const siteName = siteNames[tenant] || siteNames.intellicharts;
+    const siteName = siteNames[tenant] || siteNames.agenticnotebooks;
     
     return {
       title: `${post.title} | ${siteName} Blog`,
@@ -42,12 +42,12 @@ export async function generateMetadata({
 
 export async function generateStaticParams() {
   // Generate params for both tenants
+  const agenticnotebooksSlugs = getAllPostSlugs('agenticnotebooks');
   const intellichartsSlugs = getAllPostSlugs('intellicharts');
-  const agenticrowsSlugs = getAllPostSlugs('agenticrows');
   
   const params = [
+    ...agenticnotebooksSlugs.map(({ slug }) => ({ tenant: 'agenticnotebooks', slug })),
     ...intellichartsSlugs.map(({ slug }) => ({ tenant: 'intellicharts', slug })),
-    ...agenticrowsSlugs.map(({ slug }) => ({ tenant: 'agenticrows', slug })),
   ];
   
   return params;

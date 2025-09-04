@@ -1,19 +1,19 @@
-import AgenticRowsLanding from '@/components/pages/AgenticRows/Landing';
+import AgenticNotebooksLanding from '@/components/pages/AgenticNotebooks/Landing';
 import IntellichartsLanding from '@/components/pages/Intellicharts/Landing';
 
 interface TenantPageProps {
-  params: {
+  params: Promise<{
     tenant: string;
-  };
+  }>;
 }
 
-export default function TenantPage({ params }: TenantPageProps) {
-  const { tenant } = params;
+export default async function TenantPage({ params }: TenantPageProps) {
+  const { tenant } = await params;
 
-  if (tenant === 'agenticrows') {
-    return <AgenticRowsLanding />;
+  if (tenant === 'intellicharts') {
+    return <IntellichartsLanding />;
   }
 
-  // Default to IntelliCharts
-  return <IntellichartsLanding />;
+  // Default to AgenticNotebooks
+  return <AgenticNotebooksLanding />;
 }

@@ -51,7 +51,7 @@ export function LandingHero({ isDarkTheme, mounted }: LandingHeroProps) {
                 size="lg"
                 className="h-auto w-full rounded-md px-8 py-3 text-base font-semibold sm:w-auto"
               >
-                <span>Try AgenticRows Free</span>
+                <span>Try AgenticNotebooks Free</span>
                 <ChevronRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>

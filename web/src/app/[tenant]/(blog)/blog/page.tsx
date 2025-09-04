@@ -26,15 +26,15 @@ export default function BlogIndexPage({ params }: BlogPageProps) {
 
   // Tenant-specific metadata
   const tenantTitles = {
+    agenticnotebooks: 'Latest insights about notebook analysis and AI agents',
     intellicharts: 'Latest insights about data visualization and AI-powered charts',
-    agenticrows: 'Latest insights about spreadsheet analysis and AI agents',
   };
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-12">
       <BlogHeader
         title="Blog"
-        description={tenantTitles[tenant] || tenantTitles.intellicharts}
+        description={tenantTitles[tenant] || tenantTitles.agenticnotebooks}
       />
       <BlogList posts={allPostsData} />
     </div>
